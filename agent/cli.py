@@ -11,6 +11,9 @@ import sys
 from typing import Optional
 from dotenv import load_dotenv
 
+# Define DEFAULT_MODULES to resolve import issues in api/app.py
+DEFAULT_MODULES = []
+
 # Load environment variables from .env file
 load_dotenv()
 
