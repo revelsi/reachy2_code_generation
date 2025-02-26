@@ -89,46 +89,60 @@ def chat() -> Response:
     
     # Check if agent is initialized
     if agent is None:
-        initialize_agent()
+        try:
+            initialize_agent()
+        except Exception as e:
+            return jsonify({"error": f"Failed to initialize agent: {str(e)}"}), 500
     
     # Get message from request
-    data = request.json
-    if not data or "message" not in data:
-        return jsonify({"error": "Missing 'message' field"}), 400
-    
-    message = data["message"]
-    
     try:
+        data = request.json
+        if not data:
+            return jsonify({"error": "Request body must be valid JSON"}), 400
+        
+        if "message" not in data:
+            return jsonify({"error": "Missing 'message' field in request body"}), 400
+        
+        message = data["message"]
+        
         # Process the message
-        response = agent.process_message(message)
+        try:
+            response = agent.process_message(message)
+            
+            # Extract tool calls for visualization
+            tool_calls = []
+            for msg in agent.state.messages:
+                if hasattr(msg, "tool_calls") and msg.tool_calls:
+                    for tool_call in msg.tool_calls:
+                        # Find the corresponding result if available
+                        result = None
+                        if hasattr(agent.state, "tool_results"):
+                            for tool_result in agent.state.tool_results:
+                                if tool_result.tool_call_id == tool_call.get("id"):
+                                    result = tool_result.result
+                                    break
+                        
+                        # Add to tool calls
+                        tool_calls.append({
+                            "name": tool_call.get("function", {}).get("name", "unknown"),
+                            "arguments": tool_call.get("function", {}).get("arguments", {}),
+                            "result": result
+                        })
+            
+            return jsonify({
+                "response": response,
+                "tool_calls": tool_calls
+            })
         
-        # Extract tool calls for visualization
-        tool_calls = []
-        for msg in agent.state.messages:
-            if hasattr(msg, "tool_calls") and msg.tool_calls:
-                for tool_call in msg.tool_calls:
-                    # Find the corresponding result if available
-                    result = None
-                    if hasattr(agent.state, "tool_results"):
-                        for tool_result in agent.state.tool_results:
-                            if tool_result.tool_call_id == tool_call.get("id"):
-                                result = tool_result.result
-                                break
-                    
-                    # Add to tool calls
-                    tool_calls.append({
-                        "name": tool_call.get("function", {}).get("name", "unknown"),
-                        "arguments": tool_call.get("function", {}).get("arguments", {}),
-                        "result": result
-                    })
-        
-        return jsonify({
-            "response": response,
-            "tool_calls": tool_calls
-        })
-    
+        except Exception as e:
+            error_message = f"Error processing message: {str(e)}"
+            print(f"Error in chat endpoint: {error_message}")
+            import traceback
+            traceback.print_exc()
+            return jsonify({"error": error_message}), 500
+            
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"error": f"Invalid request: {str(e)}"}), 400
 
 
 @app.route("/api/reset", methods=["POST"])

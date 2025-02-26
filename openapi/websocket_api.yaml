@@ -1,0 +1,181 @@
+asyncapi: 2.6.0
+info:
+  title: Reachy Function Calling WebSocket API
+  description: WebSocket API for real-time updates from the Reachy 2 robot
+  version: 1.0.0
+servers:
+  websocket:
+    url: ws://localhost:8000
+    protocol: ws
+    description: Local WebSocket server
+channels:
+  /ws:
+    subscribe:
+      summary: Receive real-time updates from the robot
+      description: Subscribe to this channel to receive real-time updates about the robot's status, tool executions, and agent responses
+      message:
+        oneOf:
+          - $ref: '#/components/messages/StatusUpdate'
+          - $ref: '#/components/messages/ToolExecution'
+          - $ref: '#/components/messages/AgentResponse'
+          - $ref: '#/components/messages/Error'
+components:
+  messages:
+    StatusUpdate:
+      name: statusUpdate
+      title: Robot Status Update
+      summary: Update on the robot's current status
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: [status_update]
+            description: Message type identifier
+          timestamp:
+            type: number
+            description: Unix timestamp of the update
+          data:
+            type: object
+            properties:
+              status:
+                type: string
+                description: Connection status of the robot
+              arms:
+                type: object
+                properties:
+                  left:
+                    $ref: '#/components/schemas/ArmStatus'
+                  right:
+                    $ref: '#/components/schemas/ArmStatus'
+              head:
+                type: object
+                properties:
+                  position:
+                    type: array
+                    items:
+                      type: number
+                    description: Position of the head [yaw, pitch, roll]
+              base:
+                type: object
+                properties:
+                  position:
+                    type: array
+                    items:
+                      type: number
+                    description: Position of the base [x, y, theta]
+              last_action:
+                type: string
+                nullable: true
+                description: Last action performed by the robot
+    ToolExecution:
+      name: toolExecution
+      title: Tool Execution
+      summary: Information about a tool being executed
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: [tool_execution]
+            description: Message type identifier
+          timestamp:
+            type: number
+            description: Unix timestamp of the execution
+          data:
+            type: object
+            properties:
+              tool_name:
+                type: string
+                description: Name of the tool being executed
+              arguments:
+                type: object
+                description: Arguments passed to the tool
+              status:
+                type: string
+                enum: [started, completed, failed]
+                description: Status of the tool execution
+              result:
+                type: object
+                nullable: true
+                description: Result of the tool execution (if completed)
+              error:
+                type: string
+                nullable: true
+                description: Error message (if failed)
+    AgentResponse:
+      name: agentResponse
+      title: Agent Response
+      summary: Response from the agent to a user message
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: [agent_response]
+            description: Message type identifier
+          timestamp:
+            type: number
+            description: Unix timestamp of the response
+          data:
+            type: object
+            properties:
+              message:
+                type: string
+                description: Agent's response message
+              tool_calls:
+                type: array
+                description: List of tool calls made during processing
+                items:
+                  $ref: '#/components/schemas/ToolCall'
+    Error:
+      name: error
+      title: Error Message
+      summary: Error message from the server
+      contentType: application/json
+      payload:
+        type: object
+        properties:
+          type:
+            type: string
+            enum: [error]
+            description: Message type identifier
+          timestamp:
+            type: number
+            description: Unix timestamp of the error
+          data:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+              code:
+                type: string
+                description: Error code
+  schemas:
+    ArmStatus:
+      type: object
+      properties:
+        position:
+          type: array
+          items:
+            type: number
+          description: Joint positions of the arm
+        gripper_opening:
+          type: number
+          description: Opening of the gripper (0.0 to 1.0)
+    ToolCall:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the tool
+        arguments:
+          type: object
+          description: Arguments passed to the tool
+        result:
+          type: object
+          description: Result of the tool execution 

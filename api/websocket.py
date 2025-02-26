@@ -12,6 +12,7 @@ import json
 import asyncio
 import threading
 import time
+import traceback
 from typing import Dict, Any, List, Set
 import websockets
 from dotenv import load_dotenv
@@ -50,37 +51,93 @@ class WebSocketServer:
                 "left": {"position": [0.0] * 7, "gripper_opening": 0.0},
                 "right": {"position": [0.0] * 7, "gripper_opening": 0.0}
             },
-            "head": {"position": [0.0, 0.0, 0.0]},
+            "head": {"position": [0.0] * 3},
             "base": {"position": [0.0, 0.0, 0.0]},
             "last_action": None,
             "last_update": time.time()
         }
+        
+        # Start the server
+        self.start()
+    
+    def start(self) -> None:
+        """Start the WebSocket server."""
+        if self.running:
+            print("WebSocket server is already running")
+            return
+        
+        # Start the server in a separate thread
+        self.update_thread = threading.Thread(target=self._run_server)
+        self.update_thread.daemon = True
+        self.update_thread.start()
+        
+        print(f"WebSocket server started on ws://{self.host}:{self.port}")
+        self.running = True
+    
+    def stop(self) -> None:
+        """Stop the WebSocket server."""
+        if not self.running:
+            print("WebSocket server is not running")
+            return
+        
+        # Stop the server
+        if self.server:
+            asyncio.run(self.server.close())
+            self.server = None
+        
+        self.running = False
+        print("WebSocket server stopped")
+    
+    def _run_server(self) -> None:
+        """Run the WebSocket server in a separate thread."""
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        
+        try:
+            # Create the server
+            start_server = websockets.serve(
+                self.handle_client,
+                self.host,
+                self.port
+            )
+            
+            # Run the server
+            self.server = loop.run_until_complete(start_server)
+            loop.run_forever()
+        except Exception as e:
+            print(f"Error running WebSocket server: {e}")
+            traceback.print_exc()
+            self.running = False
     
     async def register(self, websocket: websockets.WebSocketServerProtocol) -> None:
         """
         Register a new client.
         
         Args:
-            websocket: WebSocket connection to register.
+            websocket: WebSocket connection.
         """
         self.clients.add(websocket)
-        print(f"Client connected. Total clients: {len(self.clients)}")
+        print(f"Client connected: {websocket.remote_address} (total: {len(self.clients)})")
         
         # Send initial state
-        await websocket.send(json.dumps({
-            "type": "state",
-            "data": self.robot_state
-        }))
+        try:
+            await websocket.send(json.dumps({
+                "type": "state",
+                "data": self.robot_state
+            }))
+        except Exception as e:
+            print(f"Error sending initial state: {e}")
     
     async def unregister(self, websocket: websockets.WebSocketServerProtocol) -> None:
         """
         Unregister a client.
         
         Args:
-            websocket: WebSocket connection to unregister.
+            websocket: WebSocket connection.
         """
-        self.clients.remove(websocket)
-        print(f"Client disconnected. Total clients: {len(self.clients)}")
+        if websocket in self.clients:
+            self.clients.remove(websocket)
+            print(f"Client disconnected: {websocket.remote_address} (total: {len(self.clients)})")
     
     async def send_to_clients(self, message: Dict[str, Any]) -> None:
         """
@@ -93,14 +150,21 @@ class WebSocketServer:
             return
         
         # Convert message to JSON
-        message_json = json.dumps(message)
+        try:
+            message_json = json.dumps(message)
+        except Exception as e:
+            print(f"Error converting message to JSON: {e}")
+            return
         
-        # Send to all clients
+        # Send message to all clients
         disconnected_clients = set()
         for client in self.clients:
             try:
                 await client.send(message_json)
             except websockets.exceptions.ConnectionClosed:
+                disconnected_clients.add(client)
+            except Exception as e:
+                print(f"Error sending message to client: {e}")
                 disconnected_clients.add(client)
         
         # Remove disconnected clients
@@ -123,10 +187,27 @@ class WebSocketServer:
                     data = json.loads(message)
                     if data.get("type") == "ping":
                         await websocket.send(json.dumps({"type": "pong"}))
+                    elif data.get("type") == "get_state":
+                        await websocket.send(json.dumps({
+                            "type": "state",
+                            "data": self.robot_state
+                        }))
                 except json.JSONDecodeError:
-                    pass
+                    await websocket.send(json.dumps({
+                        "type": "error",
+                        "message": "Invalid JSON message"
+                    }))
+                except Exception as e:
+                    print(f"Error processing message: {e}")
+                    await websocket.send(json.dumps({
+                        "type": "error",
+                        "message": f"Error processing message: {str(e)}"
+                    }))
         except websockets.exceptions.ConnectionClosed:
             pass
+        except Exception as e:
+            print(f"Error handling client: {e}")
+            traceback.print_exc()
         finally:
             await self.unregister(websocket)
     
@@ -138,14 +219,18 @@ class WebSocketServer:
             new_state: New robot state.
         """
         # Update the state
-        self.robot_state.update(new_state)
-        self.robot_state["last_update"] = time.time()
-        
-        # Notify clients
-        asyncio.run(self.send_to_clients({
-            "type": "state",
-            "data": self.robot_state
-        }))
+        try:
+            self.robot_state.update(new_state)
+            self.robot_state["last_update"] = time.time()
+            
+            # Notify clients
+            asyncio.run(self.send_to_clients({
+                "type": "state",
+                "data": self.robot_state
+            }))
+        except Exception as e:
+            print(f"Error updating robot state: {e}")
+            traceback.print_exc()
     
     def notify_action(self, action: Dict[str, Any]) -> None:
         """
@@ -154,61 +239,90 @@ class WebSocketServer:
         Args:
             action: Action details.
         """
-        # Update last action
-        self.robot_state["last_action"] = action
-        
-        # Notify clients
-        asyncio.run(self.send_to_clients({
-            "type": "action",
-            "data": action
-        }))
-    
-    async def update_loop(self) -> None:
-        """Periodic update loop for robot state."""
-        while self.running:
-            # In a real implementation, you would get the actual robot state here
-            # For now, we'll just send a heartbeat
-            await self.send_to_clients({
-                "type": "heartbeat",
-                "timestamp": time.time()
-            })
+        try:
+            # Update last action
+            self.robot_state["last_action"] = action
             
-            # Wait for next update
-            await asyncio.sleep(1.0)
+            # Notify clients
+            asyncio.run(self.send_to_clients({
+                "type": "action",
+                "data": action
+            }))
+        except Exception as e:
+            print(f"Error notifying action: {e}")
+            traceback.print_exc()
     
-    async def start_server(self) -> None:
-        """Start the WebSocket server."""
-        self.running = True
-        self.server = await websockets.serve(self.handle_client, self.host, self.port)
-        print(f"WebSocket server started at ws://{self.host}:{self.port}")
+    def notify_thinking(self, content: str) -> None:
+        """
+        Notify clients about the agent's thinking process.
         
-        # Start update loop
-        asyncio.create_task(self.update_loop())
-        
-        # Keep the server running
-        await self.server.wait_closed()
+        Args:
+            content: Thinking content.
+        """
+        try:
+            asyncio.run(self.send_to_clients({
+                "type": "thinking",
+                "content": content
+            }))
+        except Exception as e:
+            print(f"Error notifying thinking: {e}")
+            traceback.print_exc()
     
-    def start(self) -> None:
-        """Start the WebSocket server in a separate thread."""
-        def run_server():
-            asyncio.run(self.start_server())
+    def notify_function_call(self, name: str, parameters: Dict[str, Any], call_id: str) -> None:
+        """
+        Notify clients about a function call.
         
-        self.update_thread = threading.Thread(target=run_server)
-        self.update_thread.daemon = True
-        self.update_thread.start()
+        Args:
+            name: Function name.
+            parameters: Function parameters.
+            call_id: Function call ID.
+        """
+        try:
+            asyncio.run(self.send_to_clients({
+                "type": "function_call",
+                "name": name,
+                "parameters": parameters,
+                "id": call_id
+            }))
+        except Exception as e:
+            print(f"Error notifying function call: {e}")
+            traceback.print_exc()
     
-    def stop(self) -> None:
-        """Stop the WebSocket server."""
-        self.running = False
-        if self.server:
-            self.server.close()
+    def notify_code_output(self, content: str) -> None:
+        """
+        Notify clients about code output.
         
-        if self.update_thread and self.update_thread.is_alive():
-            self.update_thread.join(timeout=1.0)
+        Args:
+            content: Code output content.
+        """
+        try:
+            asyncio.run(self.send_to_clients({
+                "type": "code_output",
+                "content": content
+            }))
+        except Exception as e:
+            print(f"Error notifying code output: {e}")
+            traceback.print_exc()
+    
+    def notify_error(self, message: str) -> None:
+        """
+        Notify clients about an error.
+        
+        Args:
+            message: Error message.
+        """
+        try:
+            asyncio.run(self.send_to_clients({
+                "type": "error",
+                "message": message
+            }))
+        except Exception as e:
+            print(f"Error notifying error: {e}")
+            traceback.print_exc()
 
 
 # Global WebSocket server instance
-websocket_server = None
+_WS_SERVER = None
 
 
 def get_websocket_server(host: str = "0.0.0.0", port: int = 8765) -> WebSocketServer:
@@ -218,17 +332,16 @@ def get_websocket_server(host: str = "0.0.0.0", port: int = 8765) -> WebSocketSe
     Args:
         host: Host to run the server on.
         port: Port to run the server on.
-        
+    
     Returns:
         WebSocketServer: WebSocket server instance.
     """
-    global websocket_server
+    global _WS_SERVER
     
-    if websocket_server is None:
-        websocket_server = WebSocketServer(host=host, port=port)
-        websocket_server.start()
+    if _WS_SERVER is None:
+        _WS_SERVER = WebSocketServer(host=host, port=port)
     
-    return websocket_server
+    return _WS_SERVER
 
 
 def update_robot_state(new_state: Dict[str, Any]) -> None:

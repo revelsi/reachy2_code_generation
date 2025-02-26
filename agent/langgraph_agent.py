@@ -13,6 +13,7 @@ import inspect
 import sys
 from typing import Dict, List, Any, Optional, Callable, Union, TypedDict, Sequence
 from dotenv import load_dotenv
+import time
 
 # Load environment variables from .env file
 load_dotenv()
@@ -211,12 +212,12 @@ class ReachyLangGraphAgent:
         
         return count
     
-    def get_available_tools(self) -> List[Dict]:
+    def get_available_tools(self) -> List[Dict[str, Any]]:
         """
-        Get the list of available tools in the format expected by the OpenAI API.
+        Get the list of available tools.
         
         Returns:
-            List[Dict]: List of tool definitions.
+            List[Dict[str, Any]]: List of tool schemas
         """
         return list(self.tools.values())
     
@@ -521,6 +522,70 @@ class ReachyLangGraphAgent:
         """Reset the conversation history."""
         # No need to do anything, as we create a new state for each conversation
         pass
+        
+    def get_robot_status(self) -> Dict[str, Any]:
+        """
+        Get the current status of the robot.
+        
+        Returns:
+            Dict[str, Any]: Robot status information
+        """
+        status = {
+            "status": "connected",
+            "last_update": time.time(),
+            "arms": {
+                "left": {"position": [0.0] * 7, "gripper_opening": 0.0},
+                "right": {"position": [0.0] * 7, "gripper_opening": 0.0}
+            },
+            "head": {"position": [0.0, 0.0, 0.0]},
+            "base": {"position": [0.0, 0.0, 0.0]},
+            "last_action": None
+        }
+        
+        # Try to get actual robot status if available
+        try:
+            if "get_robot_info" in self.tool_implementations:
+                info_result = self.tool_implementations["get_robot_info"]()
+                if info_result.get("success", False):
+                    status.update(info_result.get("result", {}))
+            
+            # Get arm positions if available
+            if "get_arm_position" in self.tool_implementations:
+                for side in ["left", "right"]:
+                    try:
+                        arm_result = self.tool_implementations["get_arm_position"](side=side)
+                        if arm_result.get("success", False):
+                            status["arms"][side]["position"] = arm_result.get("result", {}).get("positions", [0.0] * 7)
+                    except:
+                        pass
+            
+            # Get head position if available
+            if "get_head_position" in self.tool_implementations:
+                try:
+                    head_result = self.tool_implementations["get_head_position"]()
+                    if head_result.get("success", False):
+                        status["head"]["position"] = head_result.get("result", {}).get("positions", [0.0, 0.0, 0.0])
+                except:
+                    pass
+            
+            # Get base position if available
+            if "get_base_position" in self.tool_implementations:
+                try:
+                    base_result = self.tool_implementations["get_base_position"]()
+                    if base_result.get("success", False):
+                        base_pos = base_result.get("result", {})
+                        status["base"]["position"] = [
+                            base_pos.get("x", 0.0),
+                            base_pos.get("y", 0.0),
+                            base_pos.get("theta", 0.0)
+                        ]
+                except:
+                    pass
+                    
+        except Exception as e:
+            status["error"] = str(e)
+        
+        return status
 
 
 # Example usage

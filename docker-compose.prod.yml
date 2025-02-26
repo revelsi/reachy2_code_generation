@@ -5,12 +5,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-      target: development
-    volumes:
-      - .:/app
-      - backend_venv:/app/venv
+      target: production
     ports:
-      - "8000:8000"
+      - "${API_PORT:-8000}:8000"
     environment:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - MODEL=${MODEL:-gpt-4-turbo}
@@ -21,25 +18,23 @@ services:
       - API_PORT=8000
       - WS_HOST=0.0.0.0
       - WS_PORT=8000
-      - DEBUG=${DEBUG:-false}
-    command: python api/server.py
+      - DEBUG=false
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
 
   frontend:
-    image: node:18-alpine
-    working_dir: /app
-    volumes:
-      - ./frontend:/app
-      - frontend_node_modules:/app/node_modules
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.prod
     ports:
-      - "3000:3000"
-    environment:
-      - NODE_ENV=development
-    command: sh -c "npm install && npm run dev"
+      - "${FRONTEND_PORT:-3000}:80"
     depends_on:
       - backend
     restart: unless-stopped
-
-volumes:
-  backend_venv:
-  frontend_node_modules: 
+    environment:
+      - API_URL=http://backend:8000 

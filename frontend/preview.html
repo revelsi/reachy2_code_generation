@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reachy Function Calling - Preview</title>
+  <style>
+    :root {
+      --background: 0 0% 100%;
+      --foreground: 222.2 84% 4.9%;
+      --card: 0 0% 100%;
+      --card-foreground: 222.2 84% 4.9%;
+      --primary: 222.2 47.4% 11.2%;
+      --primary-foreground: 210 40% 98%;
+      --secondary: 210 40% 96.1%;
+      --secondary-foreground: 222.2 47.4% 11.2%;
+      --muted: 210 40% 96.1%;
+      --muted-foreground: 215.4 16.3% 46.9%;
+      --accent: 210 40% 96.1%;
+      --accent-foreground: 222.2 47.4% 11.2%;
+      --destructive: 0 84.2% 60.2%;
+      --destructive-foreground: 210 40% 98%;
+      --border: 214.3 31.8% 91.4%;
+      --input: 214.3 31.8% 91.4%;
+      --ring: 222.2 84% 4.9%;
+      --radius: 0.5rem;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    }
+
+    body {
+      background-color: hsl(var(--background));
+      color: hsl(var(--foreground));
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 1rem;
+    }
+
+    header {
+      border-bottom: 1px solid hsla(var(--border), 0.4);
+      background-color: hsla(var(--background), 0.95);
+      backdrop-filter: blur(8px);
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+
+    .header-content {
+      display: flex;
+      height: 4rem;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .logo img {
+      height: 2rem;
+      width: 2rem;
+    }
+
+    .logo span {
+      font-weight: bold;
+      font-size: 1.25rem;
+    }
+
+    nav a {
+      color: hsl(var(--muted-foreground));
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    nav a:hover {
+      color: hsl(var(--foreground));
+    }
+
+    main {
+      flex: 1;
+      padding: 1rem 0;
+    }
+
+    .panels {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      height: calc(100vh - 9rem);
+    }
+
+    @media (min-width: 1024px) {
+      .panels {
+        flex-direction: row;
+      }
+    }
+
+    .panel {
+      display: flex;
+      flex-direction: column;
+      background-color: hsla(var(--card), 0.8);
+      backdrop-filter: blur(4px);
+      border-radius: var(--radius);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .chat-panel {
+      flex: 1;
+      height: 50%;
+    }
+
+    .code-panel {
+      flex: 1;
+      height: 50%;
+    }
+
+    @media (min-width: 1024px) {
+      .chat-panel {
+        width: 66.666667%;
+        height: 100%;
+      }
+      
+      .code-panel {
+        width: 33.333333%;
+        height: 100%;
+      }
+    }
+
+    .panel-header {
+      padding: 1rem;
+      border-bottom: 1px solid hsla(var(--border), 0.3);
+      background-color: hsla(var(--card), 0.8);
+      backdrop-filter: blur(4px);
+      border-top-left-radius: var(--radius);
+      border-top-right-radius: var(--radius);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-title {
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: hsl(var(--card-foreground));
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .messages {
+      display: flex;
+      flex-direction: column;
+      border-top: 1px solid hsla(var(--border), 0.3);
+    }
+
+    .message {
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+    }
+
+    .message.user {
+      background-color: hsla(var(--secondary), 0.2);
+    }
+
+    .message-inner {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .avatar {
+      width: 2rem;
+      height: 2rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background-color: hsla(var(--primary), 0.1);
+      flex-shrink: 0;
+    }
+
+    .message-content {
+      flex: 1;
+    }
+
+    .message-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .message-sender {
+      font-weight: 500;
+    }
+
+    .message-time {
+      font-size: 0.75rem;
+      color: hsl(var(--muted-foreground));
+    }
+
+    .message-text {
+      font-size: 0.875rem;
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+
+    .function-call {
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: 0.375rem;
+      background-color: hsla(var(--secondary), 0.1);
+    }
+
+    .function-call-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .function-name {
+      font-size: 0.875rem;
+      font-weight: 500;
+    }
+
+    .function-name span {
+      font-weight: 700;
+    }
+
+    .function-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.375rem;
+      font-size: 0.75rem;
+      font-weight: 500;
+      height: 1.75rem;
+      padding: 0 0.5rem;
+      background-color: transparent;
+      border: 1px solid;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .button-approve {
+      background-color: hsla(142, 76%, 36%, 0.1);
+      border-color: hsla(142, 76%, 36%, 0.3);
+      color: hsl(142, 76%, 36%);
+    }
+
+    .button-approve:hover {
+      background-color: hsla(142, 76%, 36%, 0.2);
+    }
+
+    .button-reject {
+      background-color: hsla(var(--destructive), 0.1);
+      border-color: hsla(var(--destructive), 0.3);
+      color: hsl(var(--destructive));
+    }
+
+    .button-reject:hover {
+      background-color: hsla(var(--destructive), 0.2);
+    }
+
+    .function-parameters {
+      font-size: 0.75rem;
+      font-family: monospace;
+      background-color: hsla(var(--secondary), 0.2);
+      padding: 0.5rem;
+      border-radius: 0.25rem;
+      overflow-x: auto;
+    }
+
+    .toggle-button {
+      display: inline-flex;
+      align-items: center;
+      font-size: 0.75rem;
+      color: hsl(var(--muted-foreground));
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem 0.5rem;
+      border-radius: 0.25rem;
+      margin-top: 0.5rem;
+    }
+
+    .toggle-button:hover {
+      color: hsl(var(--foreground));
+      background-color: hsla(var(--accent), 0.5);
+    }
+
+    .thinking-content {
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      border: 1px solid hsl(var(--border));
+      border-radius: 0.375rem;
+      background-color: hsla(var(--secondary), 0.1);
+      font-size: 0.75rem;
+      font-family: monospace;
+      white-space: pre-wrap;
+    }
+
+    .welcome {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 2rem;
+    }
+
+    .welcome-content {
+      max-width: 28rem;
+    }
+
+    .welcome-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+
+    .welcome-text {
+      color: hsl(var(--muted-foreground));
+      margin-bottom: 1rem;
+    }
+
+    .examples {
+      text-align: left;
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid hsla(var(--border), 0.5);
+    }
+
+    .examples-title {
+      font-size: 0.875rem;
+      color: hsl(var(--muted-foreground));
+      margin-bottom: 0.5rem;
+    }
+
+    .examples-list {
+      list-style-type: disc;
+      list-style-position: inside;
+      margin-top: 0.5rem;
+      font-size: 0.875rem;
+      color: hsl(var(--muted-foreground));
+    }
+
+    .examples-list li {
+      margin-bottom: 0.25rem;
+    }
+
+    .input-area {
+      padding: 1rem;
+      border-top: 1px solid hsla(var(--border), 0.3);
+      background-color: hsla(var(--card), 0.8);
+      backdrop-filter: blur(4px);
+      border-bottom-left-radius: var(--radius);
+      border-bottom-right-radius: var(--radius);
+    }
+
+    .input-form {
+      position: relative;
+      width: 100%;
+    }
+
+    .input-textarea {
+      width: 100%;
+      resize: none;
+      border-radius: 0.75rem;
+      border: 1px solid hsla(var(--input), 0.5);
+      background-color: hsla(var(--background), 0.5);
+      backdrop-filter: blur(4px);
+      padding: 0.75rem 1rem;
+      padding-right: 3rem;
+      font-size: 1rem;
+      min-height: 3rem;
+      max-height: 8rem;
+      outline: none;
+      transition: all 0.2s;
+    }
+
+    .input-textarea:focus {
+      border-color: hsla(var(--primary), 0.3);
+      box-shadow: 0 0 0 1px hsla(var(--primary), 0.3);
+    }
+
+    .input-textarea::placeholder {
+      color: hsla(var(--muted-foreground), 0.7);
+    }
+
+    .send-button {
+      position: absolute;
+      right: 0.5rem;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 2.25rem;
+      width: 2.25rem;
+      border-radius: 9999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: hsl(var(--primary));
+      transition: background-color 0.2s;
+    }
+
+    .send-button:hover {
+      background-color: hsla(var(--primary), 0.1);
+    }
+
+    .input-help {
+      font-size: 0.75rem;
+      color: hsla(var(--muted-foreground), 0.7);
+      text-align: center;
+      margin-top: 0.5rem;
+    }
+
+    .code-content {
+      flex: 1;
+      padding: 1rem;
+      overflow-y: auto;
+    }
+
+    .code-empty {
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: hsl(var(--muted-foreground));
+      font-size: 0.875rem;
+    }
+
+    .code-display {
+      white-space: pre-wrap;
+      overflow-x: auto;
+      padding: 1rem;
+      border-radius: 0.375rem;
+      background-color: hsla(var(--secondary), 0.1);
+      border: 1px solid hsla(var(--border), 0.5);
+      font-size: 0.875rem;
+      font-family: monospace;
+    }
+
+    footer {
+      border-top: 1px solid hsla(var(--border), 0.4);
+      padding: 1rem 0;
+      background-color: hsla(var(--background), 0.95);
+      backdrop-filter: blur(8px);
+    }
+
+    .footer-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
+    @media (min-width: 768px) {
+      .footer-content {
+        flex-direction: row;
+      }
+    }
+
+    .footer-text {
+      font-size: 0.875rem;
+      color: hsl(var(--muted-foreground));
+    }
+
+    /* Icons */
+    .icon {
+      width: 1em;
+      height: 1em;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    .icon-sm {
+      width: 0.875em;
+      height: 0.875em;
+    }
+
+    .icon-mr {
+      margin-right: 0.25rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <div class="header-content">
+        <div class="logo">
+          <svg class="icon" viewBox="0 0 24 24">
+            <path d="M12 8.5V7.5"></path>
+            <path d="M12 16.5V15.5"></path>
+            <path d="M10 12.4V11.6C10 11.2686 10.2686 11 10.6 11H13.4C13.7314 11 14 11.2686 14 11.6V12.4C14 12.7314 13.7314 13 13.4 13H10.6C10.2686 13 10 12.7314 10 12.4Z"></path>
+            <path d="M17.5 15.5V8.5C17.5 7.39543 16.6046 6.5 15.5 6.5H8.5C7.39543 6.5 6.5 7.39543 6.5 8.5V15.5C6.5 16.6046 7.39543 17.5 8.5 17.5H15.5C16.6046 17.5 17.5 16.6046 17.5 15.5Z"></path>
+            <path d="M17.5 10.5H19.5C20.0523 10.5 20.5 10.9477 20.5 11.5V12.5C20.5 13.0523 20.0523 13.5 19.5 13.5H17.5"></path>
+            <path d="M6.5 10.5H4.5C3.94772 10.5 3.5 10.9477 3.5 11.5V12.5C3.5 13.0523 3.94772 13.5 4.5 13.5H6.5"></path>
+            <path d="M12 17.5V20.5M9.5 20.5H14.5"></path>
+            <path d="M12 6.5V3.5M9.5 3.5H14.5"></path>
+          </svg>
+          <span>Reachy Function Calling</span>
+        </div>
+        <nav>
+          <a href="https://github.com/yourusername/reachy-function-calling" target="_blank" rel="noopener noreferrer">GitHub</a>
+        </nav>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="panels">
+        <!-- Chat Panel -->
+        <div class="panel chat-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Chat with Reachy</h2>
+          </div>
+          
+          <div class="panel-content">
+            <!-- Messages -->
+            <div class="messages">
+              <!-- User Message -->
+              <div class="message user">
+                <div class="message-inner">
+                  <div class="avatar">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24">
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                      <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                  </div>
+                  <div class="message-content">
+                    <div class="message-header">
+                      <div class="message-sender">You</div>
+                      <div class="message-time">10:30 AM</div>
+                    </div>
+                    <div class="message-text">Move the right arm up</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- System Message with Function Call -->
+              <div class="message">
+                <div class="message-inner">
+                  <div class="avatar">
+                    <svg class="icon icon-sm" viewBox="0 0 24 24">
+                      <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+                    </svg>
+                  </div>
+                  <div class="message-content">
+                    <div class="message-header">
+                      <div class="message-sender">Reachy Assistant</div>
+                      <div class="message-time">10:31 AM</div>
+                    </div>
+                    <div class="message-text">I'll move the right arm upward. Let me do that for you.</div>
+                    
+                    <!-- Function Call -->
+                    <div class="function-call">
+                      <div class="function-call-header">
+                        <div class="function-name">Function Call: <span>move_arm</span></div>
+                        <div class="function-buttons">
+                          <button class="button button-approve">
+                            <svg class="icon icon-sm icon-mr" viewBox="0 0 24 24">
+                              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"></path>
+                            </svg>
+                            Approve
+                          </button>
+                          <button class="button button-reject">
+                            <svg class="icon icon-sm icon-mr" viewBox="0 0 24 24">
+                              <path d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3zm7-13h2.67A2.31 2.31 0 0 1 22 4v7a2.31 2.31 0 0 1-2.33 2H17"></path>
+                            </svg>
+                            Reject
+                          </button>
+                        </div>
+                      </div>
+                      <div class="function-parameters">
+<pre>{
+  "arm": "right",
+  "direction": "up",
+  "distance": 0.2
+}</pre>
+                      </div>
+                    </div>
+                    
+                    <!-- Thinking Toggle -->
+                    <button class="toggle-button">
+                      <svg class="icon icon-sm icon-mr" viewBox="0 0 24 24">
+                        <polyline points="6 9 12 15 18 9"></polyline>
+                      </svg>
+                      Show thinking
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="input-area">
+            <form class="input-form">
+              <textarea class="input-textarea" placeholder="Ask something about Reachy 2..."></textarea>
+              <button type="submit" class="send-button">
+                <svg class="icon" viewBox="0 0 24 24">
+                  <line x1="22" y1="2" x2="11" y2="13"></line>
+                  <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+              </button>
+            </form>
+            <p class="input-help">Shift+Enter for new line, Enter to send</p>
+          </div>
+        </div>
+        
+        <!-- Code Panel -->
+        <div class="panel code-panel">
+          <div class="panel-header">
+            <h2 class="panel-title">Code Output</h2>
+            <button class="button">
+              <svg class="icon icon-sm icon-mr" viewBox="0 0 24 24">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              Copy
+            </button>
+          </div>
+          
+          <div class="code-content">
+            <div class="code-display">
+# Python code to move the right arm up
+import time
+from reachy_sdk import ReachySDK
+
+# Connect to the robot
+reachy = ReachySDK(host='localhost')
+print("Connected to Reachy")
+
+# Move the right arm up
+def move_arm_up(distance=0.2):
+    # Get current position
+    current_pos = reachy.right_arm.forward_kinematics()
+    print(f"Current position: {current_pos}")
+    
+    # Calculate new position (move up in z-axis)
+    target_pos = current_pos.copy()
+    target_pos[2] += distance  # Add distance to z coordinate
+    
+    # Move to new position
+    print(f"Moving to: {target_pos}")
+    reachy.right_arm.goto(target_pos, duration=1.0)
+    time.sleep(1.5)  # Wait for movement to complete
+    
+    return {"status": "success", "message": "Right arm moved up successfully"}
+
+# Execute the movement
+result = move_arm_up(distance=0.2)
+print(result)
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <p class="footer-text">&copy; 2023 Reachy Function Calling</p>
+        <p class="footer-text">Built with React, TailwindCSS, and Reachy 2</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html> 

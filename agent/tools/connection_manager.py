@@ -9,6 +9,7 @@ or a mock implementation for testing.
 import os
 import sys
 import logging
+import traceback
 from typing import Any, Dict, Optional, Union
 
 # Configure logging
@@ -19,6 +20,7 @@ logger = logging.getLogger("connection_manager")
 # Global robot instance
 _REACHY_INSTANCE = None
 _CONNECTION_TYPE = None
+_CONNECTION_ERROR = None
 
 def connect_to_reachy(
     host: str = "localhost", 
@@ -38,12 +40,15 @@ def connect_to_reachy(
     Returns:
         Any: Reachy instance
     """
-    global _REACHY_INSTANCE, _CONNECTION_TYPE
+    global _REACHY_INSTANCE, _CONNECTION_TYPE, _CONNECTION_ERROR
     
     # Return existing instance if already connected
     if _REACHY_INSTANCE is not None:
         logger.info(f"Using existing Reachy connection ({_CONNECTION_TYPE})")
         return _REACHY_INSTANCE
+    
+    # Reset connection error
+    _CONNECTION_ERROR = None
     
     # Determine connection type
     if use_mock:
@@ -73,7 +78,22 @@ def connect_to_reachy(
             logger.info("Connected to mock Reachy")
             
         except ImportError as e:
-            logger.error(f"Failed to import mock Reachy: {e}")
+            error_msg = f"Failed to import mock Reachy: {e}"
+            logger.error(error_msg)
+            _CONNECTION_ERROR = {
+                "type": "import_error",
+                "message": error_msg,
+                "traceback": traceback.format_exc()
+            }
+            raise
+        except Exception as e:
+            error_msg = f"Failed to initialize mock Reachy: {e}"
+            logger.error(error_msg)
+            _CONNECTION_ERROR = {
+                "type": "initialization_error",
+                "message": error_msg,
+                "traceback": traceback.format_exc()
+            }
             raise
         
     else:
@@ -89,8 +109,14 @@ def connect_to_reachy(
             logger.info("Connected to real Reachy")
             
         except ImportError as e:
-            logger.error(f"Failed to import Reachy SDK: {e}")
+            error_msg = f"Failed to import Reachy SDK: {e}"
+            logger.error(error_msg)
             logger.warning("Falling back to mock implementation")
+            _CONNECTION_ERROR = {
+                "type": "import_error",
+                "message": error_msg,
+                "traceback": traceback.format_exc()
+            }
             
             # Fall back to mock implementation
             try:
@@ -98,34 +124,78 @@ def connect_to_reachy(
                 try:
                     from agent.tools.mock_reachy import MockReachy
                 except ImportError:
+                    # Try relative import
                     from .mock_reachy import MockReachy
                 
+                # Create mock Reachy instance
                 _REACHY_INSTANCE = MockReachy(host=host, use_virtual=True)
                 _CONNECTION_TYPE = "mock (fallback)"
-                
                 logger.info("Connected to mock Reachy (fallback)")
-            except ImportError as e2:
-                logger.error(f"Failed to import mock implementation: {e2}")
+                
+            except Exception as e:
+                error_msg = f"Failed to initialize fallback mock Reachy: {e}"
+                logger.error(error_msg)
+                _CONNECTION_ERROR = {
+                    "type": "fallback_error",
+                    "message": error_msg,
+                    "traceback": traceback.format_exc()
+                }
+                raise
+                
+        except Exception as e:
+            error_msg = f"Failed to connect to real Reachy: {e}"
+            logger.error(error_msg)
+            logger.warning("Falling back to mock implementation")
+            _CONNECTION_ERROR = {
+                "type": "connection_error",
+                "message": error_msg,
+                "traceback": traceback.format_exc()
+            }
+            
+            # Fall back to mock implementation
+            try:
+                # Try different import paths
+                try:
+                    from agent.tools.mock_reachy import MockReachy
+                except ImportError:
+                    # Try relative import
+                    from .mock_reachy import MockReachy
+                
+                # Create mock Reachy instance
+                _REACHY_INSTANCE = MockReachy(host=host, use_virtual=True)
+                _CONNECTION_TYPE = "mock (fallback)"
+                logger.info("Connected to mock Reachy (fallback)")
+                
+            except Exception as e:
+                error_msg = f"Failed to initialize fallback mock Reachy: {e}"
+                logger.error(error_msg)
+                _CONNECTION_ERROR = {
+                    "type": "fallback_error",
+                    "message": error_msg,
+                    "traceback": traceback.format_exc()
+                }
                 raise
     
     return _REACHY_INSTANCE
 
+
 def get_reachy() -> Any:
     """
-    Get the current Reachy instance.
+    Get the Reachy instance.
     
     Returns:
         Any: Reachy instance
     
     Raises:
-        RuntimeError: If not connected to a Reachy robot
+        RuntimeError: If Reachy is not connected
     """
-    global _REACHY_INSTANCE
-    
     if _REACHY_INSTANCE is None:
-        raise RuntimeError("Not connected to a Reachy robot. Call connect_to_reachy() first.")
+        error_msg = "Reachy is not connected. Call connect_to_reachy() first."
+        logger.error(error_msg)
+        raise RuntimeError(error_msg)
     
     return _REACHY_INSTANCE
+
 
 def disconnect_reachy() -> None:
     """Disconnect from the Reachy robot."""
@@ -135,21 +205,25 @@ def disconnect_reachy() -> None:
         logger.info(f"Disconnecting from Reachy ({_CONNECTION_TYPE})")
         
         try:
-            _REACHY_INSTANCE.close()
+            # Call close() method if it exists
+            if hasattr(_REACHY_INSTANCE, "close"):
+                _REACHY_INSTANCE.close()
         except Exception as e:
-            logger.error(f"Error while disconnecting: {e}")
+            logger.error(f"Error disconnecting from Reachy: {e}")
         
         _REACHY_INSTANCE = None
         _CONNECTION_TYPE = None
 
+
 def is_mock() -> bool:
     """
-    Check if using a mock implementation.
+    Check if the current connection is to a mock Reachy.
     
     Returns:
-        bool: True if using a mock implementation, False otherwise
+        bool: True if connected to a mock Reachy, False otherwise
     """
     return _CONNECTION_TYPE is not None and _CONNECTION_TYPE.startswith("mock")
+
 
 def get_connection_info() -> Dict[str, Any]:
     """
@@ -158,13 +232,21 @@ def get_connection_info() -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Connection information
     """
-    global _REACHY_INSTANCE, _CONNECTION_TYPE
-    
-    return {
+    info = {
         "connected": _REACHY_INSTANCE is not None,
-        "connection_type": _CONNECTION_TYPE,
-        "instance": str(_REACHY_INSTANCE.__class__) if _REACHY_INSTANCE is not None else None
+        "type": _CONNECTION_TYPE,
+        "error": _CONNECTION_ERROR
     }
+    
+    # Add robot info if available
+    if _REACHY_INSTANCE is not None and hasattr(_REACHY_INSTANCE, "get_info"):
+        try:
+            info["robot"] = _REACHY_INSTANCE.get_info()
+        except Exception as e:
+            logger.error(f"Error getting robot info: {e}")
+            info["robot_error"] = str(e)
+    
+    return info
 
 
 if __name__ == "__main__":

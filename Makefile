@@ -16,7 +16,7 @@ test:
 	pytest agent/test_*.py
 
 lint:
-	flake8 agent/ scrape_sdk_docs.py
+	flake8 agent/ agent/tools/scrape_sdk_docs.py
 
 install:
 	pip install -e .
@@ -28,4 +28,4 @@ run-web:
 	python agent/web_interface.py
 
 regenerate:
-	python scrape_sdk_docs.py 
+	python agent/tools/scrape_sdk_docs.py 

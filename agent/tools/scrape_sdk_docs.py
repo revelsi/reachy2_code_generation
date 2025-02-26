@@ -16,10 +16,10 @@ import nbformat
 # Repository and directory configuration
 GIT_URL = "https://github.com/pollen-robotics/reachy2-sdk.git"
 
-# Output directories
-RAW_DOCS_DIR = "data/raw_docs"
+# Output directories - adjust paths for new location
+RAW_DOCS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data/raw_docs")
 EXTRACTED_DIR = os.path.join(RAW_DOCS_DIR, "extracted")
-EXTERNAL_DOCS_DIR = "data/external_docs/documents"
+EXTERNAL_DOCS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data/external_docs/documents")
 os.makedirs(EXTRACTED_DIR, exist_ok=True)
 os.makedirs(EXTERNAL_DOCS_DIR, exist_ok=True)
 

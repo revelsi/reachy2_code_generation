@@ -15,29 +15,37 @@ This repository contains a framework for transparent function calling with the R
 - **Mock Robot**: Test the system without a physical robot
 - **REST API**: Control the robot through a REST API
 - **WebSocket Updates**: Receive real-time updates about the robot's status and actions
+- **Modern Web Interface**: Clean, responsive UI for interacting with the robot
 
-## Getting Started
+## System Requirements
 
-### Prerequisites
+- **Python**: 3.8+ (3.10 recommended)
+- **Node.js**: v18.0.0+ (for frontend development)
+- **OpenAI API key**: Required for natural language processing
+- **Reachy 2 robot**: Optional - a mock robot is provided for testing
 
-- Python 3.8+
-- OpenAI API key (for natural language control)
-- Reachy 2 robot (optional - a mock robot is provided for testing)
+## Installation
 
-### Installation
+### Backend Setup
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/Reachy_function_calling.git
-cd Reachy_function_calling
+git clone https://github.com/yourusername/reachy_function_calling.git
+cd reachy_function_calling
 ```
 
-2. Install the required packages:
+2. Create and activate a virtual environment:
+```bash
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+```
+
+3. Install the required packages:
 ```bash
 pip install -r requirements.txt
 ```
 
-3. Set up your OpenAI API key:
+4. Set up your OpenAI API key:
 ```bash
 export OPENAI_API_KEY=your_api_key_here
 ```
@@ -48,11 +56,120 @@ OPENAI_API_KEY=your_api_key_here
 MODEL=gpt-4-turbo
 ```
 
-## Usage
+### Frontend Setup
 
-### Simple Demo
+1. Navigate to the frontend directory:
+```bash
+cd frontend
+```
 
-The `simple_demo.py` script demonstrates the transparent function calling framework with minimal dependencies.
+2. Install dependencies:
+```bash
+npm install
+```
+
+## Docker Setup
+
+The application can be run using Docker for both development and production environments.
+
+### Prerequisites
+
+- Docker and Docker Compose installed on your system
+- OpenAI API key
+
+### Development with Docker
+
+1. Create a `.env` file in the root directory with your OpenAI API key:
+```
+OPENAI_API_KEY=your_api_key_here
+```
+
+2. Start the development environment:
+```bash
+docker-compose up
+```
+
+This will:
+- Start the backend server with hot-reloading
+- Start the frontend development server with hot-reloading
+- Mount your local code into the containers for real-time development
+
+3. Access the application:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000/api
+
+### Production Deployment with Docker
+
+1. Create a `.env` file with your production settings:
+```
+OPENAI_API_KEY=your_api_key_here
+MODEL=gpt-4-turbo
+USE_MOCK=true  # Set to false if connecting to a real robot
+REACHY_HOST=your_robot_ip  # If using a real robot
+```
+
+2. Build and start the production containers:
+```bash
+docker-compose -f docker-compose.prod.yml up -d
+```
+
+3. Access the production application:
+   - Frontend: http://localhost:3000
+   - Backend API: http://localhost:8000/api
+
+### Docker Configuration Options
+
+You can customize the Docker deployment by setting these environment variables:
+
+- `API_PORT`: Port for the backend API (default: 8000)
+- `FRONTEND_PORT`: Port for the frontend (default: 3000)
+- `MODEL`: OpenAI model to use (default: gpt-4-turbo)
+- `REACHY_HOST`: Hostname or IP of the Reachy robot
+- `USE_MOCK`: Whether to use a mock robot implementation
+- `USE_VIRTUAL`: Whether to use a virtual robot with the real SDK
+
+## Running the Application
+
+### Option 1: Running the Full Stack (Backend + Frontend)
+
+1. Start the backend server:
+```bash
+python api/server.py --api-port 8000 --ws-port 8000
+```
+
+2. In a separate terminal, start the frontend development server:
+```bash
+cd frontend
+npm run dev
+```
+
+3. Open your browser and navigate to `http://localhost:3000`
+
+### Option 2: Using the HTML Preview (No Node.js Required)
+
+If you don't have Node.js v18+ installed, you can still view the UI:
+
+1. Start the backend server:
+```bash
+python api/server.py --api-port 8000 --ws-port 8000
+```
+
+2. Open `frontend/preview.html` directly in your browser
+
+### Option 3: Running the Backend Only
+
+```bash
+# Start the API server
+python api/server.py
+
+# Start with custom ports
+python api/server.py --api-port 5000 --ws-port 8765
+
+# Start with a specific model
+python api/server.py --model gpt-4-turbo
+```
+
+### Option 4: Simple Demo (Command Line)
 
 ```bash
 # Run with example commands
@@ -68,54 +185,21 @@ python agent/simple_demo.py --interactive
 python agent/simple_demo.py --auto-approve
 ```
 
-### API Server
+## Error Handling
 
-The API server provides both REST API and WebSocket endpoints for controlling the robot and receiving real-time updates.
+The application includes robust error handling:
 
-```bash
-# Start the API server
-python api/server.py
+- **Robot Connection**: If the physical Reachy robot is not available, the system automatically falls back to a mock implementation
+- **WebSocket Reconnection**: The frontend automatically attempts to reconnect if the WebSocket connection is lost
+- **API Error Handling**: All API endpoints include proper error handling and return appropriate status codes
+- **User Feedback**: Errors are displayed to the user in the UI with clear messages
 
-# Start with custom ports
-python api/server.py --api-port 5000 --ws-port 8765
+## Security Considerations
 
-# Start with a specific model
-python api/server.py --model gpt-4-turbo
-```
-
-### API Client
-
-The API client provides a simple way to interact with the API server.
-
-```bash
-# Run the API client example
-python api/client_example.py
-
-# Run only the REST API example
-python api/client_example.py --rest
-
-# Run only the WebSocket example
-python api/client_example.py --ws
-```
-
-### Command-line Arguments
-
-#### Simple Demo
-- `--examples`: Run example commands
-- `--prompt TEXT`: Natural language prompt for the robot
-- `--interactive`: Run in interactive mode
-- `--auto-approve`: Automatically approve all function calls
-- `--model MODEL`: OpenAI model to use (default: gpt-4-turbo or value from MODEL env var)
-- `--api-key KEY`: OpenAI API key (if not provided, will use OPENAI_API_KEY environment variable)
-
-#### API Server
-- `--api-host HOST`: Host to run the API server on (default: 0.0.0.0)
-- `--api-port PORT`: Port to run the API server on (default: 5000)
-- `--ws-host HOST`: Host to run the WebSocket server on (default: 0.0.0.0)
-- `--ws-port PORT`: Port to run the WebSocket server on (default: 8765)
-- `--debug`: Run in debug mode
-- `--model MODEL`: OpenAI model to use
-- `--regenerate`: Regenerate tool definitions
+- **Function Call Approval**: All function calls require explicit user approval before execution
+- **Input Validation**: All inputs are validated before being processed
+- **Error Logging**: Errors are logged for debugging but sensitive information is not exposed
+- **CORS Protection**: The API server includes CORS protection to prevent unauthorized access
 
 ## API Reference
 
@@ -185,26 +269,6 @@ python api/client_example.py --ws
   }
   ```
 
-#### Get/Update Configuration
-- **URL**: `/api/config`
-- **Method**: `GET`/`POST`
-- **Request Body** (for POST):
-  ```json
-  {
-    "model": "Model name",
-    "focus_modules": ["module1", "module2"],
-    "regenerate_tools": true
-  }
-  ```
-- **Response**:
-  ```json
-  {
-    "status": "Configuration updated",
-    "model": "Model name",
-    "focus_modules": ["module1", "module2"]
-  }
-  ```
-
 ### WebSocket Messages
 
 #### State Update
@@ -234,75 +298,59 @@ python api/client_example.py --ws
 }
 ```
 
-#### Heartbeat
+#### Thinking Process
 ```json
 {
-  "type": "heartbeat",
-  "timestamp": 1234567890
+  "type": "thinking",
+  "content": "Reasoning process..."
 }
 ```
 
-## Architecture
-
-### SimpleTransparentExecutor
-
-The `SimpleTransparentExecutor` class wraps functions to provide a transparent execution flow:
-
-```python
-executor = SimpleTransparentExecutor(auto_approve=False)
-function = executor.register_function(my_function)
-result = function(param1="value", reasoning="This is why I'm calling the function")
+#### Function Call
+```json
+{
+  "type": "function_call",
+  "name": "function_name",
+  "parameters": {...},
+  "id": "call_id"
+}
 ```
 
-### MockReachy
-
-The `MockReachy` class provides a simple mock implementation of the Reachy 2 robot for testing:
-
-```python
-reachy = MockReachy()
-reachy.get_info()
-reachy.move_arm("right", [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7])
-reachy.look_at(0.5, 0.3, 0.2)
-reachy.move_base(1.0, 0.5, 45.0)
+#### Function Approval
+```json
+{
+  "type": "function_approval",
+  "id": "call_id",
+  "approved": true
+}
 ```
 
-### ReachyLangGraphAgent
+## Troubleshooting
 
-The `ReachyLangGraphAgent` class implements a graph-based agent using LangGraph:
+### Common Issues
 
-```python
-agent = ReachyLangGraphAgent(model="gpt-4-turbo")
-response = agent.process_message("Can you move the robot's right arm up?")
-```
+1. **WebSocket Connection Failed**
+   - Ensure the backend server is running
+   - Check that the WebSocket port is not blocked by a firewall
+   - Verify the WebSocket URL in the frontend configuration
 
-### API Server
+2. **OpenAI API Key Issues**
+   - Ensure your API key is correctly set in the `.env` file or as an environment variable
+   - Check that your API key has sufficient credits
 
-The API server provides both REST API and WebSocket endpoints:
+3. **Node.js Version**
+   - The frontend requires Node.js v18.0.0 or higher
+   - If you can't install Node.js v18+, use the HTML preview option
 
-```python
-# Start the API server
-from api.server import main
-main()
-```
+4. **Robot Connection Issues**
+   - If connecting to a physical Reachy robot, ensure it's powered on and accessible
+   - Check the IP address or hostname is correct
+   - The system will automatically fall back to a mock implementation if the robot is unavailable
 
-### API Client
-
-The API client provides a simple way to interact with the API server:
-
-```python
-from api.client_example import ReachyClient
-
-client = ReachyClient()
-response = client.send_message("Can you move the robot's right arm up?")
-```
-
-## Frontend Integration
-
-You can integrate a custom frontend with the API server. Here are some options:
-
-1. **Use the REST API and WebSocket endpoints**: Build a custom frontend that communicates with the API server.
-2. **Embed in the existing Gradio interface**: Use the Gradio HTML component to embed custom components.
-3. **Generate with Lovable**: Use Lovable to generate a modern, responsive frontend.
+5. **Docker Issues**
+   - If you encounter permission issues, try running Docker commands with `sudo`
+   - For volume mounting issues, ensure your Docker has permission to access the local directories
+   - If containers can't communicate, check that they're on the same Docker network
 
 ## License
 
@@ -310,5 +358,6 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Acknowledgments
 
-- [Reachy 2 SDK](https://github.com/pollen-robotics/reachy2-sdk)
-- [OpenAI API](https://platform.openai.com/docs/api-reference) 
+- [Pollen Robotics](https://www.pollen-robotics.com/) for creating the Reachy robot
+- [OpenAI](https://openai.com/) for their function calling API
+- [LangGraph](https://github.com/langchain-ai/langgraph) for the agent framework 

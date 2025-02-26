@@ -219,38 +219,50 @@
                 ws.close();
             }
             
-            ws = new WebSocket(WS_URL);
-            
-            ws.onopen = function() {
-                console.log('Connected to WebSocket server');
-                connectionStatus.textContent = 'Connected';
-                connectionStatus.className = 'connection-status connected';
-                connectButton.textContent = 'Disconnect';
-            };
-            
-            ws.onmessage = function(event) {
-                const data = JSON.parse(event.data);
-                console.log('Received WebSocket message:', data);
+            try {
+                ws = new WebSocket(WS_URL);
                 
-                if (data.type === 'state') {
-                    updateRobotStatus(data.data);
-                } else if (data.type === 'action') {
-                    addActionNotification(data.data);
-                }
-            };
-            
-            ws.onclose = function() {
-                console.log('Disconnected from WebSocket server');
-                connectionStatus.textContent = 'Disconnected';
+                ws.onopen = function() {
+                    console.log('Connected to WebSocket server');
+                    connectionStatus.textContent = 'Connected';
+                    connectionStatus.className = 'connection-status connected';
+                    connectButton.textContent = 'Disconnect';
+                };
+                
+                ws.onmessage = function(event) {
+                    try {
+                        const data = JSON.parse(event.data);
+                        console.log('Received WebSocket message:', data);
+                        
+                        if (data.type === 'state') {
+                            updateRobotStatus(data.data);
+                        } else if (data.type === 'action') {
+                            addActionNotification(data.data);
+                        } else if (data.type === 'heartbeat') {
+                            console.log('Heartbeat received:', data.timestamp);
+                        }
+                    } catch (parseError) {
+                        console.error('Error parsing WebSocket message:', parseError);
+                    }
+                };
+                
+                ws.onclose = function() {
+                    console.log('Disconnected from WebSocket server');
+                    connectionStatus.textContent = 'Disconnected';
+                    connectionStatus.className = 'connection-status disconnected';
+                    connectButton.textContent = 'Connect';
+                };
+                
+                ws.onerror = function(error) {
+                    console.error('WebSocket error:', error);
+                    connectionStatus.textContent = 'Error: Connection failed';
+                    connectionStatus.className = 'connection-status disconnected';
+                };
+            } catch (error) {
+                console.error('Error creating WebSocket connection:', error);
+                connectionStatus.textContent = 'Error: ' + error.message;
                 connectionStatus.className = 'connection-status disconnected';
-                connectButton.textContent = 'Connect';
-            };
-            
-            ws.onerror = function(error) {
-                console.error('WebSocket error:', error);
-                connectionStatus.textContent = 'Error: ' + error;
-                connectionStatus.className = 'connection-status disconnected';
-            };
+            }
         }
         
         // Update robot status display
