@@ -14,15 +14,15 @@ This is the cleanest approach as it isolates everything in containers.
 
 ### 1. Clone the repository (if you haven't already)
 
-```bash
+```zsh
 git clone https://github.com/yourusername/reachy_function_calling.git
 cd reachy_function_calling
 ```
 
 ### 2. Create a .env file with your OpenAI API key
 
-```bash
-cp .env.example .env
+```zsh
+cp .env.test .env
 ```
 
 Edit the `.env` file and add your OpenAI API key:
@@ -37,8 +37,8 @@ DEBUG=true
 
 ### 3. Build and start the development containers
 
-```bash
-docker-compose up --build
+```zsh
+docker compose up --build
 ```
 
 This will:
@@ -62,15 +62,115 @@ This will:
 
 ### 6. Test the production build
 
-```bash
+```zsh
 # Stop the development containers
-docker-compose down
+docker compose down
 
 # Build and start the production containers
-docker-compose -f docker-compose.prod.yml up --build
+docker compose -f docker-compose.prod.yml up --build
 ```
 
 Access the production application at http://localhost:3000
+
+## Option 1A: Step-by-Step Guide for Docker Desktop
+
+If you're using Docker Desktop, follow these detailed steps:
+
+### 1. Ensure Docker Desktop is installed and running
+
+- Download Docker Desktop from [https://www.docker.com/products/docker-desktop/](https://www.docker.com/products/docker-desktop/) if you haven't already
+- Install and launch Docker Desktop
+- Verify Docker Desktop is running by checking for the Docker icon in your system tray/menu bar
+
+### 2. Clone the repository and set up environment
+
+1. Open a terminal (Terminal on macOS with zsh, or Command Prompt/PowerShell on Windows)
+2. Clone the repository:
+   ```zsh
+   git clone https://github.com/yourusername/reachy_function_calling.git
+   cd reachy_function_calling
+   ```
+
+3. Create your `.env` file from the test template:
+   ```zsh
+   cp .env.test .env
+   ```
+
+4. Edit the `.env` file with your favorite text editor and replace `your_api_key_here` with your actual OpenAI API key
+
+### 3. Run the verification script
+
+```zsh
+./verify_docker.sh
+```
+
+This script will:
+- Verify Docker and Docker Compose are installed
+- Check if your `.env` file exists and has an API key
+- Create necessary directories if they don't exist
+- Provide instructions for the next steps
+
+### 4. Build and run the application with Docker Desktop
+
+1. Open Docker Desktop
+2. Click on the "Containers" tab in the left sidebar
+3. Click the "Run" button in the top right
+4. In the "Run a new container" dialog:
+   - Leave the "Image" field blank (we'll use docker-compose)
+   - Click "Cancel" to exit this dialog
+
+5. Return to your terminal and run:
+   ```zsh
+   docker compose up --build
+   ```
+
+6. In Docker Desktop, you should now see:
+   - A new container group for your project
+   - Two containers running (backend and frontend)
+   - Green status indicators showing they're running
+
+### 5. Monitor container logs in Docker Desktop
+
+1. In Docker Desktop, click on your container group
+2. You'll see both containers listed
+3. Click on each container to view its logs
+4. Look for:
+   - Backend: "Application startup complete" message
+   - Frontend: "Local: http://localhost:3000" message
+
+### 6. Access and test the application
+
+1. Open your web browser and navigate to:
+   - Frontend: http://localhost:3000
+
+2. Test basic functionality:
+   - Send a message: "What can you do?"
+   - Try a command: "Wave your right arm"
+   - Approve the function call when prompted
+   - Verify the response and code output
+
+### 7. Stop the containers when finished
+
+1. In Docker Desktop:
+   - Click on your container group
+   - Click the "Stop" button (square icon)
+
+2. Or in your terminal:
+   ```zsh
+   docker compose down
+   ```
+
+### 8. Test the production build (optional)
+
+1. In your terminal:
+   ```zsh
+   docker compose -f docker-compose.prod.yml up --build
+   ```
+
+2. In Docker Desktop, you'll see new production containers running
+3. Access the production application at http://localhost:3000
+4. Test functionality as before
+5. Stop the containers when finished
 
 ## Option 2: Testing Without Docker
 
@@ -78,16 +178,16 @@ If you prefer to test without Docker, you can run the backend and frontend separ
 
 ### 1. Set up the backend
 
-```bash
+```zsh
 # Create and activate a virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+source venv/bin/activate  # Note: On Windows use: venv\Scripts\activate
 
 # Install dependencies
 pip install -r requirements.txt
 
 # Set up your OpenAI API key
-export OPENAI_API_KEY=your_api_key_here  # On Windows: set OPENAI_API_KEY=your_api_key_here
+export OPENAI_API_KEY=your_api_key_here  # Note: On Windows use: set OPENAI_API_KEY=your_api_key_here
 
 # Start the backend server
 python api/server.py
@@ -95,7 +195,7 @@ python api/server.py
 
 ### 2. Set up the frontend
 
-```bash
+```zsh
 # In a separate terminal
 cd frontend
 
@@ -157,10 +257,17 @@ npm run dev
 
 You can also run the automated tests:
 
-```bash
+```zsh
 # Run backend tests
 pytest agent/test_*.py
 
 # Run linting
 flake8 agent/ agent/tools/scrape_sdk_docs.py
-``` 
+```
+
+## Shell Compatibility Notes
+
+- This guide uses zsh syntax, which is the default shell on macOS since Catalina
+- If you're using bash, the commands should work the same way
+- For Windows users, use PowerShell or Command Prompt with the noted Windows-specific commands
+- The verification and test scripts (`verify_docker.sh` and `test_local.sh`) are compatible with zsh, bash, and sh 
