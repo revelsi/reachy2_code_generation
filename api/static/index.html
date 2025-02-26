@@ -234,12 +234,41 @@
                         const data = JSON.parse(event.data);
                         console.log('Received WebSocket message:', data);
                         
-                        if (data.type === 'state') {
-                            updateRobotStatus(data.data);
-                        } else if (data.type === 'action') {
-                            addActionNotification(data.data);
-                        } else if (data.type === 'heartbeat') {
-                            console.log('Heartbeat received:', data.timestamp);
+                        switch (data.type) {
+                            case 'state':
+                                updateRobotStatus(data.data);
+                                break;
+                            case 'action':
+                                addActionNotification(data.data);
+                                break;
+                            case 'thinking':
+                                updateThinkingStatus(data.content);
+                                break;
+                            case 'complete':
+                                addMessage(data.content, false);
+                                clearThinkingStatus();
+                                if (data.tool_calls && data.tool_calls.length > 0) {
+                                    data.tool_calls.forEach(toolCall => {
+                                        addToolCall(toolCall);
+                                    });
+                                }
+                                break;
+                            case 'function_call':
+                                addToolCall({
+                                    name: data.name,
+                                    arguments: JSON.stringify(data.parameters),
+                                    result: null
+                                });
+                                break;
+                            case 'error':
+                                addErrorMessage(data.message);
+                                clearThinkingStatus();
+                                break;
+                            case 'heartbeat':
+                                console.log('Heartbeat received:', data.timestamp);
+                                break;
+                            default:
+                                console.warn('Unknown message type:', data.type);
                         }
                     } catch (parseError) {
                         console.error('Error parsing WebSocket message:', parseError);
@@ -421,6 +450,37 @@
                 robotStatus.innerHTML = `<p>Error getting tools: ${error.message}</p>`;
                 return null;
             }
+        }
+        
+        // Update thinking status
+        function updateThinkingStatus(message) {
+            const thinkingElement = document.getElementById('thinkingStatus') || document.createElement('div');
+            thinkingElement.id = 'thinkingStatus';
+            thinkingElement.className = 'thinking-status';
+            thinkingElement.innerHTML = `<span class="thinking-dots"></span> ${message}`;
+            
+            if (!document.getElementById('thinkingStatus')) {
+                chatMessages.appendChild(thinkingElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        }
+        
+        // Clear thinking status
+        function clearThinkingStatus() {
+            const thinkingElement = document.getElementById('thinkingStatus');
+            if (thinkingElement) {
+                thinkingElement.remove();
+            }
+        }
+        
+        // Add error message
+        function addErrorMessage(message) {
+            const errorElement = document.createElement('div');
+            errorElement.className = 'message error-message';
+            errorElement.textContent = `Error: ${message}`;
+            
+            chatMessages.appendChild(errorElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
         
         // Event Listeners

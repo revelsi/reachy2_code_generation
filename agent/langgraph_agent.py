@@ -11,9 +11,14 @@ import os
 import importlib
 import inspect
 import sys
-from typing import Dict, List, Any, Optional, Callable, Union, TypedDict, Sequence
+from typing import Dict, List, Any, Optional, Callable, Union, TypedDict, Sequence, Literal
 from dotenv import load_dotenv
 import time
+import logging
+import asyncio
+import websockets
+from openai import OpenAI
+import httpx
 
 # Load environment variables from .env file
 load_dotenv()
@@ -26,21 +31,53 @@ except ImportError:
 
 from pathlib import Path
 
-from openai import OpenAI
 from pydantic import BaseModel, Field
-from langgraph.graph import StateGraph, END
+from langgraph.graph import StateGraph, END, START
 from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.graph.message import add_messages
 
-from .tool_mapper import ReachyToolMapper
+# Import LangChain message types
+from langchain_core.messages import (
+    AIMessage,
+    HumanMessage,
+    SystemMessage,
+    ToolMessage,
+    BaseMessage
+)
 
+from tool_mapper import ReachyToolMapper
 
-class Message(BaseModel):
-    """A message in the conversation."""
-    role: str
-    content: Optional[str] = None
-    tool_calls: Optional[List[Dict[str, Any]]] = None
-    tool_call_id: Optional[str] = None
+# Import WebSocket server for notifications
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from api.websocket import get_websocket_server
 
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+# Configure OpenAI client with custom settings
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    timeout=30.0,  # Increase timeout
+    max_retries=2,  # Add retries
+    base_url="https://api.openai.com/v1",  # Explicitly set base URL
+    http_client=httpx.Client(
+        transport=httpx.HTTPTransport(retries=2),
+        timeout=30.0,
+        verify=True  # Ensure SSL verification is enabled
+    )
+)
+
+# Test the client configuration
+try:
+    test_response = client.models.list()
+    logger.debug("Successfully connected to OpenAI API")
+except Exception as e:
+    logger.error(f"Error testing OpenAI connection: {e}")
+
+# WebSocket server for notifications
+websocket_server = None
+websocket_clients = set()
 
 class ToolCall(BaseModel):
     """A tool call made by the agent."""
@@ -55,15 +92,15 @@ class ToolResult(BaseModel):
     result: Dict[str, Any]
 
 
-class AgentState(BaseModel):
+class AgentState(TypedDict):
     """
     The state of the agent, including conversation history and tool-related information.
     """
-    messages: List[Message] = Field(default_factory=list)
-    current_tool_calls: List[ToolCall] = Field(default_factory=list)
-    tool_results: List[ToolResult] = Field(default_factory=list)
-    error: Optional[str] = None
-    final_response: Optional[str] = None
+    messages: Annotated[List[BaseMessage], add_messages]
+    current_tool_calls: List[ToolCall]
+    tool_results: List[ToolResult]
+    error: Optional[str]
+    final_response: Optional[str]
 
 
 class ReachyLangGraphAgent:
@@ -74,34 +111,16 @@ class ReachyLangGraphAgent:
     tool selection, and execution, providing more flexibility and better error handling.
     """
     
-    def __init__(
-        self,
-        api_key: Optional[str] = None,
-        model: Optional[str] = None,
-        temperature: float = 0.2,
-        max_tokens: int = 1024,
-    ):
-        """
-        Initialize the Reachy LangGraph agent.
-        
-        Args:
-            api_key: OpenAI API key. If None, will use OPENAI_API_KEY environment variable.
-            model: LLM model to use. If None, will use MODEL environment variable or default to gpt-4-turbo.
-            temperature: Temperature for LLM sampling.
-            max_tokens: Maximum tokens for LLM response.
-        """
-        self.client = OpenAI(api_key=api_key)
-        
-        # Use model from environment variable if not provided
-        if model is None:
-            model = os.environ.get("MODEL", "gpt-4-turbo")
-            
+    def __init__(self, model: str = "gpt-4-turbo", api_key: Optional[str] = None):
         self.model = model
-        self.temperature = temperature
-        self.max_tokens = max_tokens
-        
-        self.tools = {}  # Tool schemas
-        self.tool_implementations = {}  # Tool functions
+        if api_key:
+            self.client = OpenAI(api_key=api_key)
+        else:
+            self.client = client  # Use the configured client
+        logger.debug(f"Initialized agent with model: {model}")
+        self.tool_implementations = {}
+        self.tools = []
+        self.load_tools()
         
         # System prompt for the agent
         self.system_prompt = """
@@ -113,17 +132,18 @@ class ReachyLangGraphAgent:
         actions, and always confirm what you're about to do before executing potentially
         dangerous movements.
         
+        If the user asks about available tools or capabilities, provide a clear explanation
+        of the available functions without actually calling them. For such meta-queries,
+        respond directly with the information rather than making tool calls.
+        
         If you're unsure about a request or if it seems unsafe, ask for clarification.
         Always prioritize the safety of the robot and any humans around it.
         """
         
-        # Load tools using the tool mapper
-        self._load_tools()
-        
-        # Build the agent graph
+        # Build the graph after all initialization is complete
         self.graph = self._build_graph()
     
-    def _load_tools(self) -> None:
+    def load_tools(self):
         """
         Load tools using the ReachyToolMapper.
         """
@@ -219,7 +239,7 @@ class ReachyLangGraphAgent:
         Returns:
             List[Dict[str, Any]]: List of tool schemas
         """
-        return list(self.tools.values())
+        return self.tools
     
     def _parse_user_input(self, state: AgentState) -> AgentState:
         """
@@ -231,98 +251,150 @@ class ReachyLangGraphAgent:
         Returns:
             AgentState: Updated agent state.
         """
+        logger.debug("Entering _parse_user_input")
+        
+        # Get WebSocket server for notifications
+        ws_server = get_websocket_server()
+        ws_server.notify_thinking("Parsing your input...")
+        
         # The last message should be the user input
-        last_message = state.messages[-1]
-        if last_message.role != "user":
-            state.error = "Expected user message"
+        last_message = state["messages"][-1]
+        if not isinstance(last_message, HumanMessage):
+            state["error"] = f"Expected user message, got {type(last_message).__name__}"
+            logger.error(state["error"])
             return state
         
-        # No additional processing needed, just return the state
+        logger.debug("Successfully parsed user input")
         return state
     
-    def _select_tool(self, state: AgentState) -> AgentState:
+    def _call_llm(self, state: AgentState) -> AgentState:
         """
-        Select a tool to use based on the user input.
+        Call the LLM to decide what to do next.
         
         Args:
             state: Current agent state.
             
         Returns:
-            AgentState: Updated agent state with selected tool.
+            AgentState: Updated agent state with LLM response.
         """
-        # Convert messages to the format expected by OpenAI
-        openai_messages = []
+        logger.debug("Entering _call_llm")
         
-        # Add system message if not present
-        if not state.messages or state.messages[0].role != "system":
-            openai_messages.append({"role": "system", "content": self.system_prompt})
+        # Get WebSocket server for notifications
+        ws_server = get_websocket_server()
+        ws_server.notify_thinking("Processing your request...")
         
-        # Add the rest of the messages
-        for message in state.messages:
-            msg_dict = {"role": message.role}
+        try:
+            # Check if this is a meta-query about tools
+            last_message = state["messages"][-1]
+            if isinstance(last_message, HumanMessage) and "tools" in last_message.content.lower():
+                # Get list of available tools
+                tools = self.get_available_tools()
+                tool_descriptions = []
+                for tool in tools:
+                    name = tool["function"]["name"]
+                    desc = tool["function"]["description"].split("\n")[0]  # Get first line
+                    tool_descriptions.append(f"- {name}: {desc}")
+                
+                # Create response
+                response = "Here are the available tools:\n\n" + "\n".join(tool_descriptions)
+                
+                # Add response to conversation and set final response
+                state["messages"].append(AIMessage(content=response))
+                state["final_response"] = response
+                
+                # Notify completion
+                ws_server.notify_complete(response)
+                
+                # Clear any pending tool calls to ensure we end the conversation
+                state["current_tool_calls"] = []
+                state["tool_results"] = []
+                return state
             
-            if message.content is not None:
-                msg_dict["content"] = message.content
-                
-            if message.tool_calls:
-                msg_dict["tool_calls"] = message.tool_calls
-                
-            if message.tool_call_id:
-                msg_dict["tool_call_id"] = message.tool_call_id
-                
-            openai_messages.append(msg_dict)
-        
-        # Call the LLM
-        response = self.client.chat.completions.create(
-            model=self.model,
-            messages=openai_messages,
-            tools=self.get_available_tools(),
-            temperature=self.temperature,
-            max_tokens=self.max_tokens
-        )
-        
-        # Get the response message
-        response_message = response.choices[0].message
-        
-        # Add the assistant's response to the conversation
-        assistant_message = Message(
-            role="assistant",
-            content=response_message.content
-        )
-        
-        # Check if the model wants to call a tool
-        if response_message.tool_calls:
-            assistant_message.tool_calls = []
-            state.current_tool_calls = []
+            # Convert messages to the format expected by OpenAI
+            openai_messages = []
             
-            for tool_call in response_message.tool_calls:
-                # Extract tool call information
-                tool_name = tool_call.function.name
-                tool_args = json.loads(tool_call.function.arguments)
+            # Add the messages in the format OpenAI expects
+            for message in state["messages"]:
+                if isinstance(message, SystemMessage):
+                    openai_messages.append({"role": "system", "content": message.content})
+                elif isinstance(message, HumanMessage):
+                    openai_messages.append({"role": "user", "content": message.content})
+                elif isinstance(message, AIMessage):
+                    msg_dict = {"role": "assistant"}
+                    if message.content:
+                        msg_dict["content"] = message.content
+                    if hasattr(message, "tool_calls") and message.tool_calls:
+                        msg_dict["tool_calls"] = message.tool_calls
+                    openai_messages.append(msg_dict)
+                elif isinstance(message, ToolMessage):
+                    openai_messages.append({
+                        "role": "tool",
+                        "content": message.content,
+                        "tool_call_id": message.tool_call_id if hasattr(message, "tool_call_id") else None
+                    })
+            
+            logger.debug("Calling OpenAI with %d messages", len(openai_messages))
+            
+            # Call the LLM
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=openai_messages,
+                tools=self.get_available_tools(),
+                temperature=0.2,
+                max_tokens=1024
+            )
+            
+            # Get the response message
+            response_message = response.choices[0].message
+            logger.debug("Got response from OpenAI: %s", response_message)
+            
+            # Add the assistant's response to the conversation
+            assistant_message = AIMessage(content=response_message.content)
+            
+            # Check if the model wants to call a tool
+            if response_message.tool_calls:
+                logger.debug("Model wants to call %d tools", len(response_message.tool_calls))
+                assistant_message.tool_calls = []
+                state["current_tool_calls"] = []
                 
-                # Add to the message
-                assistant_message.tool_calls.append({
-                    "id": tool_call.id,
-                    "type": "function",
-                    "function": {
-                        "name": tool_name,
-                        "arguments": tool_call.function.arguments
-                    }
-                })
-                
-                # Add to the current tool calls
-                state.current_tool_calls.append(
-                    ToolCall(
-                        name=tool_name,
-                        arguments=tool_args,
-                        id=tool_call.id
+                for tool_call in response_message.tool_calls:
+                    # Extract tool call information
+                    tool_name = tool_call.function.name
+                    tool_args = json.loads(tool_call.function.arguments)
+                    
+                    logger.debug("Processing tool call: %s with args %s", tool_name, tool_args)
+                    
+                    # Notify about the function call
+                    ws_server.notify_function_call(tool_name, tool_args, tool_call.id)
+                    
+                    # Add to the message
+                    assistant_message.tool_calls.append({
+                        "id": tool_call.id,
+                        "type": "function",
+                        "function": {
+                            "name": tool_name,
+                            "arguments": tool_call.function.arguments
+                        }
+                    })
+                    
+                    # Add to the current tool calls
+                    state["current_tool_calls"].append(
+                        ToolCall(
+                            name=tool_name,
+                            arguments=tool_args,
+                            id=tool_call.id
+                        )
                     )
-                )
-        
-        # Add the assistant's response to the conversation
-        state.messages.append(assistant_message)
-        
-        return state
+            
+            # Add the assistant's response to the conversation
+            state["messages"].append(assistant_message)
+            logger.debug("Successfully processed LLM response")
+            return state
+            
+        except Exception as e:
+            logger.error("Error in _call_llm: %s", str(e), exc_info=True)
+            state["error"] = f"Error calling LLM: {str(e)}"
+            return state
     
     def _execute_tools(self, state: AgentState) -> AgentState:
         """
@@ -334,15 +406,20 @@ class ReachyLangGraphAgent:
         Returns:
             AgentState: Updated agent state with tool results.
         """
-        if not state.current_tool_calls:
+        # Get WebSocket server for notifications
+        ws_server = get_websocket_server()
+        
+        if not state["current_tool_calls"]:
             # No tools to execute, just return the state
             return state
         
-        state.tool_results = []
+        state["tool_results"] = []
         
-        for tool_call in state.current_tool_calls:
+        for tool_call in state["current_tool_calls"]:
             tool_name = tool_call.name
             tool_args = tool_call.arguments
+            
+            ws_server.notify_thinking(f"Executing tool: {tool_name}")
             
             # Check if the tool exists
             if tool_name not in self.tool_implementations:
@@ -350,19 +427,23 @@ class ReachyLangGraphAgent:
                     "success": False,
                     "error": f"Tool {tool_name} not found"
                 }
+                ws_server.notify_error(f"Tool {tool_name} not found")
             else:
                 # Execute the tool
                 try:
                     tool_func = self.tool_implementations[tool_name]
                     result = tool_func(**tool_args)
+                    if not result.get("success", False):
+                        ws_server.notify_error(result.get("error", "Unknown error"))
                 except Exception as e:
                     result = {
                         "success": False,
                         "error": str(e)
                     }
+                    ws_server.notify_error(str(e))
             
             # Add the result to the state
-            state.tool_results.append(
+            state["tool_results"].append(
                 ToolResult(
                     tool_call_id=tool_call.id,
                     result=result
@@ -370,16 +451,12 @@ class ReachyLangGraphAgent:
             )
             
             # Add the tool result to the conversation
-            state.messages.append(
-                Message(
-                    role="tool",
-                    tool_call_id=tool_call.id,
-                    content=json.dumps(result)
-                )
-            )
+            tool_message = ToolMessage(content=json.dumps(result))
+            tool_message.tool_call_id = tool_call.id
+            state["messages"].append(tool_message)
         
         # Clear current tool calls
-        state.current_tool_calls = []
+        state["current_tool_calls"] = []
         
         return state
     
@@ -393,53 +470,56 @@ class ReachyLangGraphAgent:
         Returns:
             AgentState: Updated agent state with final response.
         """
+        # Get WebSocket server for notifications
+        ws_server = get_websocket_server()
+        ws_server.notify_thinking("Generating final response...")
+        
         # Convert messages to the format expected by OpenAI
         openai_messages = []
         
-        # Add system message if not present
-        if not state.messages or state.messages[0].role != "system":
-            openai_messages.append({"role": "system", "content": self.system_prompt})
-        
-        # Add the rest of the messages
-        for message in state.messages:
-            msg_dict = {"role": message.role}
-            
-            if message.content is not None:
-                msg_dict["content"] = message.content
-                
-            if message.tool_calls:
-                msg_dict["tool_calls"] = message.tool_calls
-                
-            if message.tool_call_id:
-                msg_dict["tool_call_id"] = message.tool_call_id
-                
-            openai_messages.append(msg_dict)
+        # Add the messages in the format OpenAI expects
+        for message in state["messages"]:
+            if isinstance(message, SystemMessage):
+                openai_messages.append({"role": "system", "content": message.content})
+            elif isinstance(message, HumanMessage):
+                openai_messages.append({"role": "user", "content": message.content})
+            elif isinstance(message, AIMessage):
+                msg_dict = {"role": "assistant"}
+                if message.content:
+                    msg_dict["content"] = message.content
+                if hasattr(message, "tool_calls") and message.tool_calls:
+                    msg_dict["tool_calls"] = message.tool_calls
+                openai_messages.append(msg_dict)
+            elif isinstance(message, ToolMessage):
+                openai_messages.append({
+                    "role": "tool",
+                    "content": message.content,
+                    "tool_call_id": message.tool_call_id if hasattr(message, "tool_call_id") else None
+                })
         
         # Call the LLM
         response = self.client.chat.completions.create(
             model=self.model,
             messages=openai_messages,
-            temperature=self.temperature,
-            max_tokens=self.max_tokens
+            temperature=0.2,
+            max_tokens=1024
         )
         
         # Get the response message
         response_message = response.choices[0].message
         
         # Add the final response to the conversation
-        state.messages.append(
-            Message(
-                role="assistant",
-                content=response_message.content
-            )
-        )
+        state["messages"].append(AIMessage(content=response_message.content))
         
         # Set the final response
-        state.final_response = response_message.content
+        state["final_response"] = response_message.content
+        
+        # Notify completion
+        ws_server.notify_complete(response_message.content)
         
         return state
     
-    def _should_continue(self, state: AgentState) -> str:
+    def _should_continue(self, state: AgentState) -> Literal["call_llm", "execute_tools", "generate_response", END]:
         """
         Determine whether to continue the conversation or end it.
         
@@ -449,23 +529,32 @@ class ReachyLangGraphAgent:
         Returns:
             str: Next node to execute.
         """
-        if state.error:
+        # If we have a final response, end the conversation
+        if state["final_response"] is not None:
+            return END
+        
+        # If there's an error, go to generate_response to provide a response about the error
+        if state["error"]:
             return "generate_response"
         
-        if state.current_tool_calls:
+        # If there are tool calls pending execution, execute them
+        if state["current_tool_calls"]:
             return "execute_tools"
         
-        if state.tool_results:
+        # If there are tool results and no pending tool calls, generate a response
+        if state["tool_results"]:
             return "generate_response"
         
-        # Check if the last assistant message has tool calls
-        for message in reversed(state.messages):
-            if message.role == "assistant" and message.tool_calls:
-                return "execute_tools"
-            elif message.role == "assistant":
-                break
+        # Check if the last message was from the assistant
+        for message in reversed(state["messages"]):
+            if isinstance(message, AIMessage):
+                if hasattr(message, "tool_calls") and message.tool_calls:
+                    return "execute_tools"
+                # If the assistant has responded without tool calls, end the conversation
+                return END
         
-        return END
+        # If we haven't seen an assistant message yet, continue to call_llm
+        return "call_llm"
     
     def _build_graph(self) -> StateGraph:
         """
@@ -477,46 +566,127 @@ class ReachyLangGraphAgent:
         # Create the graph
         graph = StateGraph(AgentState)
         
+        # Define the tool execution node
+        tool_node = ToolNode(tools=self.get_available_tools())
+        
         # Add nodes
         graph.add_node("parse_user_input", self._parse_user_input)
-        graph.add_node("select_tool", self._select_tool)
+        graph.add_node("call_llm", self._call_llm)
         graph.add_node("execute_tools", self._execute_tools)
         graph.add_node("generate_response", self._generate_response)
         
-        # Add edges
-        graph.add_edge("parse_user_input", "select_tool")
-        graph.add_edge("select_tool", self._should_continue)
-        graph.add_edge("execute_tools", "generate_response")
-        graph.add_edge("generate_response", END)
-        
         # Set the entry point
-        graph.set_entry_point("parse_user_input")
+        graph.add_edge(START, "parse_user_input")
         
-        return graph
-    
-    def process_message(self, user_message: str) -> str:
-        """
-        Process a user message and generate a response, potentially calling tools.
+        # Add basic edge from parse_user_input to call_llm
+        graph.add_edge("parse_user_input", "call_llm")
         
-        Args:
-            user_message: User's message.
-            
-        Returns:
-            str: Agent's response.
-        """
-        # Create initial state
-        state = AgentState(
-            messages=[
-                Message(role="system", content=self.system_prompt),
-                Message(role="user", content=user_message)
-            ]
+        # Add conditional edges
+        graph.add_conditional_edges(
+            "call_llm",
+            self._should_continue,
+            {
+                "call_llm": "call_llm",
+                "execute_tools": "execute_tools",
+                "generate_response": "generate_response",
+                END: END
+            }
         )
         
-        # Run the graph
-        final_state = self.graph.invoke(state)
+        graph.add_conditional_edges(
+            "execute_tools",
+            self._should_continue,
+            {
+                "call_llm": "call_llm",
+                "execute_tools": "execute_tools",
+                "generate_response": "generate_response",
+                END: END
+            }
+        )
         
-        # Return the final response
-        return final_state.final_response or "I couldn't generate a response."
+        graph.add_conditional_edges(
+            "generate_response",
+            self._should_continue,
+            {
+                "call_llm": "call_llm",
+                "execute_tools": "execute_tools",
+                "generate_response": "generate_response",
+                END: END
+            }
+        )
+        
+        # Compile the graph
+        return graph.compile()
+    
+    def process_message(self, message: str) -> Dict[str, Any]:
+        """Process a message using the LangGraph agent."""
+        try:
+            # Initialize state with system message if needed
+            initial_messages = []
+            
+            # Add system message
+            initial_messages.append(SystemMessage(content=self.system_prompt))
+            
+            # Add user message
+            initial_messages.append(HumanMessage(content=message))
+            
+            # Create initial state
+            state = {
+                "messages": initial_messages,
+                "current_tool_calls": [],
+                "tool_results": [],
+                "error": None,
+                "final_response": None
+            }
+
+            # Send initial thinking notification
+            ws_server = get_websocket_server()
+            ws_server.notify_thinking("Processing your message...")
+
+            # Run the graph
+            final_state = self.graph.invoke(state)
+            
+            # Extract tool calls from messages
+            tool_calls = []
+            for msg in final_state["messages"]:
+                if isinstance(msg, AIMessage) and hasattr(msg, "tool_calls") and msg.tool_calls:
+                    for tc in msg.tool_calls:
+                        tool_result = None
+                        for tr in final_state["tool_results"]:
+                            if tr.tool_call_id == tc.get("id"):
+                                tool_result = tr.result
+                                break
+                                
+                        tool_calls.append({
+                            "name": tc.get("function", {}).get("name", "unknown"),
+                            "arguments": tc.get("function", {}).get("arguments", {}),
+                            "result": tool_result
+                        })
+
+            # Get final response from the last assistant message
+            final_response = None
+            for msg in reversed(final_state["messages"]):
+                if isinstance(msg, AIMessage):
+                    final_response = msg.content
+                    break
+
+            # Send completion notification
+            if final_state["error"]:
+                ws_server.notify_error(final_state["error"])
+            elif final_response:
+                ws_server.notify_complete(final_response)
+
+            # Return the processed message and tool calls
+            return {
+                "message": final_response,
+                "tool_calls": tool_calls,
+                "error": final_state["error"],
+            }
+        except Exception as e:
+            error_msg = f"Error processing message: {str(e)}"
+            ws_server = get_websocket_server()
+            ws_server.notify_error(error_msg)
+            return {"message": None, "tool_calls": [], "error": error_msg}
     
     def reset_conversation(self):
         """Reset the conversation history."""
@@ -593,7 +763,7 @@ if __name__ == "__main__":
     import os
     
     # Create agent
-    agent = ReachyLangGraphAgent(api_key=os.environ.get("OPENAI_API_KEY"))
+    agent = ReachyLangGraphAgent(model="gpt-4-turbo", api_key=os.environ.get("OPENAI_API_KEY"))
     
     # Process a message
     response = agent.process_message("Can you move the robot's right arm up?")

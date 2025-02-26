@@ -1,8 +1,27 @@
-.PHONY: setup clean test lint install run-cli run-web
+.PHONY: setup clean test lint install run-cli run-web check-python create-venv setup-venv
 
-setup:
-	python -m venv venv
-	. venv/bin/activate && pip install -r requirements.txt
+PYTHON_VERSION := 3.10
+VENV_NAME := venv_py310
+
+check-python:
+	@echo "Checking Python version..."
+	@python3 -c "import sys; v=sys.version_info; sys.exit(0 if v.major==3 and v.minor>=10 else 1)" || \
+		(echo "Python 3.10+ is required. Current version: $$(python3 --version)"; exit 1)
+
+create-venv: check-python
+	@echo "Creating virtual environment with Python $(PYTHON_VERSION)..."
+	@if [ ! -d "$(VENV_NAME)" ]; then \
+		python3 -m venv $(VENV_NAME); \
+	else \
+		echo "Virtual environment $(VENV_NAME) already exists."; \
+	fi
+
+setup-venv: create-venv
+	@echo "Installing dependencies in virtual environment..."
+	@. $(VENV_NAME)/bin/activate && pip install --upgrade pip && pip install -r requirements.txt
+
+setup: setup-venv
+	@echo "Setup complete. Activate the virtual environment with: source $(VENV_NAME)/bin/activate"
 
 clean:
 	rm -rf build/
@@ -13,19 +32,19 @@ clean:
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 
 test:
-	pytest agent/test_*.py
+	@. $(VENV_NAME)/bin/activate && pytest agent/test_*.py
 
 lint:
-	flake8 agent/ agent/tools/scrape_sdk_docs.py
+	@. $(VENV_NAME)/bin/activate && flake8 agent/ agent/tools/scrape_sdk_docs.py
 
 install:
-	pip install -e .
+	@. $(VENV_NAME)/bin/activate && pip install -e .
 
 run-cli:
-	python agent/cli.py
+	@. $(VENV_NAME)/bin/activate && python agent/cli.py
 
 run-web:
-	python agent/web_interface.py
+	@. $(VENV_NAME)/bin/activate && python agent/web_interface.py
 
 regenerate:
-	python agent/tools/scrape_sdk_docs.py 
+	@. $(VENV_NAME)/bin/activate && python agent/tools/scrape_sdk_docs.py 

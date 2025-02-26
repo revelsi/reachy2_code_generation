@@ -11,6 +11,7 @@ import sys
 import json
 from typing import Dict, Any
 from dotenv import load_dotenv
+import unittest
 
 # Load environment variables from .env file
 load_dotenv()
@@ -149,5 +150,24 @@ def main():
     print("\nAll tests passed! ✅")
 
 
+class TestReachyLangGraphAgent(unittest.TestCase):
+    def setUp(self):
+        self.agent = ReachyLangGraphAgent()
+    
+    def test_simple_query(self):
+        """Test that the agent can process a simple query without websockets."""
+        # Simple query that should work without actual robot connection
+        response = self.agent.process_message("What tools are available?")
+        
+        # Print response for debugging
+        print("\nAgent Response:", response)
+        
+        # Basic assertions
+        self.assertIsNotNone(response)
+        self.assertIsNotNone(response["message"])
+        self.assertIn("tool_calls", response)
+        self.assertIsNone(response["error"])
+
+
 if __name__ == "__main__":
-    main() 
+    unittest.main() 

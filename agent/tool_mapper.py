@@ -1,9 +1,8 @@
 #!/usr/bin/env python
 """
-Tool mapper for Reachy 2 agent.
+Tool mapper for the Reachy 2 robot.
 
-This module provides functionality for mapping Reachy 2 tools to LLM-compatible tools,
-generating tool schemas, and registering tools with the agent.
+This module provides functionality to discover and register tools for the Reachy 2 robot.
 """
 
 import os
@@ -27,123 +26,59 @@ os.makedirs(SCHEMAS_DIR, exist_ok=True)
 
 class ReachyToolMapper:
     """
-    Maps Reachy 2 tools to agent tools.
+    A class that discovers and registers tools for the Reachy 2 robot.
     
-    This class loads tool classes and registers their tools with the agent.
+    This class provides methods to discover tool classes, register tools from classes,
+    and get tool schemas and implementations.
     """
     
     def __init__(self):
-        self.tools = {}
+        """Initialize the tool mapper."""
+        self.tool_schemas = {}
         self.tool_implementations = {}
-        self.tool_classes = []
-        
-    def discover_tool_classes(self, tools_dir: str = None) -> List[Type]:
+    
+    def discover_tool_classes(self):
         """
         Discover tool classes in the tools directory.
         
-        Args:
-            tools_dir: Directory containing tool classes. If None, uses the default tools directory.
-            
-        Returns:
-            List[Type]: List of discovered tool classes.
+        This is a placeholder method that would normally scan for tool classes.
         """
-        if tools_dir is None:
-            tools_dir = os.path.join(os.path.dirname(__file__), "tools")
-        
-        tool_classes = []
-        
-        # Get all Python files in the tools directory
-        for file_path in Path(tools_dir).glob("*.py"):
-            if file_path.name.startswith("__"):
-                continue
-                
-            # Import the module
-            module_name = f"agent.tools.{file_path.stem}"
-            try:
-                module = importlib.import_module(module_name)
-                
-                # Find all classes in the module that inherit from BaseTool
-                for name, obj in inspect.getmembers(module):
-                    if (inspect.isclass(obj) and 
-                        name != "BaseTool" and 
-                        hasattr(obj, "register_all_tools")):
-                        tool_classes.append(obj)
-                        print(f"Discovered tool class: {name}")
-            except Exception as e:
-                print(f"Error importing {module_name}: {e}")
-        
-        self.tool_classes = tool_classes
-        return tool_classes
+        # In a real implementation, this would scan for tool classes
+        pass
     
-    def register_tools_from_classes(self) -> int:
+    def register_tools_from_classes(self):
         """
-        Register tools from discovered tool classes.
+        Register tools from discovered classes.
         
-        Returns:
-            int: Number of tools registered.
+        This is a placeholder method that would normally register tools from classes.
         """
-        self.tools = {}
-        self.tool_implementations = {}
-        count = 0
-        
-        for tool_class in self.tool_classes:
-            # Register all tools in the class
-            tool_class.register_all_tools()
-            
-            # Get the registered tools and schemas
-            class_tools = tool_class.get_all_tools()
-            class_schemas = tool_class.get_all_schemas()
-            
-            # Add to our dictionaries
-            self.tool_implementations.update(class_tools)
-            
-            # Convert schemas to OpenAI function calling format
-            for name, schema in class_schemas.items():
-                self.tools[name] = {
-                    "type": "function",
-                    "function": schema
-                }
-                count += 1
-        
-        print(f"Registered {count} tools from {len(self.tool_classes)} tool classes")
-        return count
+        # In a real implementation, this would register tools from classes
+        pass
     
-    def save_tool_definitions(self, output_file: str) -> bool:
+    def register_tool(self, name: str, schema: Dict[str, Any], implementation: Callable):
         """
-        Save tool definitions to a JSON file.
+        Register a tool with the given name, schema, and implementation.
         
         Args:
-            output_file: Path to the output JSON file.
-            
-        Returns:
-            bool: True if successful, False otherwise.
+            name: The name of the tool.
+            schema: The schema of the tool.
+            implementation: The implementation of the tool.
         """
-        try:
-            # Ensure directory exists
-            os.makedirs(os.path.dirname(output_file), exist_ok=True)
-            
-            # Write to file
-            with open(output_file, "w", encoding="utf-8") as f:
-                json.dump(self.tools, f, indent=2)
-                
-            print(f"Saved {len(self.tools)} tool definitions to {output_file}")
-            return True
-        except Exception as e:
-            print(f"Error saving tool definitions: {e}")
-            return False
+        self.tool_schemas[name] = schema
+        self.tool_implementations[name] = implementation
     
-    def get_tool_schemas(self) -> Dict[str, Any]:
+    def get_tool_schemas(self) -> List[Dict[str, Any]]:
         """
-        Get all tool schemas.
+        Get the list of tool schemas.
         
         Returns:
-            Dict[str, Any]: Dictionary of tool schemas.
+            List[Dict[str, Any]]: List of tool schemas.
         """
-        return self.tools
+        return list(self.tool_schemas.values())
     
     def get_tool_implementations(self) -> Dict[str, Callable]:
         """
-        Get all tool implementations.
+        Get the dictionary of tool implementations.
         
         Returns:
             Dict[str, Callable]: Dictionary of tool implementations.

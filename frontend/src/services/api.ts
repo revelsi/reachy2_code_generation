@@ -1,6 +1,7 @@
 import { Tool } from "@/types/robot";
 
-const API_BASE_URL = "/api";
+// Use the correct API base URL
+const API_BASE_URL = process.env.NODE_ENV === 'production' ? "/api" : "http://localhost:5001/api";
 
 export async function sendChatMessage(message: string) {
   try {

@@ -1,49 +1,26 @@
-FROM python:3.10-slim as base
+FROM python:3.10-slim
 
-# Set working directory
 WORKDIR /app
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    git \
-    && rm -rf /var/lib/apt/lists/*
-
-# Copy requirements
+# Copy requirements first for better caching
 COPY requirements.txt .
+COPY pyproject.toml .
+COPY setup.py .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install dependencies
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
-# Development stage
-FROM base as development
-
-# Install development dependencies
-RUN pip install --no-cache-dir pytest pytest-cov black isort mypy
-
-# Copy application code
+# Copy the rest of the application
 COPY . .
 
-# Create data directories
-RUN mkdir -p data/raw_docs data/external_docs
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV PYTHONPATH=/app
 
-# Production stage
-FROM base as production
+# Expose ports
+EXPOSE 5000
+EXPOSE 8765
 
-# Copy application code
-COPY . .
-
-# Create data directories
-RUN mkdir -p data/raw_docs data/external_docs
-
-# Expose API and WebSocket ports
-EXPOSE 8000
-
-# Set default command
-CMD ["python", "api/server.py"] 
+# Run the application
+CMD ["python", "api/app.py"] 

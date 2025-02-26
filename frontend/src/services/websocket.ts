@@ -21,7 +21,8 @@ class WebSocketService {
   private connect() {
     // Use relative URL for WebSocket connection
     const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-    const wsUrl = `${protocol}//${window.location.host}/ws`;
+    const host = process.env.NODE_ENV === 'production' ? window.location.host : 'localhost:8765';
+    const wsUrl = `${protocol}//${host}`;
     
     try {
       this.socket = new WebSocket(wsUrl);

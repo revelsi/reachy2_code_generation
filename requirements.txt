@@ -1,25 +1,34 @@
+# Python 3.10+ required
 # Core dependencies
-openai>=1.0.0
-python-dotenv>=1.0.0
-typing-extensions>=4.0.0  # For Python 3.8 compatibility
-flask>=2.0.0  # For REST API
-flask-cors>=3.0.0  # For CORS support
-websockets>=10.0  # For WebSocket server
+openai==1.12.0
+python-dotenv==1.0.0
+typing-extensions==4.8.0  # For Python 3.8+ compatibility
+flask==2.3.3  # For REST API
+flask-cors==4.0.0  # For CORS support
+websockets==11.0.3  # For WebSocket server
+psutil==5.9.6  # For system monitoring
 
-# Optional dependencies
-gradio>=3.50.0  # For web interface
-langgraph>=0.0.15  # For LangGraph agent
+# LangChain and LangGraph dependencies
+# Using compatible versions without strict pinning to avoid dependency conflicts
+langgraph>=0.0.15
+langchain>=0.0.267
+langchain-openai>=0.0.2
 pydantic>=2.0.0  # For data validation
 
-# For development
-pytest>=7.0.0  # For testing
-black>=23.0.0  # For code formatting
+# Optional dependencies
+gradio==4.13.0  # For web interface
 
-nbformat>=5.0.0
-langchain>=0.1.0
-langchain-openai>=0.0.2
-matplotlib>=3.0.0
-networkx>=3.0.0
-numpy>=1.24.0
-pyquaternion>=0.9.9
+# For development
+pytest==7.4.3  # For testing
+black==23.12.0  # For code formatting
+flake8==6.1.0  # For linting
+
+# For visualization and data processing
+nbformat==5.9.2
+matplotlib==3.8.2
+networkx==3.2.1
+numpy==1.26.3
+pyquaternion==0.9.9
+
+# Reachy SDK
 reachy2-sdk>=1.0.0 

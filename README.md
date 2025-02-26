@@ -1,5 +1,17 @@
 # Reachy Function Calling with Transparent Execution
 
+## ⚠️ Current Development Status
+
+**Note: This project is currently under active development and is not yet stable.**
+
+The LangGraph agent implementation is being developed to replace the previous agent architecture. Several issues are currently being addressed:
+
+- Tool discovery is not working correctly (0 tools loaded)
+- The agent is running in mock mode by default
+- Testing infrastructure is being set up to allow isolated testing
+
+Please see the [TODO.md](TODO.md) file for a detailed list of current issues and planned work.
+
 This repository contains a framework for transparent function calling with the Reachy 2 robot. It demonstrates how to create a system that:
 
 1. Shows the reasoning behind each function call
@@ -23,6 +35,29 @@ This repository contains a framework for transparent function calling with the R
 - **Node.js**: v18.0.0+ (for frontend development)
 - **OpenAI API key**: Required for natural language processing
 - **Reachy 2 robot**: Optional - a mock robot is provided for testing
+
+## Environment Requirements
+
+- Python 3.10 or higher
+- Virtual environment (created automatically by the setup process)
+
+## Setup
+
+The project requires Python 3.10 or higher. The setup process will automatically create a virtual environment with the correct Python version.
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/reachy-function-calling.git
+cd reachy-function-calling
+
+# Set up the environment (creates venv_py310 and installs dependencies)
+make setup
+
+# Activate the virtual environment
+source venv_py310/bin/activate
+```
+
+If you're using pyenv to manage Python versions, the included `.python-version` file will automatically select Python 3.10.12.
 
 ## Installation
 

@@ -90,20 +90,23 @@ class WebSocketServer:
     
     def _run_server(self) -> None:
         """Run the WebSocket server in a separate thread."""
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        
         try:
-            # Create the server
-            start_server = websockets.serve(
-                self.handle_client,
-                self.host,
-                self.port
-            )
+            # Create a new event loop for this thread
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
             
-            # Run the server
-            self.server = loop.run_until_complete(start_server)
-            loop.run_forever()
+            # Define the coroutine to start the server
+            async def start_server_async():
+                self.server = await websockets.serve(
+                    self.handle_client,
+                    self.host,
+                    self.port
+                )
+                # Keep the server running
+                await asyncio.Future()  # Run forever
+            
+            # Run the coroutine in the event loop
+            loop.run_until_complete(start_server_async())
         except Exception as e:
             print(f"Error running WebSocket server: {e}")
             traceback.print_exc()
@@ -171,13 +174,13 @@ class WebSocketServer:
         for client in disconnected_clients:
             await self.unregister(client)
     
-    async def handle_client(self, websocket: websockets.WebSocketServerProtocol, path: str) -> None:
+    async def handle_client(self, websocket: websockets.WebSocketServerProtocol, path=None) -> None:
         """
         Handle a client connection.
         
         Args:
             websocket: WebSocket connection.
-            path: Connection path.
+            path: Connection path (optional).
         """
         await self.register(websocket)
         try:
@@ -192,6 +195,34 @@ class WebSocketServer:
                             "type": "state",
                             "data": self.robot_state
                         }))
+                    elif data.get("type") == "message":
+                        # Get the agent instance
+                        from api.app import agent
+                        if agent is None:
+                            await websocket.send(json.dumps({
+                                "type": "error",
+                                "message": "Agent not initialized"
+                            }))
+                            continue
+                        
+                        # Process the message
+                        try:
+                            response = agent.process_message(data.get("content"))
+                            
+                            # Send the response
+                            await websocket.send(json.dumps({
+                                "type": "complete",
+                                "content": response.get("message"),
+                                "tool_calls": response.get("tool_calls", [])
+                            }))
+                        except Exception as e:
+                            error_msg = f"Error processing message: {str(e)}"
+                            print(error_msg)
+                            traceback.print_exc()
+                            await websocket.send(json.dumps({
+                                "type": "error",
+                                "message": error_msg
+                            }))
                 except json.JSONDecodeError:
                     await websocket.send(json.dumps({
                         "type": "error",
@@ -199,6 +230,7 @@ class WebSocketServer:
                     }))
                 except Exception as e:
                     print(f"Error processing message: {e}")
+                    traceback.print_exc()
                     await websocket.send(json.dumps({
                         "type": "error",
                         "message": f"Error processing message: {str(e)}"
@@ -223,11 +255,13 @@ class WebSocketServer:
             self.robot_state.update(new_state)
             self.robot_state["last_update"] = time.time()
             
-            # Notify clients
-            asyncio.run(self.send_to_clients({
-                "type": "state",
-                "data": self.robot_state
-            }))
+            # Create a task to notify clients
+            if self.clients:
+                message = {
+                    "type": "state",
+                    "data": self.robot_state
+                }
+                self._schedule_task(self.send_to_clients(message))
         except Exception as e:
             print(f"Error updating robot state: {e}")
             traceback.print_exc()
@@ -243,11 +277,13 @@ class WebSocketServer:
             # Update last action
             self.robot_state["last_action"] = action
             
-            # Notify clients
-            asyncio.run(self.send_to_clients({
-                "type": "action",
-                "data": action
-            }))
+            # Create a task to notify clients
+            if self.clients:
+                message = {
+                    "type": "action",
+                    "data": action
+                }
+                self._schedule_task(self.send_to_clients(message))
         except Exception as e:
             print(f"Error notifying action: {e}")
             traceback.print_exc()
@@ -260,12 +296,32 @@ class WebSocketServer:
             content: Thinking content.
         """
         try:
-            asyncio.run(self.send_to_clients({
-                "type": "thinking",
-                "content": content
-            }))
+            if self.clients:
+                message = {
+                    "type": "thinking",
+                    "content": content
+                }
+                self._schedule_task(self.send_to_clients(message))
         except Exception as e:
             print(f"Error notifying thinking: {e}")
+            traceback.print_exc()
+    
+    def notify_complete(self, content: str) -> None:
+        """
+        Notify clients about completion.
+        
+        Args:
+            content: Completion content.
+        """
+        try:
+            if self.clients:
+                message = {
+                    "type": "complete",
+                    "content": content
+                }
+                self._schedule_task(self.send_to_clients(message))
+        except Exception as e:
+            print(f"Error notifying completion: {e}")
             traceback.print_exc()
     
     def notify_function_call(self, name: str, parameters: Dict[str, Any], call_id: str) -> None:
@@ -278,12 +334,14 @@ class WebSocketServer:
             call_id: Function call ID.
         """
         try:
-            asyncio.run(self.send_to_clients({
-                "type": "function_call",
-                "name": name,
-                "parameters": parameters,
-                "id": call_id
-            }))
+            if self.clients:
+                message = {
+                    "type": "function_call",
+                    "name": name,
+                    "parameters": parameters,
+                    "id": call_id
+                }
+                self._schedule_task(self.send_to_clients(message))
         except Exception as e:
             print(f"Error notifying function call: {e}")
             traceback.print_exc()
@@ -296,10 +354,12 @@ class WebSocketServer:
             content: Code output content.
         """
         try:
-            asyncio.run(self.send_to_clients({
-                "type": "code_output",
-                "content": content
-            }))
+            if self.clients:
+                message = {
+                    "type": "code_output",
+                    "content": content
+                }
+                self._schedule_task(self.send_to_clients(message))
         except Exception as e:
             print(f"Error notifying code output: {e}")
             traceback.print_exc()
@@ -312,12 +372,41 @@ class WebSocketServer:
             message: Error message.
         """
         try:
-            asyncio.run(self.send_to_clients({
-                "type": "error",
-                "message": message
-            }))
+            if self.clients:
+                message = {
+                    "type": "error",
+                    "message": message
+                }
+                self._schedule_task(self.send_to_clients(message))
         except Exception as e:
             print(f"Error notifying error: {e}")
+            traceback.print_exc()
+
+    def _schedule_task(self, coro):
+        """
+        Schedule a coroutine to run in the event loop.
+        
+        Args:
+            coro: Coroutine to run.
+        """
+        try:
+            # Try to get the current event loop
+            try:
+                loop = asyncio.get_running_loop()
+            except RuntimeError:
+                # Create a new event loop if none exists
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+            
+            # If we're not in the event loop's thread, run in executor
+            if threading.current_thread() is not threading.main_thread():
+                future = asyncio.run_coroutine_threadsafe(coro, loop)
+                return future.result()
+            
+            # We're in the main thread, create a task
+            return asyncio.create_task(coro)
+        except Exception as e:
+            print(f"Error scheduling task: {e}")
             traceback.print_exc()
 
 

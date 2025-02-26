@@ -26,8 +26,8 @@ export default function App() {
     const connectWebSocket = () => {
       // Use relative URL for WebSocket connection in production
       const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-      const host = process.env.NODE_ENV === 'production' ? window.location.host : 'localhost:8000';
-      const wsUrl = `${protocol}//${host}/ws`;
+      const host = process.env.NODE_ENV === 'production' ? window.location.host : 'localhost:8765';
+      const wsUrl = `${protocol}//${host}`;
       
       console.log(`Connecting to WebSocket at ${wsUrl}`);
       const ws = new WebSocket(wsUrl);

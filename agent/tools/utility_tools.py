@@ -32,7 +32,18 @@ class UtilityTools(BaseTool):
             func=cls.get_camera_frame,
             schema=cls.create_tool_schema(
                 name="get_camera_frame",
-                description="Get a frame from a specified camera."
+                description="Get a frame from a specified camera.",
+                parameters={
+                    "camera": {
+                        "type": "string",
+                        "description": "Camera identifier (e.g., 'left_eye', 'right_eye')"
+                    },
+                    "host": {
+                        "type": "string",
+                        "description": "Hostname or IP address of the robot"
+                    }
+                },
+                required=["camera"]
             )
         )
         
@@ -41,7 +52,18 @@ class UtilityTools(BaseTool):
             func=cls.get_camera_info,
             schema=cls.create_tool_schema(
                 name="get_camera_info",
-                description="Get information about a specified camera."
+                description="Get information about a specified camera.",
+                parameters={
+                    "camera": {
+                        "type": "string",
+                        "description": "Camera identifier (e.g., 'left_eye', 'right_eye')"
+                    },
+                    "host": {
+                        "type": "string",
+                        "description": "Hostname or IP address of the robot"
+                    }
+                },
+                required=["camera"]
             )
         )
         
@@ -51,7 +73,22 @@ class UtilityTools(BaseTool):
             func=cls.play_audio,
             schema=cls.create_tool_schema(
                 name="play_audio",
-                description="Play an audio file."
+                description="Play an audio file.",
+                parameters={
+                    "file_path": {
+                        "type": "string",
+                        "description": "Path to the audio file to play"
+                    },
+                    "wait": {
+                        "type": "boolean",
+                        "description": "Whether to wait for playback to complete"
+                    },
+                    "host": {
+                        "type": "string",
+                        "description": "Hostname or IP address of the robot"
+                    }
+                },
+                required=["file_path"]
             )
         )
         
@@ -60,7 +97,22 @@ class UtilityTools(BaseTool):
             func=cls.record_audio,
             schema=cls.create_tool_schema(
                 name="record_audio",
-                description="Record audio for a specified duration."
+                description="Record audio for a specified duration.",
+                parameters={
+                    "duration": {
+                        "type": "number",
+                        "description": "Duration to record in seconds"
+                    },
+                    "file_path": {
+                        "type": "string",
+                        "description": "Path to save the recorded audio"
+                    },
+                    "host": {
+                        "type": "string",
+                        "description": "Hostname or IP address of the robot"
+                    }
+                },
+                required=["duration", "file_path"]
             )
         )
         
@@ -70,7 +122,34 @@ class UtilityTools(BaseTool):
             func=cls.move_base,
             schema=cls.create_tool_schema(
                 name="move_base",
-                description="Move the mobile base to a target pose."
+                description="Move the mobile base to a target pose.",
+                parameters={
+                    "x": {
+                        "type": "number",
+                        "description": "Target X position in meters"
+                    },
+                    "y": {
+                        "type": "number",
+                        "description": "Target Y position in meters"
+                    },
+                    "theta": {
+                        "type": "number",
+                        "description": "Target orientation in radians"
+                    },
+                    "duration": {
+                        "type": "number",
+                        "description": "Duration of the movement in seconds"
+                    },
+                    "wait": {
+                        "type": "boolean",
+                        "description": "Whether to wait for movement to complete"
+                    },
+                    "host": {
+                        "type": "string",
+                        "description": "Hostname or IP address of the robot"
+                    }
+                },
+                required=["x", "y", "theta"]
             )
         )
         
@@ -79,7 +158,33 @@ class UtilityTools(BaseTool):
             func=cls.translate_base,
             schema=cls.create_tool_schema(
                 name="translate_base",
-                description="Translate the mobile base by a specified distance."
+                description="Translate the mobile base by a specified distance.",
+                parameters={
+                    "x": {
+                        "type": "number",
+                        "description": "X distance to translate in meters"
+                    },
+                    "y": {
+                        "type": "number",
+                        "description": "Y distance to translate in meters"
+                    },
+                    "theta": {
+                        "type": "number",
+                        "description": "Rotation to apply in radians"
+                    },
+                    "duration": {
+                        "type": "number",
+                        "description": "Duration of the movement in seconds"
+                    },
+                    "wait": {
+                        "type": "boolean",
+                        "description": "Whether to wait for movement to complete"
+                    },
+                    "host": {
+                        "type": "string",
+                        "description": "Hostname or IP address of the robot"
+                    }
+                }
             )
         )
         
@@ -88,7 +193,13 @@ class UtilityTools(BaseTool):
             func=cls.get_base_position,
             schema=cls.create_tool_schema(
                 name="get_base_position",
-                description="Get the current position of the mobile base."
+                description="Get the current position of the mobile base.",
+                parameters={
+                    "host": {
+                        "type": "string",
+                        "description": "Hostname or IP address of the robot"
+                    }
+                }
             )
         )
         
@@ -98,7 +209,13 @@ class UtilityTools(BaseTool):
             func=cls.get_robot_info,
             schema=cls.create_tool_schema(
                 name="get_robot_info",
-                description="Get information about the Reachy 2 robot."
+                description="Get information about the Reachy 2 robot.",
+                parameters={
+                    "host": {
+                        "type": "string",
+                        "description": "Hostname or IP address of the robot"
+                    }
+                }
             )
         )
         

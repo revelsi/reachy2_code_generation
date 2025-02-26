@@ -5,6 +5,12 @@ import json
 import argparse
 from typing import List, Tuple, Dict, Any
 from dotenv import load_dotenv
+import logging
+from openai import OpenAI
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # Load environment variables from .env file
 load_dotenv()
@@ -17,6 +23,15 @@ sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(__file__))))
 from agent.langgraph_agent import ReachyLangGraphAgent
 from agent.cli import setup_agent, DEFAULT_MODULES
 
+# Configure OpenAI client with custom settings
+client = OpenAI(
+    api_key=os.getenv("OPENAI_API_KEY"),
+    timeout=30.0,  # Increase timeout
+    max_retries=2  # Add retries
+)
+
+# Log API key presence (not the actual key)
+logger.debug(f"OpenAI API key is {'set' if os.getenv('OPENAI_API_KEY') else 'not set'}")
 
 class AgentInterface:
     """Web interface for the Reachy 2 Agent using Gradio."""
@@ -66,34 +81,21 @@ class AgentInterface:
             Tuple[List[List[str]], List[Dict[str, Any]]]: Updated chat history and tool calls.
         """
         # Process the message
-        response = self.agent.process_message(message)
+        response_data = self.agent.process_message(message)
+        
+        # Extract the message from the response
+        response_message = response_data.get("message", "")
+        if response_data.get("error"):
+            response_message = f"Error: {response_data.get('error')}"
         
         # Update chat history
-        history.append([message, response])
+        history.append([message, response_message])
         self.chat_history = history
         
-        # Get tool calls from the agent
-        tool_calls = []
-        for msg in self.agent.state.messages:
-            if msg.tool_calls:
-                for tool_call in msg.tool_calls:
-                    # Find the corresponding result if available
-                    result = None
-                    for tool_result in self.agent.state.tool_results:
-                        if tool_result.tool_call_id == tool_call.get("id"):
-                            result = tool_result.result
-                            break
-                    
-                    # Add to tool calls
-                    tool_calls.append({
-                        "name": tool_call.get("function", {}).get("name", "unknown"),
-                        "arguments": tool_call.get("function", {}).get("arguments", {}),
-                        "result": result
-                    })
+        # Get tool calls from the response
+        self.tool_calls = response_data.get("tool_calls", [])
         
-        self.tool_calls = tool_calls
-        
-        return history, tool_calls
+        return history, self.tool_calls
     
     def reset_chat(self) -> Tuple[List[List[str]], List[Dict[str, Any]]]:
         """
@@ -102,7 +104,7 @@ class AgentInterface:
         Returns:
             Tuple[List[List[str]], List[Dict[str, Any]]]: Empty chat history and tool calls.
         """
-        self.agent.reset()
+        self.agent.reset_conversation()
         self.chat_history = []
         self.tool_calls = []
         return [], []
@@ -149,7 +151,6 @@ class AgentInterface:
                     tool_calls_json = gr.JSON(
                         value=self.tool_calls,
                         label="Tool Calls",
-                        height=500,
                     )
             
             # Set up event handlers
