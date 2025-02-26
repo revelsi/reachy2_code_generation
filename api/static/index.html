@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reachy Robot Control</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            grid-column: 1 / span 2;
+        }
+        
+        h1, h2, h3 {
+            margin: 0;
+        }
+        
+        .chat-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .message {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            max-width: 80%;
+        }
+        
+        .user-message {
+            background-color: #3498db;
+            color: white;
+            align-self: flex-end;
+            margin-left: auto;
+        }
+        
+        .bot-message {
+            background-color: #f1f1f1;
+            color: #333;
+            align-self: flex-start;
+        }
+        
+        .chat-input {
+            display: flex;
+        }
+        
+        .chat-input input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+        
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        .status-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            height: 600px;
+        }
+        
+        .robot-status {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .tool-call {
+            margin-bottom: 15px;
+            padding: 10px;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+            border-left: 4px solid #3498db;
+        }
+        
+        .tool-call h4 {
+            margin-top: 0;
+            color: #3498db;
+        }
+        
+        .tool-call pre {
+            background-color: #f1f1f1;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+        
+        .status-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .connection-status {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        
+        .connected {
+            background-color: #2ecc71;
+            color: white;
+        }
+        
+        .disconnected {
+            background-color: #e74c3c;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Reachy Robot Control</h1>
+        <p>Control the Reachy robot using natural language</p>
+    </header>
+    
+    <div class="container">
+        <div class="chat-container">
+            <h2>Chat with Reachy</h2>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input">
+                <input type="text" id="messageInput" placeholder="Type your message here...">
+                <button id="sendButton">Send</button>
+            </div>
+            <div style="margin-top: 10px;">
+                <button id="resetButton">Reset Conversation</button>
+            </div>
+        </div>
+        
+        <div class="status-container">
+            <h2>Robot Status</h2>
+            <div class="connection-status disconnected" id="connectionStatus">Disconnected</div>
+            <div class="robot-status" id="robotStatus">
+                <p>Waiting for robot status...</p>
+            </div>
+            <div class="status-actions">
+                <button id="connectButton">Connect</button>
+                <button id="getStatusButton">Get Status</button>
+                <button id="getToolsButton">Get Tools</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Configuration
+        const API_URL = 'http://localhost:5000';
+        const WS_URL = 'ws://localhost:8765';
+        
+        // DOM Elements
+        const chatMessages = document.getElementById('chatMessages');
+        const messageInput = document.getElementById('messageInput');
+        const sendButton = document.getElementById('sendButton');
+        const resetButton = document.getElementById('resetButton');
+        const robotStatus = document.getElementById('robotStatus');
+        const connectionStatus = document.getElementById('connectionStatus');
+        const connectButton = document.getElementById('connectButton');
+        const getStatusButton = document.getElementById('getStatusButton');
+        const getToolsButton = document.getElementById('getToolsButton');
+        
+        // WebSocket connection
+        let ws = null;
+        
+        // Connect to WebSocket
+        function connectWebSocket() {
+            if (ws) {
+                ws.close();
+            }
+            
+            ws = new WebSocket(WS_URL);
+            
+            ws.onopen = function() {
+                console.log('Connected to WebSocket server');
+                connectionStatus.textContent = 'Connected';
+                connectionStatus.className = 'connection-status connected';
+                connectButton.textContent = 'Disconnect';
+            };
+            
+            ws.onmessage = function(event) {
+                const data = JSON.parse(event.data);
+                console.log('Received WebSocket message:', data);
+                
+                if (data.type === 'state') {
+                    updateRobotStatus(data.data);
+                } else if (data.type === 'action') {
+                    addActionNotification(data.data);
+                }
+            };
+            
+            ws.onclose = function() {
+                console.log('Disconnected from WebSocket server');
+                connectionStatus.textContent = 'Disconnected';
+                connectionStatus.className = 'connection-status disconnected';
+                connectButton.textContent = 'Connect';
+            };
+            
+            ws.onerror = function(error) {
+                console.error('WebSocket error:', error);
+                connectionStatus.textContent = 'Error: ' + error;
+                connectionStatus.className = 'connection-status disconnected';
+            };
+        }
+        
+        // Update robot status display
+        function updateRobotStatus(status) {
+            robotStatus.innerHTML = `
+                <h3>Robot State</h3>
+                <p><strong>Status:</strong> ${status.status}</p>
+                <p><strong>Last Update:</strong> ${new Date(status.last_update * 1000).toLocaleTimeString()}</p>
+                
+                <h4>Arms</h4>
+                <p><strong>Left:</strong> ${JSON.stringify(status.arms.left)}</p>
+                <p><strong>Right:</strong> ${JSON.stringify(status.arms.right)}</p>
+                
+                <h4>Head</h4>
+                <p>${JSON.stringify(status.head)}</p>
+                
+                <h4>Base</h4>
+                <p>${JSON.stringify(status.base)}</p>
+                
+                ${status.last_action ? `
+                    <h4>Last Action</h4>
+                    <p>${JSON.stringify(status.last_action)}</p>
+                ` : ''}
+            `;
+        }
+        
+        // Add action notification
+        function addActionNotification(action) {
+            const notification = document.createElement('div');
+            notification.className = 'tool-call';
+            notification.innerHTML = `
+                <h4>${action.name}</h4>
+                <p><strong>Parameters:</strong></p>
+                <pre>${JSON.stringify(action.parameters, null, 2)}</pre>
+                <p><strong>Result:</strong></p>
+                <pre>${JSON.stringify(action.result, null, 2)}</pre>
+            `;
+            
+            robotStatus.appendChild(notification);
+            robotStatus.scrollTop = robotStatus.scrollHeight;
+        }
+        
+        // Add message to chat
+        function addMessage(message, isUser) {
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${isUser ? 'user-message' : 'bot-message'}`;
+            messageElement.textContent = message;
+            
+            chatMessages.appendChild(messageElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Add tool call to chat
+        function addToolCall(toolCall) {
+            const toolCallElement = document.createElement('div');
+            toolCallElement.className = 'tool-call';
+            toolCallElement.innerHTML = `
+                <h4>${toolCall.name}</h4>
+                <p><strong>Arguments:</strong></p>
+                <pre>${JSON.stringify(JSON.parse(toolCall.arguments), null, 2)}</pre>
+                <p><strong>Result:</strong></p>
+                <pre>${JSON.stringify(toolCall.result, null, 2)}</pre>
+            `;
+            
+            chatMessages.appendChild(toolCallElement);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+        
+        // Send message to API
+        async function sendMessage(message) {
+            try {
+                const response = await fetch(`${API_URL}/api/chat`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                console.log('API response:', data);
+                
+                // Add bot response
+                addMessage(data.response, false);
+                
+                // Add tool calls
+                if (data.tool_calls && data.tool_calls.length > 0) {
+                    data.tool_calls.forEach(toolCall => {
+                        addToolCall(toolCall);
+                    });
+                }
+                
+                return data;
+            } catch (error) {
+                console.error('Error sending message:', error);
+                addMessage('Error: ' + error.message, false);
+                return null;
+            }
+        }
+        
+        // Reset conversation
+        async function resetConversation() {
+            try {
+                const response = await fetch(`${API_URL}/api/reset`, {
+                    method: 'POST'
+                });
+                
+                const data = await response.json();
+                console.log('Reset response:', data);
+                
+                // Clear chat messages
+                chatMessages.innerHTML = '';
+                
+                // Add system message
+                addMessage('Conversation has been reset.', false);
+                
+                return data;
+            } catch (error) {
+                console.error('Error resetting conversation:', error);
+                addMessage('Error resetting conversation: ' + error.message, false);
+                return null;
+            }
+        }
+        
+        // Get robot status
+        async function getStatus() {
+            try {
+                const response = await fetch(`${API_URL}/api/status`);
+                const data = await response.json();
+                console.log('Status response:', data);
+                
+                // Update robot status
+                robotStatus.innerHTML = `<pre>${JSON.stringify(data, null, 2)}</pre>`;
+                
+                return data;
+            } catch (error) {
+                console.error('Error getting status:', error);
+                robotStatus.innerHTML = `<p>Error getting status: ${error.message}</p>`;
+                return null;
+            }
+        }
+        
+        // Get available tools
+        async function getTools() {
+            try {
+                const response = await fetch(`${API_URL}/api/tools`);
+                const data = await response.json();
+                console.log('Tools response:', data);
+                
+                // Update robot status with tools
+                robotStatus.innerHTML = `<h3>Available Tools</h3><pre>${JSON.stringify(data.tools, null, 2)}</pre>`;
+                
+                return data;
+            } catch (error) {
+                console.error('Error getting tools:', error);
+                robotStatus.innerHTML = `<p>Error getting tools: ${error.message}</p>`;
+                return null;
+            }
+        }
+        
+        // Event Listeners
+        sendButton.addEventListener('click', () => {
+            const message = messageInput.value.trim();
+            if (message) {
+                addMessage(message, true);
+                sendMessage(message);
+                messageInput.value = '';
+            }
+        });
+        
+        messageInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendButton.click();
+            }
+        });
+        
+        resetButton.addEventListener('click', () => {
+            resetConversation();
+        });
+        
+        connectButton.addEventListener('click', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.close();
+            } else {
+                connectWebSocket();
+            }
+        });
+        
+        getStatusButton.addEventListener('click', () => {
+            getStatus();
+        });
+        
+        getToolsButton.addEventListener('click', () => {
+            getTools();
+        });
+        
+        // Initialize
+        addMessage('Hello! I am the Reachy robot assistant. How can I help you today?', false);
+    </script>
+</body>
+</html> 

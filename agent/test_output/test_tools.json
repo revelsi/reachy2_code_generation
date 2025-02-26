@@ -1,0 +1,481 @@
+{
+  "orbita_utils_to_position": {
+    "type": "function",
+    "function": {
+      "name": "orbita_utils_to_position",
+      "description": "Convert an internal angular value in radians to a value in degrees.\n\nArgs:\n    internal_pos: The internal angular value in radians.\n\nReturns:\n    The corresponding angular value in degrees.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "internal_pos": {
+            "type": "string",
+            "description": "Parameter internal_pos"
+          }
+        },
+        "required": [
+          "internal_pos"
+        ]
+      }
+    }
+  },
+  "orbita_utils_to_internal_position": {
+    "type": "function",
+    "function": {
+      "name": "orbita_utils_to_internal_position",
+      "description": "Convert an angular value in degrees to a value in radians.\n\nThe server expects values in radians, so conversion is necessary.\n\nArgs:\n    pos: The angular value in degrees.\n\nReturns:\n    The corresponding value in radians.\n\nRaises:\n    TypeError: If the provided value is not of type int or float.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "pos": {
+            "type": "string",
+            "description": "Parameter pos"
+          }
+        },
+        "required": [
+          "pos"
+        ]
+      }
+    }
+  },
+  "orbita_utils_unwrapped_pid_value": {
+    "type": "function",
+    "function": {
+      "name": "orbita_utils_unwrapped_pid_value",
+      "description": "Unwrap the internal PID value from a gRPC protobuf object to a Python value.\n\nArgs:\n    value: The gRPC protobuf object containing the PID values.\n\nReturns:\n    A tuple representing the unwrapped PID gains (p, i, d).",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Parameter value"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+    }
+  },
+  "orbita_utils_wrapped_proto_value": {
+    "type": "function",
+    "function": {
+      "name": "orbita_utils_wrapped_proto_value",
+      "description": "Wrap a simple Python value to the corresponding gRPC protobuf type.\n\nArgs:\n    value: The value to be wrapped, which can be a bool, float, or int.\n\nReturns:\n    The corresponding gRPC protobuf object (BoolValue, FloatValue, or UInt32Value).\n\nRaises:\n    TypeError: If the provided value is not a supported type.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Parameter value"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+    }
+  },
+  "orbita_utils_wrapped_pid_value": {
+    "type": "function",
+    "function": {
+      "name": "orbita_utils_wrapped_pid_value",
+      "description": "Wrap a simple Python value to the corresponding gRPC protobuf type.\n\nArgs:\n    value: The value to be wrapped, which can be a bool, float, or int.\n\nReturns:\n    The corresponding gRPC protobuf object (BoolValue, FloatValue, or UInt32Value).\n\nRaises:\n    TypeError: If the provided value is not a supported type.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "Parameter value"
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+    }
+  },
+  "utils_utils_convert_to_radians": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_convert_to_radians",
+      "description": "Convert a list of angles from degrees to radians.\n\nArgs:\n    angles_list: A list of angles in degrees to convert to radians.\n\nReturns:\n    A list of angles converted to radians.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "angles_list": {
+            "type": "string",
+            "description": "Parameter angles_list"
+          }
+        },
+        "required": [
+          "angles_list"
+        ]
+      }
+    }
+  },
+  "utils_utils_convert_to_degrees": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_convert_to_degrees",
+      "description": "Convert a list of angles from radians to degrees.\n\nArgs:\n    angles_list: A list of angles in radians to convert to degrees.\n\nReturns:\n    A list of angles converted to degrees.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "angles_list": {
+            "type": "string",
+            "description": "Parameter angles_list"
+          }
+        },
+        "required": [
+          "angles_list"
+        ]
+      }
+    }
+  },
+  "utils_utils_list_to_arm_position": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_list_to_arm_position",
+      "description": "Convert a list of joint positions to an ArmPosition message, considering whether the positions are in degrees or radians.\n\nArgs:\n    positions: A list of float values representing joint positions. The list should contain 7 values\n        in the following order: [shoulder_pitch, shoulder_roll, elbow_yaw, elbow_pitch, wrist_roll, wrist_pitch,wrist_yaw].\n    degrees: A flag indicating whether the input joint positions are in degrees. If set to `True`,\n        the input positions are in degrees. Defaults to `True`.\n\nReturns:\n    An ArmPosition message containing the shoulder position, elbow position, and wrist position\n    based on the input list of joint positions.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "positions": {
+            "type": "string",
+            "description": "Parameter positions"
+          },
+          "degrees": {
+            "type": "string",
+            "description": "Parameter degrees"
+          }
+        },
+        "required": [
+          "positions",
+          "degrees"
+        ]
+      }
+    }
+  },
+  "utils_utils_arm_position_to_list": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_arm_position_to_list",
+      "description": "Convert an ArmPosition message to a list of joint positions, with an option to return the result in degrees.\n\nArgs:\n    arm_pos: An ArmPosition message containing shoulder, elbow, and wrist positions.\n    degrees: Specifies whether the joint positions should be returned in degrees. If set to `True`,\n        the positions are converted to degrees. Defaults to `True`.\n\nReturns:\n    A list of joint positions based on the ArmPosition, returned in the following order:\n    [shoulder_pitch, shoulder_roll, elbow_yaw, elbow_pitch, wrist_roll, wrist_pitch, wrist_yaw].",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "arm_pos": {
+            "type": "string",
+            "description": "Parameter arm_pos"
+          },
+          "degrees": {
+            "type": "string",
+            "description": "Parameter degrees"
+          }
+        },
+        "required": [
+          "arm_pos",
+          "degrees"
+        ]
+      }
+    }
+  },
+  "utils_utils_ext_euler_angles_to_list": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_ext_euler_angles_to_list",
+      "description": "Convert an ExtEulerAngles 3D rotation message to a list of joint positions.\n\nArgs:\n    euler_angles: An ExtEulerAngles object representing a 3D rotation message.\n    degrees: Specifies whether the output should be in degrees. If set to `True`, the function\n        converts the angles to degrees before returning the list. Defaults to `True`.\n\nReturns:\n    A list of joint positions representing the Euler angles in the order [roll, pitch, yaw].",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "euler_angles": {
+            "type": "string",
+            "description": "Parameter euler_angles"
+          },
+          "degrees": {
+            "type": "string",
+            "description": "Parameter degrees"
+          }
+        },
+        "required": [
+          "euler_angles",
+          "degrees"
+        ]
+      }
+    }
+  },
+  "utils_utils_get_grpc_interpolation_mode": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_get_grpc_interpolation_mode",
+      "description": "Convert a given interpolation mode string to a corresponding GoToInterpolation object.\n\nArgs:\n    interpolation_mode: A string representing the type of interpolation to be used. It can be either\n        \"minimum_jerk\" or \"linear\".\n\nReturns:\n    An instance of the GoToInterpolation class with the interpolation type set based on the input\n    interpolation_mode string.\n\nRaises:\n    ValueError: If the interpolation_mode is not \"minimum_jerk\" or \"linear\".",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "interpolation_mode": {
+            "type": "string",
+            "description": "Parameter interpolation_mode"
+          }
+        },
+        "required": [
+          "interpolation_mode"
+        ]
+      }
+    }
+  },
+  "utils_utils_get_interpolation_mode": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_get_interpolation_mode",
+      "description": "Convert an interpolation mode enum to a string representation.\n\nArgs:\n    interpolation_mode: The interpolation mode given as InterpolationMode. The supported interpolation\n        modes are MINIMUM_JERK and LINEAR.\n\nReturns:\n    A string representing the interpolation mode based on the input interpolation_mode. Returns\n    \"minimum_jerk\" if the mode is InterpolationMode.MINIMUM_JERK, and \"linear\" if it is\n    InterpolationMode.LINEAR.\n\nRaises:\n    ValueError: If the interpolation_mode is not InterpolationMode.MINIMUM_JERK or InterpolationMode.LINEAR.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "interpolation_mode": {
+            "type": "string",
+            "description": "Parameter interpolation_mode"
+          }
+        },
+        "required": [
+          "interpolation_mode"
+        ]
+      }
+    }
+  },
+  "utils_utils_decompose_matrix": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_decompose_matrix",
+      "description": "Decompose a homogeneous 4x4 matrix into rotation (represented as a quaternion) and translation components.\n\nArgs:\n    matrix: A homogeneous 4x4 matrix represented as a NumPy array of type np.float64.\n\nReturns:\n    A tuple containing a Quaternion representing the rotation component and a NumPy array\n    representing the translation component of the input matrix.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "matrix": {
+            "type": "string",
+            "description": "Parameter matrix"
+          }
+        },
+        "required": [
+          "matrix"
+        ]
+      }
+    }
+  },
+  "utils_utils_recompose_matrix": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_recompose_matrix",
+      "description": "Recompose a homogeneous 4x4 matrix from rotation (quaternion) and translation components.\n\nArgs:\n    rotation: A 3x3 rotation matrix represented as a NumPy array of type np.float64.\n    translation: A vector representing the displacement in space, containing the x, y, and z\n        components of the translation vector.\n\nReturns:\n    A homogeneous 4x4 matrix composed from the provided rotation and translation components.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "rotation": {
+            "type": "string",
+            "description": "Parameter rotation"
+          },
+          "translation": {
+            "type": "string",
+            "description": "Parameter translation"
+          }
+        },
+        "required": [
+          "rotation",
+          "translation"
+        ]
+      }
+    }
+  },
+  "utils_utils_matrix_from_euler_angles": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_matrix_from_euler_angles",
+      "description": "Create a 4x4 homogeneous rotation matrix from roll, pitch, and yaw angles, with an option to input angles in degrees.\n\nArgs:\n    roll: The rotation angle around the x-axis in the Euler angles representation.\n    pitch: The rotation angle around the y-axis in the Euler angles representation.\n    yaw: The rotation angle around the z-axis in the Euler angles representation.\n    degrees: Specifies whether the input angles (roll, pitch, yaw) are in degrees. If set to `True`,\n        the input angles are expected to be in degrees. Defaults to `True`.\n\nReturns:\n    A 4x4 homogeneous rotation matrix created from the input roll, pitch, and yaw angles.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "roll": {
+            "type": "string",
+            "description": "Parameter roll"
+          },
+          "pitch": {
+            "type": "string",
+            "description": "Parameter pitch"
+          },
+          "yaw": {
+            "type": "string",
+            "description": "Parameter yaw"
+          },
+          "degrees": {
+            "type": "string",
+            "description": "Parameter degrees"
+          }
+        },
+        "required": [
+          "roll",
+          "pitch",
+          "yaw",
+          "degrees"
+        ]
+      }
+    }
+  },
+  "utils_utils_get_pose_matrix": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_get_pose_matrix",
+      "description": "Create a 4x4 pose matrix from a position vector and \"roll, pitch, yaw\" angles (rotation).\n\nArgs:\n    position: A list of size 3 representing the requested position of the end effector in the Reachy coordinate system.\n    rotation: A list of size 3 representing the requested orientation of the end effector in the Reachy coordinate system.\n        The rotation is given as intrinsic angles, executed in roll, pitch, yaw order.\n    degrees: Specifies whether the input angles are in degrees. If set to `True`, the angles are interpreted as degrees.\n        If set to `False`, they are interpreted as radians. Defaults to `True`.\n\nReturns:\n    The constructed 4x4 pose matrix.\n\nRaises:\n    TypeError: If `position` is not a list of floats or integers.\n    TypeError: If `rotation` is not a list of floats or integers.\n    ValueError: If the length of `position` is not 3.\n    ValueError: If the length of `rotation` is not 3.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "position": {
+            "type": "string",
+            "description": "Parameter position"
+          },
+          "rotation": {
+            "type": "string",
+            "description": "Parameter rotation"
+          },
+          "degrees": {
+            "type": "string",
+            "description": "Parameter degrees"
+          }
+        },
+        "required": [
+          "position",
+          "rotation",
+          "degrees"
+        ]
+      }
+    }
+  },
+  "utils_utils_quaternion_from_euler_angles": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_quaternion_from_euler_angles",
+      "description": "Convert Euler angles (intrinsic XYZ order) to a quaternion using the pyquaternion library.\n\nArgs:\n    roll (float): Rotation angle around the X-axis (roll), in degrees by default.\n    pitch (float): Rotation angle around the Y-axis (pitch), in degrees by default.\n    yaw (float): Rotation angle around the Z-axis (yaw), in degrees by default.\n    degrees (bool): If True, the input angles are interpreted as degrees. If False, they are\n        interpreted as radians. Defaults to True.\n\nReturns:\n    Quaternion: The quaternion representing the combined rotation in 3D space.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "roll": {
+            "type": "string",
+            "description": "Parameter roll"
+          },
+          "pitch": {
+            "type": "string",
+            "description": "Parameter pitch"
+          },
+          "yaw": {
+            "type": "string",
+            "description": "Parameter yaw"
+          },
+          "degrees": {
+            "type": "string",
+            "description": "Parameter degrees"
+          }
+        },
+        "required": [
+          "roll",
+          "pitch",
+          "yaw",
+          "degrees"
+        ]
+      }
+    }
+  },
+  "utils_utils_rotate_in_self": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_rotate_in_self",
+      "description": "Return a new homogeneous 4x4 pose matrix that is the input matrix rotated in itself.\n\nArgs:\n    frame: The input frame, given as a 4x4 homogeneous matrix.\n    rotation: A list of size 3 representing the rotation to be applied. The rotation is given as intrinsic angles,\n        executed in roll, pitch, yaw order.\n    degrees: Specifies whether the input angles are in degrees. If set to `True`, the angles are interpreted as degrees.\n        If set to `False`, they are interpreted as radians. Defaults to `True`.\n\nReturns:\n    A new 4x4 homogeneous matrix after applying the specified rotation.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "frame": {
+            "type": "string",
+            "description": "Parameter frame"
+          },
+          "rotation": {
+            "type": "string",
+            "description": "Parameter rotation"
+          },
+          "degrees": {
+            "type": "string",
+            "description": "Parameter degrees"
+          }
+        },
+        "required": [
+          "frame",
+          "rotation",
+          "degrees"
+        ]
+      }
+    }
+  },
+  "utils_utils_translate_in_self": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_translate_in_self",
+      "description": "Return a new homogeneous 4x4 pose matrix that is the input frame translated along its own axes.\n\nArgs:\n    frame: The input frame, given as a 4x4 homogeneous matrix.\n    translation: A list of size 3 representing the translation to be applied, given as [x, y, z].\n\nReturns:\n    A new homogeneous 4x4 pose matrix after translating the input frame along its own axes.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "frame": {
+            "type": "string",
+            "description": "Parameter frame"
+          },
+          "translation": {
+            "type": "string",
+            "description": "Parameter translation"
+          }
+        },
+        "required": [
+          "frame",
+          "translation"
+        ]
+      }
+    }
+  },
+  "utils_utils_invert_affine_transformation_matrix": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_invert_affine_transformation_matrix",
+      "description": "Invert a 4x4 homogeneous transformation matrix.\n\nThe function computes the inverse by transposing the rotation component and adjusting the translation component.\n\nArgs:\n    matrix: A 4x4 NumPy array representing a homogeneous transformation matrix.\n\nReturns:\n    A new 4x4 homogeneous matrix that is the inverse of the input matrix.\n\nRaises:\n    ValueError: If the input matrix is not 4x4.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "matrix": {
+            "type": "string",
+            "description": "Parameter matrix"
+          }
+        },
+        "required": [
+          "matrix"
+        ]
+      }
+    }
+  },
+  "utils_utils_get_normal_vector": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_get_normal_vector",
+      "description": "Calculate a normal vector to a given vector based on a specified direction.\n\nArgs:\n    vector: A vector [x, y, z] in 3D space.\n    arc_direction: The desired direction for the normal vector. It can be one of the following options:\n        'above', 'below', 'front', 'back', 'right', or 'left'.\n\nReturns:\n    The normal vector [x, y, z] to the given vector in the specified direction. Returns `None` if the\n    normal vector cannot be computed or if the vector is in the requested arc_direction.\n\nRaises:\n    ValueError: If the arc_direction is not one of 'above', 'below', 'front', 'back', 'right', or 'left'.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "vector": {
+            "type": "string",
+            "description": "Parameter vector"
+          },
+          "arc_direction": {
+            "type": "string",
+            "description": "Parameter arc_direction"
+          }
+        },
+        "required": [
+          "vector",
+          "arc_direction"
+        ]
+      }
+    }
+  }
+}

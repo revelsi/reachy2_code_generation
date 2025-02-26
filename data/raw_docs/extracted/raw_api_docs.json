@@ -1,0 +1,192 @@
+[
+  {
+    "type": "module",
+    "name": "reachy2_sdk.__init__",
+    "docstring": "ReachySDK package.\n\nThis package provides remote access (via socket) to a Reachy robot.\nIt automatically handles the synchronization with the robot.\nIn particular, you can easily get an always up-to-date robot state (joint positions, sensors value).\nYou can also send joint commands, compute forward or inverse kinematics.\n\nSimply do\n```python\nfrom reachy2_sdk.reachy_sdk import ReachySDK\nreachy = ReachySDK(host=\"ip_address\")\n```\n\nAnd you're ready to use Reachy!\n\n*Examples are available [here](https://github.com/pollen-robotics/reachy2-sdk/tree/develop/src/examples)\n and tutorials [there](https://github.com/pollen-robotics/reachy2-tutorials) !*",
+    "source": "__init__"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.reachy_sdk",
+    "docstring": "ReachySDK package.\n\nThis package provides remote access (via socket) to a Reachy robot.\nIt automatically handles the synchronization with the robot.\nIn particular, you can easily get an always up-to-date robot state (joint positions, sensors value).\nYou can also send joint commands, compute forward or inverse kinematics.",
+    "source": "reachy_sdk"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.orbita.orbita_axis",
+    "docstring": "Reachy OrbitaAxis module.\n\nHandles all specific methods to OrbitaAxis.",
+    "source": "orbita.orbita_axis"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.orbita.orbita",
+    "docstring": "Reachy Orbita module.\n\nHandles all specific methods commmon to all Orbita2d and Orbita3d.",
+    "source": "orbita.orbita"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.orbita.__init__",
+    "docstring": "Orbita module.\n\nThis module manages the orbita actuators: axis, motors and joints.",
+    "source": "orbita.__init__"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.orbita.orbita_joint",
+    "docstring": "Reachy OrbitaJoint module.\n\nHandles all specific methods to OrbitaJoint.",
+    "source": "orbita.orbita_joint"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.orbita.orbita2d",
+    "docstring": "Reachy Orbita2d module.\n\nHandles all specific methods to Orbita2d.",
+    "source": "orbita.orbita2d"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.orbita.orbita3d",
+    "docstring": "Reachy Orbita3d module.\n\nHandles all specific methods to Orbita3d.",
+    "source": "orbita.orbita3d"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.orbita.utils",
+    "docstring": "This module defines the utils class functions for Orbita.",
+    "source": "orbita.utils"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.orbita.orbita_motor",
+    "docstring": "Reachy OrbitaMotor module.\n\nHandles all specific methods to OrbitaMotor.",
+    "source": "orbita.orbita_motor"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.sensors.__init__",
+    "docstring": "Sensors module.\n\nThis module provides Reachy's sensors: Lidar.",
+    "source": "sensors.__init__"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.sensors.lidar",
+    "docstring": "Reachy Lidar module.\n\nHandles all specific methods to the Lidar sensor.",
+    "source": "sensors.lidar"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.config.reachy_info",
+    "docstring": "ReachyInfo module.\n\nThis module provides main informations about the robot.",
+    "source": "config.reachy_info"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.config.__init__",
+    "docstring": "Config module.\n\nThis module manages the configuration of the connected robot.",
+    "source": "config.__init__"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.utils.__init__",
+    "docstring": "Utils module.\n\nThis module contains various useful methods and classes.",
+    "source": "utils.__init__"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.utils.custom_dict",
+    "docstring": "Custom dict module.\n\nDefines a custom dict class to modify repr of dict.",
+    "source": "utils.custom_dict"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.parts.goto_based_part",
+    "docstring": "Reachy IGoToBasedPart interface.\n\nHandles common interface for parts performing movement using goto mechanism.",
+    "source": "parts.goto_based_part"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.parts.joints_based_part",
+    "docstring": "Reachy JointsBasedPart module.\n\nHandles all specific methods to parts composed of controllable joints.",
+    "source": "parts.joints_based_part"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.parts.mobile_base",
+    "docstring": "Reachy MobileBase module.\n\nHandles all specific methods to a MobileBase.",
+    "source": "parts.mobile_base"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.parts.__init__",
+    "docstring": "Parts module.\n\nThis module provides Reachy's parts: Arm, Head, Hand and MobileBase.",
+    "source": "parts.__init__"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.parts.arm",
+    "docstring": "Reachy Arm module.\n\nHandles all specific methods to an Arm (left and/or right).",
+    "source": "parts.arm"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.parts.head",
+    "docstring": "Reachy Head module.\n\nHandles all specific methods to a Head.",
+    "source": "parts.head"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.parts.hand",
+    "docstring": "Reachy Hand module.\n\nHandles all specific method to a Hand.",
+    "source": "parts.hand"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.parts.part",
+    "docstring": "Reachy Part module.\n\nHandles all specific methods commmon to all Reachy parts (Arm, Head, Hand or MobileBase).",
+    "source": "parts.part"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.media.__init__",
+    "docstring": "Media module.\n\nThis module provides access to Reachy's cameras, microphones and speakers.",
+    "source": "media.__init__"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.media.camera",
+    "docstring": "Reachy Camera module.\n\nDefine the RGB Camera of Reachy's head (Teleop) and the RGBD Camera of its torso (Depth).\nProvide access to the frames (color, depth, disparity) and the camera parameters.",
+    "source": "media.camera"
+  },
+  {
+    "type": "class",
+    "name": "CameraView",
+    "module": "reachy2_sdk.media.camera",
+    "docstring": "Enumeration for different camera views.\n\nThe `CameraView` enum provides options for specifying the view from which\nto capture images or video frames. For monocular cameras, LEFT is used as default.",
+    "methods": [],
+    "source": "reachy2_sdk.media.camera.CameraView",
+    "bases": [
+      "Enum"
+    ]
+  },
+  {
+    "type": "class",
+    "name": "CameraType",
+    "module": "reachy2_sdk.media.camera",
+    "docstring": "Camera names defined in pollen-vision.",
+    "methods": [],
+    "source": "reachy2_sdk.media.camera.CameraType",
+    "bases": [
+      "Enum"
+    ]
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.media.camera_manager",
+    "docstring": "Reachy Camera Manager module.\n\nInitialize the head and torso cameras if they are available.",
+    "source": "media.camera_manager"
+  },
+  {
+    "type": "module",
+    "name": "reachy2_sdk.media.audio",
+    "docstring": "Reachy Audio module.\n\nEnable access to the microphones and speaker.",
+    "source": "media.audio"
+  }
+]
