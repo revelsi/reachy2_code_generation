@@ -14,6 +14,8 @@ from pathlib import Path
 from typing import Dict, Any, List, Type, Callable, Optional, Union
 import importlib.util
 import pkgutil
+from agent.tools.base_tool import BaseTool
+from agent.tools.connection_manager import get_reachy
 
 # Configure path to include the agent directory
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -122,7 +124,22 @@ class ReachyToolMapper:
             name: The name of the tool.
             schema: The schema of the tool.
             implementation: The implementation of the tool.
+            
+        Raises:
+            ValueError: If the schema is invalid.
         """
+        # Validate schema
+        if not isinstance(schema, dict):
+            raise ValueError("Schema must be a dictionary")
+        if not name:
+            raise ValueError("Tool name is required")
+        if not implementation:
+            raise ValueError("Tool implementation is required")
+        if not schema.get("description") and not (schema.get("function", {}).get("description")):
+            raise ValueError("Tool description is required")
+        if not schema.get("parameters") and not (schema.get("function", {}).get("parameters")):
+            raise ValueError("Tool parameters are required")
+            
         # Convert schema to LangChain/LangGraph format if needed
         if not self._is_langchain_format(schema):
             schema = self._convert_to_langchain_format(name, schema)
@@ -574,7 +591,8 @@ This module provides tools for interacting with the {module_name} module of the 
 """
 
 from typing import Dict, Any, List, Optional, Union, Tuple
-from .base_tool import BaseTool, get_reachy_connection
+from .base_tool import BaseTool
+from agent.tools.connection_manager import get_reachy
 
 class {class_name}(BaseTool):
     """Tools for interacting with the {module_name} module of the Reachy 2 SDK."""
@@ -592,7 +610,7 @@ class {class_name}(BaseTool):
         """{docstring}"""
         try:
             # Get Reachy connection
-            reachy = get_reachy_connection()
+            reachy = get_reachy()
             
             # Get the target object
             {target_obj_code}

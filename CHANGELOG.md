@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added detailed documentation for using generated tools in README.md
 - Added tool execution result notifications via WebSocket
 - Added error message display with auto-fade in the web interface
+- Added new connection manager module for centralized Reachy connection handling
 
 ### Fixed
 - Tool discovery and generation now working correctly (208 tools loaded)
@@ -24,12 +25,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Updated import paths for the reorganized directory structure
 - Tool implementations now have proper error handling and consistent return formats
 - Fixed WebSocket server to properly notify clients of tool execution and results
+- Fixed connection handling in tool implementations to use centralized connection manager
+- Fixed import issues in generated tool files
 
 ### Changed
 - Moved utility files to the `agent/utils` directory for better organization
 - Updated README.md to reflect the current state of the project
 - Updated TODO.md to mark completed items and add new tasks
 - Improved WebSocket message handling in the frontend
+- Refactored tool generation to use consistent connection pattern
+- Migrated from `get_reachy_connection` to `get_reachy` for better connection management
 
 ## [0.1.0] - 2023-02-26
 

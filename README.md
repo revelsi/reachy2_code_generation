@@ -10,6 +10,8 @@ The LangGraph agent implementation has been significantly improved with the foll
 - ✅ API documentation extraction from the Reachy 2 SDK is functioning
 - ✅ Tool implementations are generated with proper error handling and consistent return formats
 - ✅ Comprehensive test suite has been implemented to verify tool functionality
+- ✅ Centralized connection management through the new connection manager module
+- ✅ Consistent tool implementation patterns across all generated tools
 
 The agent uses real tool definitions from the Reachy 2 SDK but can operate with mock implementations when no physical robot is available.
 
@@ -105,18 +107,29 @@ OPENAI_API_KEY=your_api_key_here
 MODEL=gpt-4-turbo
 ```
 
-### Refreshing SDK Documentation
+### Refreshing SDK Documentation and Tools
 
-If the Reachy 2 SDK has been updated, you can refresh the SDK documentation and regenerate the tools:
+If the Reachy 2 SDK has been updated, or if you need to regenerate the tool implementations, you can use:
 
 ```bash
+# To refresh SDK documentation and regenerate tools
 make refresh-sdk
+
+# To only regenerate tools from existing documentation
+make generate-tools
 ```
 
-This will:
-1. Clone or update the Reachy 2 SDK repository
-2. Extract the latest API documentation
-3. Regenerate the tool definitions and implementations
+The `generate-tools` command will:
+1. Clean existing tool implementations
+2. Load the API documentation
+3. Generate fresh tool definitions
+4. Create tool implementations with consistent patterns
+5. Ensure proper connection handling through the connection manager
+
+This is useful when:
+- The SDK has been updated
+- You've modified the tool generation templates
+- You need to ensure all tools follow the latest implementation patterns
 
 ## Running the Application
 

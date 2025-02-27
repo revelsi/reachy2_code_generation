@@ -10,6 +10,7 @@ from langchain.schema import FunctionMessage
 
 from agent.utils.tool_mapper import ReachyToolMapper
 from agent.tools.base_tool import BaseTool as ReachyBaseTool
+from agent.tools.connection_manager import connect_to_reachy, get_reachy
 
 class TestReachyTools:
     """Test suite for Reachy tools."""
@@ -84,7 +85,7 @@ class TestReachyTools:
             assert "class" in content
             assert "BaseTool" in content
             assert "register_all_tools" in content
-            assert "get_reachy_connection" in content
+            assert "get_reachy" in content
     
     def test_tool_registration(self, tool_mapper, tool_schemas):
         """Test that tools can be registered and accessed."""

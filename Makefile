@@ -1,4 +1,4 @@
-.PHONY: setup clean test lint install run-cli run-web check-python create-venv setup-venv regenerate generate-tools refresh-sdk test-virtual demo-virtual test-agent
+.PHONY: setup clean test lint install run-cli run-web check-python create-venv setup-venv regenerate generate-tools refresh-sdk test-virtual demo-virtual test-agent test-unit test-integration
 
 PYTHON_VERSION := 3.10
 VENV_NAME := venv_py310
@@ -31,8 +31,16 @@ clean:
 	find . -type d -name "*.pyc" -delete
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 
-test:
-	@. $(VENV_NAME)/bin/activate && pytest agent/test_*.py
+test: test-unit test-integration
+	@echo "All tests completed."
+
+test-unit:
+	@echo "Running unit tests..."
+	@. $(VENV_NAME)/bin/activate && pytest tests/unit/ -v
+
+test-integration:
+	@echo "Running integration tests..."
+	@. $(VENV_NAME)/bin/activate && pytest tests/integration/ tests/test_agent_integration.py -v
 
 lint:
 	@. $(VENV_NAME)/bin/activate && flake8 agent/ agent/utils/scrape_sdk_docs.py
@@ -48,7 +56,7 @@ run-web:
 
 test-virtual:
 	@echo "Running virtual Reachy tests..."
-	@. $(VENV_NAME)/bin/activate && python test_virtual_reachy.py
+	@. $(VENV_NAME)/bin/activate && python tests/integration/test_virtual_reachy.py
 
 demo-virtual:
 	@echo "Starting virtual Reachy demo..."
