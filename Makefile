@@ -58,9 +58,7 @@ refresh-sdk:
 generate-tools:
 	@echo "Generating tools from API documentation..."
 	@mkdir -p agent/docs
-	@if [ ! -f "agent/docs/api_documentation.json" ]; then \
-		echo "Copying API documentation..."; \
-		cp data/raw_docs/extracted/raw_api_docs.json agent/docs/api_documentation.json; \
-	fi
+	@echo "Copying API documentation..."
+	@cp data/raw_docs/extracted/raw_api_docs.json agent/docs/api_documentation.json
 	@. $(VENV_NAME)/bin/activate && python -m agent.utils.integrate_tools
 	@echo "Tool generation completed." 
