@@ -52,7 +52,7 @@ DISABLE_WEBSOCKET = os.getenv("DISABLE_WEBSOCKET", "false").lower() in ("true", 
 
 # Robot settings
 REACHY_HOST = os.getenv("REACHY_HOST", "localhost")
-USE_MOCK = os.getenv("USE_MOCK", "true").lower() in ("true", "1", "t")
+USE_MOCK = os.getenv("USE_MOCK", "true").lower() in ("true", "1", "t")  # Default to mock mode if no robot available
 USE_VIRTUAL = os.getenv("USE_VIRTUAL", "true").lower() in ("true", "1", "t")
 
 # System information

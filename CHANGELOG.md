@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Development environment setup scripts (`start_dev.sh` and `start_dev.bat`) for consistent environment setup
+- Tool verification script (`verify_tools.py`) to check tool generation
 - Comprehensive test suite for tool functionality
 - CONTRIBUTING.md with guidelines for contributors
 - CHANGELOG.md to track changes

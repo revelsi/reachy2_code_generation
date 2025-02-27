@@ -33,7 +33,7 @@ from pathlib import Path
 
 from pydantic import BaseModel, Field
 from langgraph.graph import StateGraph, END, START
-from langgraph.prebuilt import ToolNode, tools_condition
+from langgraph.checkpoint import CheckpointAt
 from langgraph.graph.message import add_messages
 
 # Import LangChain message types
@@ -142,11 +142,20 @@ class ReachyLangGraphAgent:
     def load_tools(self):
         """
         Load tools using the ReachyToolMapper.
+        
+        This method always uses real tool definitions from the Reachy SDK,
+        but can use mock implementations when no physical robot is available.
         """
-        # Create a tool mapper instance
+        # Import config here to avoid circular imports
+        from config import USE_MOCK
+        
+        # Log whether we're using mock mode or real robot
+        logger.info(f"Loading tools with {'mock' if USE_MOCK else 'real'} implementations")
+        
+        # Standard tool discovery using ReachyToolMapper
         mapper = ReachyToolMapper()
         
-        # Discover and register tools
+        # Discover and register tools - this gets the real tool definitions from the SDK
         tool_classes = mapper.discover_tool_classes()
         num_tools = mapper.register_tools_from_classes(tool_classes)
         
@@ -160,11 +169,101 @@ class ReachyLangGraphAgent:
             if os.path.exists(schemas_dir):
                 self.load_tool_schemas_from_dir(schemas_dir)
         
+        # If we're in mock mode, replace implementations with mock versions
+        if USE_MOCK:
+            logger.info("Using mock implementations for tools")
+            self._replace_with_mock_implementations()
+        
         # Log the loaded tools
         logger.info(f"Loaded {len(self.tools)} tools and {len(self.tool_implementations)} implementations")
         
         # Validate that tools are in the correct format for LangChain/LangGraph
         self._validate_and_fix_tool_schemas()
+    
+    def _replace_with_mock_implementations(self):
+        """
+        Replace real tool implementations with mock versions.
+        This allows testing without a physical robot while still using the real tool definitions.
+        """
+        # Create mock implementations for common tool types
+        mock_implementations = {}
+        
+        # Helper function to create a generic mock implementation
+        def create_mock_implementation(tool_name):
+            def mock_implementation(**kwargs):
+                logger.info(f"MOCK: Executing {tool_name} with args: {kwargs}")
+                return {
+                    "success": True,
+                    "result": {
+                        "tool": tool_name,
+                        "args": kwargs,
+                        "mock": True,
+                        # Add some realistic-looking data based on the tool name
+                        **(self._generate_mock_result(tool_name, kwargs))
+                    }
+                }
+            return mock_implementation
+        
+        # Create mock implementations for each tool
+        for tool in self.tools:
+            if isinstance(tool, dict) and "function" in tool and "name" in tool["function"]:
+                tool_name = tool["function"]["name"]
+                mock_implementations[tool_name] = create_mock_implementation(tool_name)
+        
+        # Replace the real implementations with mock ones
+        self.tool_implementations = mock_implementations
+    
+    def _generate_mock_result(self, tool_name, kwargs):
+        """
+        Generate realistic-looking mock results based on the tool name and arguments.
+        
+        Args:
+            tool_name: The name of the tool
+            kwargs: The arguments passed to the tool
+            
+        Returns:
+            dict: A dictionary with realistic-looking mock results
+        """
+        result = {}
+        
+        # Handle arm-related tools
+        if "arm" in tool_name.lower():
+            if "position" in tool_name.lower() or "get" in tool_name.lower():
+                # For position getters
+                result["positions"] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+                result["joint_names"] = ["shoulder_pitch", "shoulder_roll", "arm_yaw", "elbow_pitch", "forearm_yaw", "wrist_pitch", "wrist_roll"]
+            elif "move" in tool_name.lower():
+                # For movement commands
+                result["final_position"] = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+                result["movement_time"] = 1.5
+                result["completed"] = True
+        
+        # Handle gripper-related tools
+        elif "gripper" in tool_name.lower():
+            if "open" in tool_name.lower():
+                result["opening"] = 1.0
+            elif "close" in tool_name.lower():
+                result["opening"] = 0.0
+            else:
+                result["opening"] = 0.5
+        
+        # Handle head-related tools
+        elif "head" in tool_name.lower():
+            if "position" in tool_name.lower() or "get" in tool_name.lower():
+                result["positions"] = [0.0, 0.0, 0.0]
+                result["joint_names"] = ["neck_roll", "neck_pitch", "neck_yaw"]
+            elif "move" in tool_name.lower():
+                result["final_position"] = [0.0, 0.0, 0.0]
+                result["movement_time"] = 1.0
+                result["completed"] = True
+        
+        # Handle camera-related tools
+        elif "camera" in tool_name.lower():
+            result["image_data"] = "mock_base64_encoded_image"
+            result["resolution"] = [640, 480]
+            result["format"] = "jpeg"
+        
+        return result
     
     def _validate_and_fix_tool_schemas(self):
         """

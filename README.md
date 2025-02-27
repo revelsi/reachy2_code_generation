@@ -11,7 +11,7 @@ The LangGraph agent implementation has been significantly improved with the foll
 - ✅ Tool implementations are generated with proper error handling and consistent return formats
 - ✅ Comprehensive test suite has been implemented to verify tool functionality
 
-The agent can run in either mock mode (default) or connect to a real Reachy robot when available.
+The agent uses real tool definitions from the Reachy 2 SDK but can operate with mock implementations when no physical robot is available.
 
 Please see the [TODO.md](TODO.md) file for a detailed list of current issues and planned work.
 
@@ -33,6 +33,40 @@ This repository contains a framework for transparent function calling with the R
 - **Modern Web Interface**: Clean, responsive UI for interacting with the robot
 - **Automatic Tool Generation**: Tools are automatically generated from the Reachy 2 SDK documentation
 
+## LangGraph Agent Integration
+
+The project uses LangGraph to implement a sophisticated agent architecture that can handle complex interactions with the Reachy 2 robot. The LangGraph agent provides:
+
+- **State Management**: Maintains conversation history and tool execution state
+- **Tool Integration**: Dynamically loads and executes tools based on the Reachy 2 SDK
+- **Flexible Implementation**: Can use either mock implementations or real robot connections
+- **Error Handling**: Robust error handling for tool execution failures
+
+### Real Tools with Mock Mode
+
+The agent is designed with a flexible approach to robot control:
+
+1. **Tool Definitions**: Always uses real tool definitions from the Reachy 2 SDK, ensuring compatibility with the actual robot API
+2. **Implementation Mode**: Can operate in two modes:
+   - **Mock Mode** (default): Uses mock implementations that simulate robot behavior without requiring physical hardware
+   - **Real Robot Mode**: Connects to a physical Reachy 2 robot for actual hardware control
+
+To configure the mode:
+
+- Set the `USE_MOCK` environment variable to `true` or `false` in your `.env` file
+- Set the `REACHY_HOST` environment variable to specify the robot's IP address or hostname when using real robot mode
+
+Example `.env` configuration:
+```
+# Use mock implementations (no physical robot required)
+USE_MOCK=true
+REACHY_HOST=localhost
+
+# OR: Connect to a real robot
+# USE_MOCK=false
+# REACHY_HOST=192.168.1.100
+```
+
 ## System Requirements
 
 - **Python**: 3.8+ (3.10 recommended)
@@ -45,9 +79,34 @@ This repository contains a framework for transparent function calling with the R
 - Python 3.10 or higher
 - Virtual environment (created automatically by the setup process)
 
-## Setup
+## Development Environment Setup
 
-The project requires Python 3.10 or higher. The setup process will automatically create a virtual environment with the correct Python version.
+For a consistent development experience, we provide setup scripts that ensure you're working in the correct environment with all necessary dependencies.
+
+### Using the Setup Scripts
+
+#### On macOS/Linux:
+```bash
+# Run the setup script
+./start_dev.sh
+```
+
+#### On Windows:
+```batch
+# Run the setup script
+start_dev.bat
+```
+
+These scripts will:
+1. Check if you're in the correct virtual environment and activate/create it if needed
+2. Verify all dependencies are installed
+3. Check environment variables and create a `.env` file if needed
+4. Verify that tools are properly generated
+5. Provide helpful commands to get started
+
+### Manual Setup
+
+If you prefer to set up the environment manually:
 
 ```bash
 # Clone the repository
@@ -58,7 +117,13 @@ cd reachy-function-calling
 make setup
 
 # Activate the virtual environment
-source venv_py310/bin/activate
+source venv_py310/bin/activate  # On Windows: venv_py310\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Verify tools
+python verify_tools.py
 ```
 
 If you're using pyenv to manage Python versions, the included `.python-version` file will automatically select Python 3.10.12.
@@ -143,7 +208,6 @@ This will:
 ```
 OPENAI_API_KEY=your_api_key_here
 MODEL=gpt-4-turbo
-USE_MOCK=true  # Set to false if connecting to a real robot
 REACHY_HOST=your_robot_ip  # If using a real robot
 ```
 

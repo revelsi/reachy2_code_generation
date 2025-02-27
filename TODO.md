@@ -20,8 +20,8 @@
 ## Current Issues
 
 1. **LangGraph Agent Integration**:
-   - Need to ensure the LangGraph agent properly loads and uses the generated tools
-   - Verify that the agent can handle both mock mode and real robot connections
+   - ✅ Ensured the LangGraph agent properly loads and uses the real tool definitions from the Reachy SDK
+   - ✅ Implemented flexible implementation mode - can use either mock implementations or real robot connections
 
 2. **Documentation Updates**:
    - Update documentation to reflect the current state of the project

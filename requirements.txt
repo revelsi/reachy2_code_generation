@@ -1,40 +1,39 @@
 # Python 3.10+ required
 # Core dependencies
-openai==1.12.0
-python-dotenv==1.0.0
-typing-extensions==4.8.0  # For Python 3.8+ compatibility
-flask==2.3.3  # For REST API
-flask-cors==4.0.0  # For CORS support
-websockets==11.0.3  # For WebSocket server
-psutil==5.9.6  # For system monitoring
+openai>=1.12.0,<2.0.0
+python-dotenv>=1.0.0
+typing-extensions>=4.8.0  # For Python 3.8+ compatibility
+flask>=2.3.3  # For REST API
+flask-cors>=4.0.0  # For CORS support
+websockets>=11.0.3,<12.0.0  # For WebSocket server
+psutil>=5.9.6  # For system monitoring
 
 # LangChain and LangGraph dependencies
-# Using compatible versions without strict pinning to avoid dependency conflicts
-langgraph>=0.0.15
-langchain>=0.0.267
+langchain>=0.3.0,<0.4.0
+langgraph>=0.2.20,<0.3.0
 langchain-openai>=0.0.2
-pydantic>=2.0.0  # For data validation
+pydantic>=2.0.3  # For data validation
 
 # Optional dependencies
-gradio==4.13.0  # For web interface
+gradio>=4.13.0,<5.0.0  # For web interface
 
 # For development
-pytest==7.4.3  # For testing
-pytest-cov==4.1.0  # For test coverage
-black==23.12.0  # For code formatting
-flake8==6.1.0  # For linting
-isort==5.12.0  # For import sorting
+pytest>=7.4.3  # For testing
+pytest-cov>=4.1.0  # For test coverage
+black>=23.12.0  # For code formatting
+flake8>=6.1.0  # For linting
+isort>=5.12.0  # For import sorting
 
 # For visualization and data processing
-nbformat==5.9.2
-matplotlib==3.8.2
-networkx==3.2.1
-numpy==1.26.3
-pyquaternion==0.9.9
+nbformat>=5.9.2
+matplotlib>=3.8.2
+networkx>=3.2.1
+numpy>=1.26.3
+pyquaternion>=0.9.9
 
 # For documentation extraction
-ast-comments==1.0.1  # For extracting comments from AST
-inspect-mate==0.1.2  # For enhanced inspection capabilities
+ast-comments>=1.0.1  # For extracting comments from AST
+inspect-mate>=0.0.2  # For enhanced inspection capabilities
 
 # Reachy SDK
 reachy2-sdk>=1.0.0 
