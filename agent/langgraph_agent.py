@@ -45,7 +45,7 @@ from langchain_core.messages import (
     BaseMessage
 )
 
-from tool_mapper import ReachyToolMapper
+from agent.utils.tool_mapper import ReachyToolMapper
 
 # Import WebSocket server for notifications
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -132,10 +132,6 @@ class ReachyLangGraphAgent:
         actions, and always confirm what you're about to do before executing potentially
         dangerous movements.
         
-        If the user asks about available tools or capabilities, provide a clear explanation
-        of the available functions without actually calling them. For such meta-queries,
-        respond directly with the information rather than making tool calls.
-        
         If you're unsure about a request or if it seems unsafe, ask for clarification.
         Always prioritize the safety of the robot and any humans around it.
         """
@@ -151,14 +147,68 @@ class ReachyLangGraphAgent:
         mapper = ReachyToolMapper()
         
         # Discover and register tools
-        mapper.discover_tool_classes()
-        mapper.register_tools_from_classes()
+        tool_classes = mapper.discover_tool_classes()
+        num_tools = mapper.register_tools_from_classes(tool_classes)
         
         # Get tool schemas and implementations
         self.tools = mapper.get_tool_schemas()
         self.tool_implementations = mapper.get_tool_implementations()
         
-        print(f"Loaded {len(self.tools)} tools and {len(self.tool_implementations)} implementations")
+        # If no tools were loaded, try to load from schemas directory
+        if not self.tools:
+            schemas_dir = os.path.join(os.path.dirname(__file__), "schemas")
+            if os.path.exists(schemas_dir):
+                self.load_tool_schemas_from_dir(schemas_dir)
+        
+        # Log the loaded tools
+        logger.info(f"Loaded {len(self.tools)} tools and {len(self.tool_implementations)} implementations")
+        
+        # Validate that tools are in the correct format for LangChain/LangGraph
+        self._validate_and_fix_tool_schemas()
+    
+    def _validate_and_fix_tool_schemas(self):
+        """
+        Validate that tool schemas are in the correct format for LangChain/LangGraph.
+        If not, convert them to the correct format.
+        """
+        valid_tools = []
+        for tool in self.tools:
+            # Check if the tool is in the correct format
+            if (isinstance(tool, dict) and 
+                tool.get("type") == "function" and 
+                "function" in tool and 
+                "name" in tool["function"] and 
+                "description" in tool["function"] and 
+                "parameters" in tool["function"]):
+                valid_tools.append(tool)
+            else:
+                # Try to convert to the correct format
+                try:
+                    name = tool.get("name", "unknown_tool")
+                    description = tool.get("description", "")
+                    parameters = tool.get("parameters", {})
+                    required = parameters.get("required", []) if isinstance(parameters, dict) else []
+                    
+                    # Create a properly formatted tool
+                    fixed_tool = {
+                        "type": "function",
+                        "function": {
+                            "name": name,
+                            "description": description,
+                            "parameters": {
+                                "type": "object",
+                                "properties": parameters.get("properties", {}) if isinstance(parameters, dict) else {},
+                                "required": required
+                            }
+                        }
+                    }
+                    valid_tools.append(fixed_tool)
+                    logger.info(f"Fixed tool schema format for {name}")
+                except Exception as e:
+                    logger.error(f"Could not fix tool schema: {e}")
+        
+        # Update the tools list with valid tools
+        self.tools = valid_tools
     
     def load_tool_schemas_from_dir(self, schemas_dir: str) -> int:
         """

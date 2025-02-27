@@ -19,7 +19,7 @@ if project_root not in sys.path:
     sys.path.insert(0, project_root)
 
 # Import the tool mapper
-from agent.tool_mapper import ReachyToolMapper
+from agent.utils.tool_mapper import ReachyToolMapper
 
 def inspect_directory(directory_path: str) -> None:
     """

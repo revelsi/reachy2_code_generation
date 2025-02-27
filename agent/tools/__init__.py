@@ -6,16 +6,24 @@ This package contains tool classes for controlling the Reachy 2 robot.
 """
 
 from .base_tool import BaseTool, get_reachy_connection
-from .arm_tools import ArmTools
-from .head_tools import HeadTools
-from .utility_tools import UtilityTools
+from .config_tools import ConfigTools
+from .media_tools import MediaTools
+from .orbita_tools import OrbitaTools
+from .parts_tools import PartsTools
+from .sensors_tools import SensorsTools
+from .utils_tools import UtilsTools
+from .reachy_sdk_tools import ReachySdkTools
 
 # Add any new tool classes here
 
 __all__ = [
     'BaseTool',
     'get_reachy_connection',
-    'ArmTools',
-    'HeadTools',
-    'UtilityTools',
+    'ConfigTools',
+    'MediaTools',
+    'OrbitaTools',
+    'PartsTools',
+    'SensorsTools',
+    'UtilsTools',
+    'ReachySdkTools',
 ] 

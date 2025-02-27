@@ -186,7 +186,7 @@ class BaseTool:
         required: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
-        Create a tool schema for function calling.
+        Create a tool schema for function calling in LangChain/LangGraph format.
         
         Args:
             name: Name of the tool.
@@ -195,7 +195,7 @@ class BaseTool:
             required: List of required parameter names.
             
         Returns:
-            Dict[str, Any]: Tool schema.
+            Dict[str, Any]: Tool schema in LangChain/LangGraph format.
         """
         if required is None:
             required = []
@@ -207,12 +207,16 @@ class BaseTool:
                 "description": "Reasoning behind this function call."
             }
             
+        # Create schema in LangChain/LangGraph format
         return {
-            "name": name,
-            "description": description,
-            "parameters": {
-                "type": "object",
-                "properties": parameters,
-                "required": required
+            "type": "function",
+            "function": {
+                "name": name,
+                "description": description,
+                "parameters": {
+                    "type": "object",
+                    "properties": parameters,
+                    "required": required
+                }
             }
         } 

@@ -17,7 +17,7 @@ load_dotenv()
 # Ensure the parent directory is in sys.path
 sys.path.insert(0, os.path.abspath(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
 
-from src.agent.tool_mapper import ReachyToolMapper
+from agent.utils.tool_mapper import ReachyToolMapper
 
 
 def generate_tools(focus_modules=None):

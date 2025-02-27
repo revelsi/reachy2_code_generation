@@ -14,7 +14,10 @@ authors = [
 ]
 
 [tool.pytest]
-testpaths = ["agent/test_*.py"]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_classes = "Test*"
+python_functions = "test_*"
 
 [tool.black]
 line-length = 88

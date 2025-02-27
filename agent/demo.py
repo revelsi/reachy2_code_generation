@@ -97,7 +97,7 @@ def setup_tools(use_mock: bool = False, auto_approve: bool = False) -> Dict[str,
     
     # Load tool classes
     try:
-        from tool_mapper import ReachyToolMapper
+        from agent.utils.tool_mapper import ReachyToolMapper
     except ImportError:
         try:
             from agent.tool_mapper import ReachyToolMapper

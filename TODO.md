@@ -1,55 +1,63 @@
 # TODO: Reachy Function Calling Project
 
+## Completed Items
+
+1. **✅ Tool Discovery and Generation**:
+   - Fixed the `load_api_documentation` method to handle API documentation as a list of dictionaries
+   - Updated the import path for the `extract_sdk_documentation` function
+   - Successfully generating 208 tool definitions across various modules
+   - Tool implementations are generated with proper error handling and consistent return formats
+
+2. **✅ Testing Setup**:
+   - Created comprehensive test suite in `tests/unit/tools/test_tools.py`
+   - Implemented tests for tool schema format, implementation generation, error handling, and more
+   - All tests are passing, confirming the functionality of the tool mapper
+
+3. **✅ Code Organization**:
+   - Moved utility files to the `agent/utils` directory for better organization
+   - Updated import paths and references throughout the codebase
+
 ## Current Issues
 
-1. **LangGraph Agent Implementation Issues**:
-   - Fixed: `get_available_tools` method was trying to call `.values()` on a list object
-   - The agent is loading 0 tools and 0 implementations, indicating the tool discovery process is not working
-   - The agent is running in mock mode (`Use mock: True` in configuration)
+1. **LangGraph Agent Integration**:
+   - Need to ensure the LangGraph agent properly loads and uses the generated tools
+   - Verify that the agent can handle both mock mode and real robot connections
 
-2. **Testing Setup**:
-   - The test script (`test_agent.py`) was created but may need adjustments
-   - Mock WebSocket server implementation may need review
-   - Need to ensure tests can run without affecting the main application
+2. **Documentation Updates**:
+   - Update documentation to reflect the current state of the project
+   - Add more detailed instructions for using the generated tools
 
-3. **Tool Mapper Integration**:
-   - The `ReachyToolMapper` class in `agent/tool_mapper.py` is implemented but tools aren't being discovered
-   - Need to verify the tool discovery and registration process
-
-4. **WebSocket Notifications**:
-   - WebSocket server is initialized but may need further testing
+3. **WebSocket Notifications**:
+   - Ensure WebSocket server properly notifies clients of tool execution and results
 
 ## Action Items
 
 ### High Priority
 
-1. **Fix Tool Discovery**:
-   - Debug why `ReachyToolMapper` is not finding any tools
-   - Check the tool directory structure and ensure tools are in the expected location
-   - Verify that tool classes follow the expected format for discovery
-
-2. **Fix Agent Initialization**:
-   - Ensure the agent properly initializes with tools
+1. **Improve Agent Initialization**:
+   - Ensure the agent properly initializes with the generated tools
    - Review the `load_tools` method in `ReachyLangGraphAgent`
 
-3. **Configuration Management**:
+2. **Configuration Management**:
    - Review how mock mode is configured and ensure it can be toggled appropriately
    - Document the configuration options in README.md
 
+3. **Integration Testing**:
+   - Create integration tests that verify the entire pipeline from agent initialization to tool execution
+
 ### Medium Priority
 
-1. **Testing Infrastructure**:
-   - Complete the testing setup to allow isolated testing of the agent
-   - Create comprehensive test cases for different agent behaviors
-   - Ensure tests can run without requiring actual robot hardware
-
-2. **Error Handling**:
+1. **Error Handling**:
    - Improve error handling throughout the application
    - Add more detailed logging to help diagnose issues
 
-3. **Documentation**:
-   - Update documentation to reflect the current state of the project
-   - Document the LangGraph implementation and how it differs from previous approaches
+2. **Documentation**:
+   - Create detailed documentation for each module
+   - Add examples of how to use the agent with different types of requests
+
+3. **Performance Optimization**:
+   - Identify and address any performance bottlenecks
+   - Consider caching mechanisms for frequently used data
 
 ### Low Priority
 
@@ -57,18 +65,18 @@
    - Review and refactor code for clarity and maintainability
    - Remove any unused or deprecated code
 
-2. **Performance Optimization**:
-   - Identify and address any performance bottlenecks
-   - Consider caching mechanisms for frequently used data
+2. **UI Improvements**:
+   - Enhance the web interface to better display tool execution and results
+   - Add more interactive elements for controlling the robot
 
 ## Notes for Next Session
 
-- Start by fixing the tool discovery issue
-- Test the agent with mock tools before attempting to use real hardware
-- Consider creating a simplified version of the agent for testing purposes
-- Review the LangGraph documentation to ensure our implementation follows best practices
+- Focus on ensuring the LangGraph agent properly loads and uses the generated tools
+- Test the agent with both mock and real robot connections
+- Consider adding more examples and documentation for using the agent
 
 ## References
 
 - LangGraph documentation: https://langchain-ai.github.io/langgraph/
-- OpenAI function calling documentation: https://platform.openai.com/docs/guides/function-calling 
+- OpenAI function calling documentation: https://platform.openai.com/docs/guides/function-calling
+- Reachy 2 SDK documentation: https://github.com/pollen-robotics/reachy2-sdk 

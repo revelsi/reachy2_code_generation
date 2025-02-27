@@ -2,13 +2,16 @@
 
 ## ⚠️ Current Development Status
 
-**Note: This project is currently under active development and is not yet stable.**
+**Note: This project is currently under active development.**
 
-The LangGraph agent implementation is being developed to replace the previous agent architecture. Several issues are currently being addressed:
+The LangGraph agent implementation has been significantly improved with the following updates:
 
-- Tool discovery is not working correctly (0 tools loaded)
-- The agent is running in mock mode by default
-- Testing infrastructure is being set up to allow isolated testing
+- ✅ Tool discovery and generation is now working correctly (208 tools loaded)
+- ✅ API documentation extraction from the Reachy 2 SDK is functioning
+- ✅ Tool implementations are generated with proper error handling and consistent return formats
+- ✅ Comprehensive test suite has been implemented to verify tool functionality
+
+The agent can run in either mock mode (default) or connect to a real Reachy robot when available.
 
 Please see the [TODO.md](TODO.md) file for a detailed list of current issues and planned work.
 
@@ -28,6 +31,7 @@ This repository contains a framework for transparent function calling with the R
 - **REST API**: Control the robot through a REST API
 - **WebSocket Updates**: Receive real-time updates about the robot's status and actions
 - **Modern Web Interface**: Clean, responsive UI for interacting with the robot
+- **Automatic Tool Generation**: Tools are automatically generated from the Reachy 2 SDK documentation
 
 ## System Requirements
 
@@ -189,210 +193,4 @@ If you don't have Node.js v18+ installed, you can still view the UI:
 python api/server.py --api-port 8000 --ws-port 8000
 ```
 
-2. Open `frontend/preview.html` directly in your browser
-
-### Option 3: Running the Backend Only
-
-```bash
-# Start the API server
-python api/server.py
-
-# Start with custom ports
-python api/server.py --api-port 5000 --ws-port 8765
-
-# Start with a specific model
-python api/server.py --model gpt-4-turbo
-```
-
-### Option 4: Simple Demo (Command Line)
-
-```bash
-# Run with example commands
-python agent/simple_demo.py --examples
-
-# Run with natural language control
-python agent/simple_demo.py --prompt "Make the robot wave its right arm"
-
-# Run in interactive mode
-python agent/simple_demo.py --interactive
-
-# Auto-approve all function calls
-python agent/simple_demo.py --auto-approve
-```
-
-## Error Handling
-
-The application includes robust error handling:
-
-- **Robot Connection**: If the physical Reachy robot is not available, the system automatically falls back to a mock implementation
-- **WebSocket Reconnection**: The frontend automatically attempts to reconnect if the WebSocket connection is lost
-- **API Error Handling**: All API endpoints include proper error handling and return appropriate status codes
-- **User Feedback**: Errors are displayed to the user in the UI with clear messages
-
-## Security Considerations
-
-- **Function Call Approval**: All function calls require explicit user approval before execution
-- **Input Validation**: All inputs are validated before being processed
-- **Error Logging**: Errors are logged for debugging but sensitive information is not exposed
-- **CORS Protection**: The API server includes CORS protection to prevent unauthorized access
-
-## API Reference
-
-### REST API Endpoints
-
-#### Chat
-- **URL**: `/api/chat`
-- **Method**: `POST`
-- **Request Body**:
-  ```json
-  {
-    "message": "User message"
-  }
-  ```
-- **Response**:
-  ```json
-  {
-    "response": "Agent's response",
-    "tool_calls": [
-      {
-        "name": "function_name",
-        "arguments": {"arg1": "value1"},
-        "result": {"success": true, "result": "..."}
-      }
-    ]
-  }
-  ```
-
-#### Reset Conversation
-- **URL**: `/api/reset`
-- **Method**: `POST`
-- **Response**:
-  ```json
-  {
-    "status": "Conversation reset successfully"
-  }
-  ```
-
-#### Get Tools
-- **URL**: `/api/tools`
-- **Method**: `GET`
-- **Response**:
-  ```json
-  {
-    "tools": [
-      {
-        "type": "function",
-        "function": {
-          "name": "function_name",
-          "description": "Function description",
-          "parameters": {...}
-        }
-      }
-    ]
-  }
-  ```
-
-#### Get Status
-- **URL**: `/api/status`
-- **Method**: `GET`
-- **Response**:
-  ```json
-  {
-    "agent_initialized": true,
-    "model": "gpt-4-turbo",
-    "robot": {...}
-  }
-  ```
-
-### WebSocket Messages
-
-#### State Update
-```json
-{
-  "type": "state",
-  "data": {
-    "status": "connected",
-    "arms": {...},
-    "head": {...},
-    "base": {...},
-    "last_action": {...},
-    "last_update": 1234567890
-  }
-}
-```
-
-#### Action Notification
-```json
-{
-  "type": "action",
-  "data": {
-    "name": "action_name",
-    "parameters": {...},
-    "result": {...}
-  }
-}
-```
-
-#### Thinking Process
-```json
-{
-  "type": "thinking",
-  "content": "Reasoning process..."
-}
-```
-
-#### Function Call
-```json
-{
-  "type": "function_call",
-  "name": "function_name",
-  "parameters": {...},
-  "id": "call_id"
-}
-```
-
-#### Function Approval
-```json
-{
-  "type": "function_approval",
-  "id": "call_id",
-  "approved": true
-}
-```
-
-## Troubleshooting
-
-### Common Issues
-
-1. **WebSocket Connection Failed**
-   - Ensure the backend server is running
-   - Check that the WebSocket port is not blocked by a firewall
-   - Verify the WebSocket URL in the frontend configuration
-
-2. **OpenAI API Key Issues**
-   - Ensure your API key is correctly set in the `.env` file or as an environment variable
-   - Check that your API key has sufficient credits
-
-3. **Node.js Version**
-   - The frontend requires Node.js v18.0.0 or higher
-   - If you can't install Node.js v18+, use the HTML preview option
-
-4. **Robot Connection Issues**
-   - If connecting to a physical Reachy robot, ensure it's powered on and accessible
-   - Check the IP address or hostname is correct
-   - The system will automatically fall back to a mock implementation if the robot is unavailable
-
-5. **Docker Issues**
-   - If you encounter permission issues, try running Docker commands with `sudo`
-   - For volume mounting issues, ensure your Docker has permission to access the local directories
-   - If containers can't communicate, check that they're on the same Docker network
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
-## Acknowledgments
-
-- [Pollen Robotics](https://www.pollen-robotics.com/) for creating the Reachy robot
-- [OpenAI](https://openai.com/) for their function calling API
-- [LangGraph](https://github.com/langchain-ai/langgraph) for the agent framework 
+2. Open `
