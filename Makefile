@@ -1,4 +1,4 @@
-.PHONY: setup clean test lint install run-cli run-web check-python create-venv setup-venv regenerate generate-tools
+.PHONY: setup clean test lint install run-cli run-web check-python create-venv setup-venv regenerate generate-tools refresh-sdk
 
 PYTHON_VERSION := 3.10
 VENV_NAME := venv_py310
@@ -35,7 +35,7 @@ test:
 	@. $(VENV_NAME)/bin/activate && pytest agent/test_*.py
 
 lint:
-	@. $(VENV_NAME)/bin/activate && flake8 agent/ agent/tools/scrape_sdk_docs.py
+	@. $(VENV_NAME)/bin/activate && flake8 agent/ agent/utils/scrape_sdk_docs.py
 
 install:
 	@. $(VENV_NAME)/bin/activate && pip install -e .
@@ -47,7 +47,13 @@ run-web:
 	@. $(VENV_NAME)/bin/activate && python agent/web_interface.py
 
 regenerate:
-	@. $(VENV_NAME)/bin/activate && python agent/tools/scrape_sdk_docs.py 
+	@. $(VENV_NAME)/bin/activate && python agent/utils/scrape_sdk_docs.py 
+
+refresh-sdk:
+	@echo "Refreshing SDK documentation by pulling latest SDK repository..."
+	@. $(VENV_NAME)/bin/activate && python -c "from agent.utils.scrape_sdk_docs import clone_or_update_repo, extract_sdk_documentation, save_sdk_documentation, collect_sdk_examples; clone_or_update_repo(); docs = extract_sdk_documentation(); examples = collect_sdk_examples(); save_sdk_documentation(docs, examples)"
+	@echo "SDK documentation refreshed. Now regenerating tools..."
+	@$(MAKE) generate-tools
 
 generate-tools:
 	@echo "Generating tools from API documentation..."

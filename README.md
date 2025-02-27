@@ -28,9 +28,6 @@ This repository contains a framework for transparent function calling with the R
 - **User Approval**: Approve or reject each function call before it executes
 - **OpenAI Integration**: Control the robot using natural language with OpenAI's function calling
 - **Mock Robot**: Test the system without a physical robot
-- **REST API**: Control the robot through a REST API
-- **WebSocket Updates**: Receive real-time updates about the robot's status and actions
-- **Modern Web Interface**: Clean, responsive UI for interacting with the robot
 - **Automatic Tool Generation**: Tools are automatically generated from the Reachy 2 SDK documentation
 
 ## LangGraph Agent Integration
@@ -69,71 +66,12 @@ REACHY_HOST=localhost
 
 ## System Requirements
 
-- **Python**: 3.8+ (3.10 recommended)
-- **Node.js**: v18.0.0+ (for frontend development)
+- **Python**: 3.10+ (recommended)
 - **OpenAI API key**: Required for natural language processing
-- **Reachy 2 robot**: Optional - a mock robot is provided for testing
 
-## Environment Requirements
+## Setup Instructions
 
-- Python 3.10 or higher
-- Virtual environment (created automatically by the setup process)
-
-## Development Environment Setup
-
-For a consistent development experience, we provide setup scripts that ensure you're working in the correct environment with all necessary dependencies.
-
-### Using the Setup Scripts
-
-#### On macOS/Linux:
-```bash
-# Run the setup script
-./start_dev.sh
-```
-
-#### On Windows:
-```batch
-# Run the setup script
-start_dev.bat
-```
-
-These scripts will:
-1. Check if you're in the correct virtual environment and activate/create it if needed
-2. Verify all dependencies are installed
-3. Check environment variables and create a `.env` file if needed
-4. Verify that tools are properly generated
-5. Provide helpful commands to get started
-
-### Manual Setup
-
-If you prefer to set up the environment manually:
-
-```bash
-# Clone the repository
-git clone https://github.com/yourusername/reachy-function-calling.git
-cd reachy-function-calling
-
-# Set up the environment (creates venv_py310 and installs dependencies)
-make setup
-
-# Activate the virtual environment
-source venv_py310/bin/activate  # On Windows: venv_py310\Scripts\activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Generate tools from API documentation
-make generate-tools
-
-# Verify tools
-python verify_tools.py
-```
-
-If you're using pyenv to manage Python versions, the included `.python-version` file will automatically select Python 3.10.12.
-
-## Installation
-
-### Backend Setup
+### Quick Setup
 
 1. Clone the repository:
 ```bash
@@ -141,123 +79,88 @@ git clone https://github.com/yourusername/reachy_function_calling.git
 cd reachy_function_calling
 ```
 
-2. Create and activate a virtual environment:
+2. Set up the environment:
 ```bash
-python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+make setup
 ```
 
-3. Install the required packages:
+3. Activate the virtual environment:
 ```bash
-pip install -r requirements.txt
+source venv_py310/bin/activate  # On Windows: venv_py310\Scripts\activate
 ```
 
-4. Set up your OpenAI API key:
+4. Generate tools from the Reachy 2 SDK:
+```bash
+make generate-tools
+```
+
+5. Set up your OpenAI API key:
 ```bash
 export OPENAI_API_KEY=your_api_key_here
 ```
-
 Or create a `.env` file in the root directory:
 ```
 OPENAI_API_KEY=your_api_key_here
 MODEL=gpt-4-turbo
 ```
 
-### Frontend Setup
+### Refreshing SDK Documentation
 
-1. Navigate to the frontend directory:
+If the Reachy 2 SDK has been updated, you can refresh the SDK documentation and regenerate the tools:
+
 ```bash
-cd frontend
-```
-
-2. Install dependencies:
-```bash
-npm install
-```
-
-## Docker Setup
-
-The application can be run using Docker for both development and production environments.
-
-### Prerequisites
-
-- Docker and Docker Compose installed on your system
-- OpenAI API key
-
-### Development with Docker
-
-1. Create a `.env` file in the root directory with your OpenAI API key:
-```
-OPENAI_API_KEY=your_api_key_here
-```
-
-2. Start the development environment:
-```bash
-docker-compose up
+make refresh-sdk
 ```
 
 This will:
-- Start the backend server with hot-reloading
-- Start the frontend development server with hot-reloading
-- Mount your local code into the containers for real-time development
-
-3. Access the application:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000/api
-
-### Production Deployment with Docker
-
-1. Create a `.env` file with your production settings:
-```
-OPENAI_API_KEY=your_api_key_here
-MODEL=gpt-4-turbo
-REACHY_HOST=your_robot_ip  # If using a real robot
-```
-
-2. Build and start the production containers:
-```bash
-docker-compose -f docker-compose.prod.yml up -d
-```
-
-3. Access the production application:
-   - Frontend: http://localhost:3000
-   - Backend API: http://localhost:8000/api
-
-### Docker Configuration Options
-
-You can customize the Docker deployment by setting these environment variables:
-
-- `API_PORT`: Port for the backend API (default: 8000)
-- `FRONTEND_PORT`: Port for the frontend (default: 3000)
-- `MODEL`: OpenAI model to use (default: gpt-4-turbo)
-- `REACHY_HOST`: Hostname or IP of the Reachy robot
-- `USE_MOCK`: Whether to use a mock robot implementation
-- `USE_VIRTUAL`: Whether to use a virtual robot with the real SDK
+1. Clone or update the Reachy 2 SDK repository
+2. Extract the latest API documentation
+3. Regenerate the tool definitions and implementations
 
 ## Running the Application
 
-### Option 1: Running the Full Stack (Backend + Frontend)
+### Command Line Interface
 
-1. Start the backend server:
+To run the application in command line mode:
+
 ```bash
-python api/server.py --api-port 8000 --ws-port 8000
+make run-cli
 ```
 
-2. In a separate terminal, start the frontend development server:
+### Web Interface (Experimental)
+
+To run the application with a basic web interface:
+
 ```bash
-cd frontend
-npm run dev
+make run-web
 ```
 
-3. Open your browser and navigate to `http://localhost:3000`
+## Development
 
-### Option 2: Using the HTML Preview (No Node.js Required)
+### Testing
 
-If you don't have Node.js v18+ installed, you can still view the UI:
+Run the test suite:
 
-1. Start the backend server:
 ```bash
-python api/server.py --api-port 8000 --ws-port 8000
+make test
 ```
 
-2. Open `
+### Linting
+
+Run the linter:
+
+```bash
+make lint
+```
+
+## Advanced Configuration
+
+For advanced configuration options, please refer to the documentation in the `docs` directory.
+
+## Contributing
+
+Contributions are welcome! Please feel free to submit a Pull Request.
+
+## License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
