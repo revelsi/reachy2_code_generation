@@ -22,10 +22,13 @@ var/
 
 # Virtual Environment
 venv/
-venv_py310/
+venv_*/
 ENV/
 .env
 .env.test
+.venv/
+virtualenv/
+python?-venv/
 
 # IDE files
 .idea/
