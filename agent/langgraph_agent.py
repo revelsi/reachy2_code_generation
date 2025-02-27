@@ -591,6 +591,10 @@ class ReachyLangGraphAgent:
                     }
                     ws_server.notify_error(str(e))
             
+            # Notify clients about the tool execution result
+            from api.websocket import notify_tool_execution_result
+            notify_tool_execution_result(tool_call.id, result)
+            
             # Add the result to the state
             state["tool_results"].append(
                 ToolResult(

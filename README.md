@@ -135,6 +135,65 @@ To run the application with a basic web interface:
 make run-web
 ```
 
+## Using Generated Tools
+
+The Reachy Function Calling system automatically generates tools from the Reachy 2 SDK documentation. These tools can be used in both mock mode (for testing without a physical robot) and real robot mode.
+
+### Tool Categories
+
+The generated tools are organized into several categories:
+
+1. **Arm Control**: Tools for controlling the robot's arms (left and right)
+2. **Head Control**: Tools for controlling the robot's head movements and expressions
+3. **Base Control**: Tools for controlling the robot's mobile base
+4. **Sensor Access**: Tools for accessing sensor data from the robot
+5. **System Control**: Tools for managing the robot's system settings
+
+### Using Tools via the Web Interface
+
+When using the web interface:
+
+1. Connect to the WebSocket server by clicking the "Connect" button
+2. Type your natural language request in the chat input
+3. The system will:
+   - Process your request using the LangGraph agent
+   - Display the agent's reasoning
+   - Show any tool calls with their parameters
+   - Execute the tools and display the results
+   - Provide a final response
+
+### Using Tools via the CLI
+
+When using the command-line interface:
+
+1. Run the application with `make run-cli`
+2. Type your natural language request
+3. The system will process your request and display:
+   - The agent's reasoning
+   - Tool calls with parameters
+   - Tool execution results
+   - Final response
+
+### Example Tool Usage
+
+Here are some examples of natural language requests that use the generated tools:
+
+```
+"Move the robot's right arm to position x=0.3, y=0.2, z=0.1"
+"Turn the robot's head to look at me"
+"What is the current position of the left arm?"
+"Move the robot forward 1 meter"
+"Make the robot wave its right hand"
+```
+
+### Tool Execution Flow
+
+1. **Tool Selection**: The LangGraph agent selects the appropriate tool based on your request
+2. **Parameter Extraction**: The agent extracts parameters from your request
+3. **Tool Execution**: The system executes the tool with the provided parameters
+4. **Result Notification**: The WebSocket server notifies clients about the execution result
+5. **Response Generation**: The agent generates a response based on the tool execution result
+
 ## Development
 
 ### Testing

@@ -23,11 +23,11 @@
    - ✅ Ensured the LangGraph agent properly loads and uses the real tool definitions from the Reachy SDK
    - ✅ Implemented flexible implementation mode - can use either mock implementations or real robot connections
 
-2. **Documentation Updates**:
+2. **✅ Documentation Updates**:
    - Update documentation to reflect the current state of the project
    - Add more detailed instructions for using the generated tools
 
-3. **WebSocket Notifications**:
+3. **✅ WebSocket Notifications**:
    - Ensure WebSocket server properly notifies clients of tool execution and results
 
 ## Action Items

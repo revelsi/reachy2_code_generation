@@ -346,6 +346,26 @@ class WebSocketServer:
             print(f"Error notifying function call: {e}")
             traceback.print_exc()
     
+    def notify_tool_execution_result(self, call_id: str, result: Dict[str, Any]) -> None:
+        """
+        Notify clients about a tool execution result.
+        
+        Args:
+            call_id: Function call ID.
+            result: Tool execution result.
+        """
+        try:
+            if self.clients:
+                message = {
+                    "type": "tool_result",
+                    "id": call_id,
+                    "result": result
+                }
+                self._schedule_task(self.send_to_clients(message))
+        except Exception as e:
+            print(f"Error notifying tool execution result: {e}")
+            traceback.print_exc()
+    
     def notify_code_output(self, content: str) -> None:
         """
         Notify clients about code output.
@@ -453,6 +473,18 @@ def notify_action(action: Dict[str, Any]) -> None:
     """
     server = get_websocket_server()
     server.notify_action(action)
+
+
+def notify_tool_execution_result(call_id: str, result: Dict[str, Any]) -> None:
+    """
+    Notify clients about a tool execution result.
+    
+    Args:
+        call_id: Function call ID.
+        result: Tool execution result.
+    """
+    server = get_websocket_server()
+    server.notify_tool_execution_result(call_id, result)
 
 
 if __name__ == "__main__":
