@@ -51,7 +51,7 @@ regenerate:
 
 refresh-sdk:
 	@echo "Refreshing SDK documentation by pulling latest SDK repository..."
-	@. $(VENV_NAME)/bin/activate && python -c "from agent.utils.scrape_sdk_docs import clone_or_update_repo, extract_sdk_documentation, save_sdk_documentation, collect_sdk_examples; clone_or_update_repo(); docs = extract_sdk_documentation(); examples = collect_sdk_examples(); save_sdk_documentation(docs, examples)"
+	@. $(VENV_NAME)/bin/activate && python -m agent.utils.refresh_sdk
 	@echo "SDK documentation refreshed. Now regenerating tools..."
 	@$(MAKE) generate-tools
 

@@ -35,23 +35,95 @@ EXAMPLES_DIR = os.path.join(RAW_DOCS_DIR, "examples")
 TUTORIALS_DIR = os.path.join(RAW_DOCS_DIR, "tutorials")
 
 
-def clone_or_update_repo():
-    """Clone the repository if it doesn't exist, or pull the latest changes."""
+def is_valid_git_repo(repo_path):
+    """Check if the directory is a valid Git repository."""
     try:
-        if not os.path.exists(REPO_DIR):
-            print(f"Cloning repository: {GIT_URL} into {REPO_DIR}...")
-            subprocess.run(["git", "clone", GIT_URL, REPO_DIR], check=True)
-            print("Repository cloned successfully")
+        # Check if .git directory exists
+        git_dir = os.path.join(repo_path, ".git")
+        if not os.path.exists(git_dir) or not os.path.isdir(git_dir):
+            return False
+        
+        # Try running a git command to verify it's a valid repo
+        result = subprocess.run(
+            ["git", "-C", repo_path, "rev-parse", "--is-inside-work-tree"],
+            check=False,
+            capture_output=True,
+            text=True
+        )
+        return result.returncode == 0 and result.stdout.strip() == "true"
+    except Exception:
+        return False
+
+
+def clone_or_update_repo(force_clone=False):
+    """
+    Clone the repository if it doesn't exist, or pull the latest changes.
+    
+    Args:
+        force_clone: If True, delete the existing repository and clone it again.
+                    Useful for handling corrupted repositories.
+    
+    Returns:
+        bool: True if successful, False otherwise.
+    """
+    try:
+        # If force_clone is True, remove the existing repository
+        if force_clone and os.path.exists(REPO_DIR):
+            print(f"Force clone requested. Removing existing repository at {REPO_DIR}...")
+            shutil.rmtree(REPO_DIR, ignore_errors=True)
+        
+        # Check if the repository exists and is valid
+        if os.path.exists(REPO_DIR):
+            if is_valid_git_repo(REPO_DIR):
+                print("Repository exists. Pulling latest changes...")
+                result = subprocess.run(
+                    ["git", "-C", REPO_DIR, "pull"],
+                    check=True,
+                    capture_output=True,
+                    text=True
+                )
+                print(f"Repository updated successfully: {result.stdout.strip()}")
+            else:
+                print(f"Directory exists but is not a valid Git repository: {REPO_DIR}")
+                print("Removing invalid repository and cloning again...")
+                shutil.rmtree(REPO_DIR, ignore_errors=True)
+                print(f"Cloning repository: {GIT_URL} into {REPO_DIR}...")
+                result = subprocess.run(
+                    ["git", "clone", GIT_URL, REPO_DIR],
+                    check=True,
+                    capture_output=True,
+                    text=True
+                )
+                print(f"Repository cloned successfully: {result.stdout.strip()}")
         else:
-            print("Repository exists. Pulling latest changes...")
-            subprocess.run(["git", "-C", REPO_DIR, "pull"], check=True)
-            print("Repository updated successfully")
+            print(f"Cloning repository: {GIT_URL} into {REPO_DIR}...")
+            os.makedirs(os.path.dirname(REPO_DIR), exist_ok=True)
+            result = subprocess.run(
+                ["git", "clone", GIT_URL, REPO_DIR],
+                check=True,
+                capture_output=True,
+                text=True
+            )
+            print(f"Repository cloned successfully: {result.stdout.strip()}")
+        
+        # Verify the repository was cloned/updated correctly
+        if not os.path.exists(os.path.join(REPO_DIR, "src")) or not os.path.exists(SDK_SOURCE_DIR):
+            print(f"Error: Repository structure is not as expected. Missing src directory or SDK source.")
+            return False
+            
         return True
     except subprocess.CalledProcessError as e:
         print(f"Error during git operation: {e}")
+        print(f"Command output: {e.stdout if hasattr(e, 'stdout') else 'No output'}")
+        print(f"Command error: {e.stderr if hasattr(e, 'stderr') else 'No error output'}")
+        
+        # Try to recover by forcing a clone on the next run
+        print("Suggesting to use force_clone=True on the next run to recover.")
         return False
     except Exception as e:
         print(f"Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 
@@ -366,8 +438,10 @@ def main():
 
     # Step 1: Clone/update the repository
     if not clone_or_update_repo():
-        print("Failed to clone/update repository. Aborting.")
-        return
+        print("Failed to clone/update repository. Trying with force_clone=True...")
+        if not clone_or_update_repo(force_clone=True):
+            print("Failed to clone repository even with force_clone=True. Aborting.")
+            return
 
     # Step 2: Extract SDK API documentation
     sdk_docs = extract_sdk_documentation()
