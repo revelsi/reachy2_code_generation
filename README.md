@@ -122,6 +122,9 @@ source venv_py310/bin/activate  # On Windows: venv_py310\Scripts\activate
 # Install dependencies
 pip install -r requirements.txt
 
+# Generate tools from API documentation
+make generate-tools
+
 # Verify tools
 python verify_tools.py
 ```

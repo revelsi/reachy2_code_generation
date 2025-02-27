@@ -221,6 +221,8 @@ show_help() {
     echo -e "  python verify_tools.py"
     echo -e "${GREEN}Regenerate tools:${NC}"
     echo -e "  python -m agent.utils.integrate_tools"
+    echo -e "  # or use the make command:"
+    echo -e "  make generate-tools"
     echo -e "${GREEN}Run tests:${NC}"
     echo -e "  python -m pytest tests/unit/tools/test_tools.py -v"
     echo -e "${GREEN}Run the CLI:${NC}"

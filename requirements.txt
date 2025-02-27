@@ -34,6 +34,3 @@ pyquaternion>=0.9.9
 # For documentation extraction
 ast-comments>=1.0.1  # For extracting comments from AST
 inspect-mate>=0.0.2  # For enhanced inspection capabilities
-
-# Reachy SDK
-reachy2-sdk>=1.0.0 

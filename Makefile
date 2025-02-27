@@ -1,4 +1,4 @@
-.PHONY: setup clean test lint install run-cli run-web check-python create-venv setup-venv
+.PHONY: setup clean test lint install run-cli run-web check-python create-venv setup-venv regenerate generate-tools
 
 PYTHON_VERSION := 3.10
 VENV_NAME := venv_py310
@@ -48,3 +48,13 @@ run-web:
 
 regenerate:
 	@. $(VENV_NAME)/bin/activate && python agent/tools/scrape_sdk_docs.py 
+
+generate-tools:
+	@echo "Generating tools from API documentation..."
+	@mkdir -p agent/docs
+	@if [ ! -f "agent/docs/api_documentation.json" ]; then \
+		echo "Copying API documentation..."; \
+		cp data/raw_docs/extracted/raw_api_docs.json agent/docs/api_documentation.json; \
+	fi
+	@. $(VENV_NAME)/bin/activate && python -m agent.utils.integrate_tools
+	@echo "Tool generation completed." 
