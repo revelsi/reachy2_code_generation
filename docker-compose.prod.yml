@@ -12,8 +12,6 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY}
       - MODEL=${MODEL:-gpt-4-turbo}
       - REACHY_HOST=${REACHY_HOST:-localhost}
-      - USE_MOCK=${USE_MOCK:-true}
-      - USE_VIRTUAL=${USE_VIRTUAL:-true}
       - API_HOST=0.0.0.0
       - API_PORT=8000
       - WS_HOST=0.0.0.0

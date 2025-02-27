@@ -1,0 +1,67 @@
+---
+description: AI Agent Development Project Rules and Standards
+globs: 
+alwaysApply: false
+---
+# AI AGENT PROJECT RULES
+
+## CORE PRINCIPLES
+1. STRATEGIC PLANNING
+   - Define clear, measurable objectives for your AI agent
+   - Align agent capabilities with specific business goals
+   - Consider scalability and future expansion from the start
+
+2. MODULAR DESIGN
+   - Implement a flexible, component-based architecture
+   - Build with the ability to adapt as requirements evolve
+   - Create reusable modules for core functionalities
+
+3. QUALITY ASSURANCE
+   - Prioritize data quality and accuracy
+   - Implement robust testing for all agent capabilities
+   - Continuously monitor for hallucinations and edge cases
+
+## DEVELOPMENT GUIDELINES
+# AGENT BEHAVIOR
+- First define the specific purpose and scope of your agent
+- Plan for seamless integration with existing systems
+- Implement proper error handling and fallback mechanisms
+- Design clear workflows for all agent interactions
+- Consider ethical implications and responsible AI practices
+
+# IMPLEMENTATION APPROACH
+- Choose appropriate AI models based on agent requirements
+- Implement safeguards to reduce hallucinations
+- Establish clear metrics to measure agent performance
+- Build with security and data privacy as priorities
+- Create detailed documentation for maintenance
+
+## TECHNICAL STANDARDS
+# CODE QUALITY
+- Follow consistent naming conventions
+- Implement comprehensive logging
+- Write self-documenting code with clear comments
+- Use version control effectively
+- Implement proper error handling
+
+# INTEGRATION STANDARDS
+- Design clean APIs for system interactions
+- Implement proper authentication and security
+- Ensure data consistency across integrations
+- Plan for scalability in data processing
+- Test integrations thoroughly before deployment
+
+## DEPLOYMENT AND MAINTENANCE
+# DEPLOYMENT STRATEGY
+- Implement a phased rollout approach
+- Establish monitoring systems before launch
+- Create contingency plans for potential failures
+- Set up automated alerts for critical issues
+- Document deployment procedures thoroughly
+
+# CONTINUOUS IMPROVEMENT
+- Implement feedback collection mechanisms
+- Regularly analyze performance metrics
+- Schedule periodic reviews of agent capabilities
+- Plan for model retraining and updates
+- Document all changes and improvements

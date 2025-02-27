@@ -52,8 +52,8 @@ DISABLE_WEBSOCKET = os.getenv("DISABLE_WEBSOCKET", "false").lower() in ("true", 
 
 # Robot settings
 REACHY_HOST = os.getenv("REACHY_HOST", "localhost")
-USE_MOCK = os.getenv("USE_MOCK", "true").lower() in ("true", "1", "t")  # Default to mock mode if no robot available
-USE_VIRTUAL = os.getenv("USE_VIRTUAL", "true").lower() in ("true", "1", "t")
+# Note: When REACHY_HOST is set to "localhost", we connect to a robot running in a Docker container.
+# Otherwise, we connect to a physical robot at the specified IP address.
 
 # System information
 SYSTEM_INFO = {
@@ -73,6 +73,4 @@ if DEBUG:
     print(f"- Model: {MODEL}")
     print(f"- API: {API_HOST}:{API_PORT}")
     print(f"- WebSocket: {'Disabled' if DISABLE_WEBSOCKET else f'{WS_HOST}:{WS_PORT}'}")
-    print(f"- Reachy host: {REACHY_HOST}")
-    print(f"- Use mock: {USE_MOCK}")
-    print(f"- Use virtual: {USE_VIRTUAL}") 
+    print(f"- Reachy host: {REACHY_HOST}") 

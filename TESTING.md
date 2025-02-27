@@ -30,8 +30,6 @@ Edit the `.env` file and add your OpenAI API key:
 ```
 OPENAI_API_KEY=your_api_key_here
 MODEL=gpt-4-turbo
-USE_MOCK=true
-USE_VIRTUAL=true
 DEBUG=true
 ```
 
@@ -271,3 +269,11 @@ flake8 agent/ agent/tools/scrape_sdk_docs.py
 - If you're using bash, the commands should work the same way
 - For Windows users, use PowerShell or Command Prompt with the noted Windows-specific commands
 - The verification and test scripts (`verify_docker.sh` and `test_local.sh`) are compatible with zsh, bash, and sh 
+
+# Testing with Virtual Reachy
+
+For testing with the virtual Reachy, ensure your `.env` file has:
+
+```
+REACHY_HOST=localhost
+``` 

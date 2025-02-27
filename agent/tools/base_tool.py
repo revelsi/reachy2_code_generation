@@ -44,40 +44,10 @@ except ImportError:
     TRANSPARENT_EXECUTOR_AVAILABLE = False
 
 
-def get_reachy_connection(host: str = "localhost", use_mock: bool = False) -> Any:
-    """
-    Get or create a Reachy connection.
-    
-    Args:
-        host: Hostname or IP address of the Reachy robot.
-        use_mock: Whether to use a mock implementation.
-        
-    Returns:
-        Any: Reachy instance (real or mock).
-    """
-    global _reachy_instance
-    
-    # Use connection manager if available
-    if CONNECTION_MANAGER_AVAILABLE:
-        return connect_to_reachy(host=host, use_mock=use_mock or not REACHY_SDK_AVAILABLE)
-    
-    # Fallback to basic connection
-    if _reachy_instance is None:
-        if use_mock or not REACHY_SDK_AVAILABLE:
-            # Try to import and use mock
-            try:
-                from agent.tools.mock_reachy import get_mock_reachy
-                _reachy_instance = get_mock_reachy(host=host)
-                logger.info(f"Connected to mock Reachy at {host}")
-            except ImportError:
-                logger.error("Mock Reachy not available. Cannot connect.")
-                raise RuntimeError("Cannot connect to Reachy (no SDK or mock available)")
-        else:
-            # Use real SDK
-            _reachy_instance = ReachySDK(host=host)
-            logger.info(f"Connected to real Reachy at {host}")
-            
-    return _reachy_instance
+def get_reachy_instance(host: str = None) -> Any:
+    """Get a Reachy instance, connecting if necessary."""
+    from agent.tools.connection_manager import connect_to_reachy
+    return connect_to_reachy(host=host)
 
 
 class BaseTool:

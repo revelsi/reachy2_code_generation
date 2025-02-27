@@ -1,4 +1,4 @@
-.PHONY: setup clean test lint install run-cli run-web check-python create-venv setup-venv regenerate generate-tools refresh-sdk
+.PHONY: setup clean test lint install run-cli run-web check-python create-venv setup-venv regenerate generate-tools refresh-sdk test-virtual demo-virtual test-agent
 
 PYTHON_VERSION := 3.10
 VENV_NAME := venv_py310
@@ -46,6 +46,14 @@ run-cli:
 run-web:
 	@. $(VENV_NAME)/bin/activate && python agent/web_interface.py
 
+test-virtual:
+	@echo "Running virtual Reachy tests..."
+	@. $(VENV_NAME)/bin/activate && python test_virtual_reachy.py
+
+demo-virtual:
+	@echo "Starting virtual Reachy demo..."
+	@. $(VENV_NAME)/bin/activate && python demo_virtual_reachy.py
+
 regenerate:
 	@. $(VENV_NAME)/bin/activate && python agent/utils/scrape_sdk_docs.py 
 
@@ -61,4 +69,7 @@ generate-tools:
 	@echo "Copying API documentation..."
 	@cp data/raw_docs/extracted/raw_api_docs.json agent/docs/api_documentation.json
 	@. $(VENV_NAME)/bin/activate && python -m agent.utils.integrate_tools
-	@echo "Tool generation completed." 
+	@echo "Tool generation completed."
+
+test-agent:
+	python tests/test_agent.py -v 

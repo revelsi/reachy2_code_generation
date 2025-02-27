@@ -89,7 +89,7 @@ def setup_tools(use_mock: bool = False, auto_approve: bool = False) -> Dict[str,
     
     # Connect to Reachy (real or mock)
     print("Connecting to Reachy...")
-    reachy = connect_to_reachy(use_mock=use_mock)
+    reachy = connect_to_reachy(host="localhost")
     
     # Get connection info
     connection_info = get_connection_info()

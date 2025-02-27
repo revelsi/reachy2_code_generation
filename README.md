@@ -36,31 +36,32 @@ The project uses LangGraph to implement a sophisticated agent architecture that 
 
 - **State Management**: Maintains conversation history and tool execution state
 - **Tool Integration**: Dynamically loads and executes tools based on the Reachy 2 SDK
-- **Flexible Implementation**: Can use either mock implementations or real robot connections
+- **Flexible Implementation**: Can use either virtual or physical robot connections
 - **Error Handling**: Robust error handling for tool execution failures
 
-### Real Tools with Mock Mode
+### Virtual Robot Mode
 
 The agent is designed with a flexible approach to robot control:
 
-1. **Tool Definitions**: Always uses real tool definitions from the Reachy 2 SDK, ensuring compatibility with the actual robot API
+1. **Tool Definitions**: Uses real tool definitions from the Reachy 2 SDK, ensuring compatibility with the actual robot API
 2. **Implementation Mode**: Can operate in two modes:
-   - **Mock Mode** (default): Uses mock implementations that simulate robot behavior without requiring physical hardware
-   - **Real Robot Mode**: Connects to a physical Reachy 2 robot for actual hardware control
+   - **Virtual Mode** (default): Connects to a virtual Reachy 2 robot running in a Docker container on localhost. This virtual robot uses the exact same API as a physical robot, making it perfect for development and testing without requiring physical hardware.
+   - **Physical Robot Mode**: Connects to a physical Reachy 2 robot for actual hardware control
+
+The key insight is that the virtual robot is not a mock or simulation - it's the real Reachy SDK running in a Docker container, providing identical API behavior to a physical robot. This means code developed with the virtual robot will work seamlessly with a physical robot.
 
 To configure the mode:
 
-- Set the `USE_MOCK` environment variable to `true` or `false` in your `.env` file
-- Set the `REACHY_HOST` environment variable to specify the robot's IP address or hostname when using real robot mode
+- Set the `REACHY_HOST` environment variable in your `.env` file:
+  - Use `localhost` for virtual mode (Docker container)
+  - Use the IP address of your physical robot for physical mode
 
 Example `.env` configuration:
 ```
-# Use mock implementations (no physical robot required)
-USE_MOCK=true
+# Use virtual mode (Docker container on localhost)
 REACHY_HOST=localhost
 
-# OR: Connect to a real robot
-# USE_MOCK=false
+# OR: Connect to a physical robot
 # REACHY_HOST=192.168.1.100
 ```
 
@@ -193,6 +194,41 @@ Here are some examples of natural language requests that use the generated tools
 3. **Tool Execution**: The system executes the tool with the provided parameters
 4. **Result Notification**: The WebSocket server notifies clients about the execution result
 5. **Response Generation**: The agent generates a response based on the tool execution result
+
+## Testing with Virtual Reachy
+
+The project includes tools for testing and demonstrating the virtual Reachy functionality without requiring a physical robot.
+
+### Running the Virtual Reachy Tests
+
+To verify that your environment is correctly set up to work with the virtual Reachy:
+
+```bash
+make test-virtual
+```
+
+This will run a series of tests that:
+1. Verify connection to the virtual Reachy
+2. Test agent initialization with the virtual robot
+3. Execute basic robot commands
+4. Test tool execution through the agent
+
+### Interactive Virtual Reachy Demo
+
+For an interactive demonstration of the virtual Reachy capabilities:
+
+```bash
+make demo-virtual
+```
+
+This launches an interactive command-line interface that allows you to:
+- Control the robot's arms
+- Move the robot's head
+- Operate the grippers
+- Access camera feeds
+- Get robot information
+
+The demo is a great way to explore the virtual Reachy functionality without using the full agent system.
 
 ## Development
 
