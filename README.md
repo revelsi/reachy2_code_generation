@@ -12,6 +12,8 @@ The LangGraph agent implementation has been significantly improved with the foll
 - ✅ Comprehensive test suite has been implemented to verify tool functionality
 - ✅ Centralized connection management through the new connection manager module
 - ✅ Consistent tool implementation patterns across all generated tools
+- ✅ Dual-mode architecture supporting both function calling and code generation
+- ✅ Centralized model configuration management for easy customization
 
 The agent uses real tool definitions from the Reachy 2 SDK but can operate with mock implementations when no physical robot is available.
 
@@ -31,6 +33,39 @@ This repository contains a framework for transparent function calling with the R
 - **OpenAI Integration**: Control the robot using natural language with OpenAI's function calling
 - **Mock Robot**: Test the system without a physical robot
 - **Automatic Tool Generation**: Tools are automatically generated from the Reachy 2 SDK documentation
+- **Dual-Mode Architecture**: Switch between function calling and code generation modes
+- **Centralized Model Configuration**: Easily customize model parameters across the application
+
+## Dual-Mode Architecture
+
+The project implements a dual-mode architecture that allows users to interact with the Reachy 2 robot in two different ways:
+
+### Function Calling Mode
+
+In this mode, the agent uses OpenAI's function calling capability to:
+- Analyze user requests and determine the appropriate robot functions to call
+- Display the reasoning behind each function call
+- Show the function call with parameters
+- Request user permission before execution
+- Display execution results
+
+### Code Generation Mode
+
+In this mode, the agent:
+- Generates Python code based on natural language requests
+- Validates the generated code for basic syntax and structure
+- Displays the code with explanations
+- Allows users to review and modify the code before execution
+
+Users can switch between these modes through the web interface or CLI, providing flexibility in how they interact with the robot.
+
+## Model Configuration
+
+The project includes a centralized model configuration system that allows users to:
+- Select different OpenAI models (e.g., gpt-4-turbo, gpt-4o, gpt-3.5-turbo)
+- Adjust model parameters such as temperature, max tokens, and more
+- Update model settings at runtime through the web interface or API
+- Maintain consistent model settings across different components of the application
 
 ## LangGraph Agent Integration
 

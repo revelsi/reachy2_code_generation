@@ -8,6 +8,7 @@ import os
 import sys
 import platform
 from dotenv import load_dotenv
+from typing import Dict, Any, List, Optional
 
 # Load environment variables from .env file
 load_dotenv()
@@ -38,7 +39,33 @@ if HTTPS_PROXY:
 
 # Environment settings
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
+
+# Model settings
 MODEL = os.getenv("MODEL", "gpt-4-turbo")
+MODEL_TEMPERATURE = float(os.getenv("MODEL_TEMPERATURE", "0.2"))
+MODEL_MAX_TOKENS = int(os.getenv("MODEL_MAX_TOKENS", "4000"))
+MODEL_TOP_P = float(os.getenv("MODEL_TOP_P", "0.95"))
+MODEL_FREQUENCY_PENALTY = float(os.getenv("MODEL_FREQUENCY_PENALTY", "0"))
+MODEL_PRESENCE_PENALTY = float(os.getenv("MODEL_PRESENCE_PENALTY", "0"))
+
+# Model configuration dictionary for easy access
+MODEL_CONFIG = {
+    "model": MODEL,
+    "temperature": MODEL_TEMPERATURE,
+    "max_tokens": MODEL_MAX_TOKENS,
+    "top_p": MODEL_TOP_P,
+    "frequency_penalty": MODEL_FREQUENCY_PENALTY,
+    "presence_penalty": MODEL_PRESENCE_PENALTY,
+}
+
+# Available models for selection in UI
+AVAILABLE_MODELS = [
+    "gpt-4-turbo",
+    "gpt-4o",
+    "gpt-4",
+    "gpt-3.5-turbo",
+]
+
 DEBUG = os.getenv("DEBUG", "false").lower() in ("true", "1", "t")
 
 # API settings
@@ -73,4 +100,47 @@ if DEBUG:
     print(f"- Model: {MODEL}")
     print(f"- API: {API_HOST}:{API_PORT}")
     print(f"- WebSocket: {'Disabled' if DISABLE_WEBSOCKET else f'{WS_HOST}:{WS_PORT}'}")
-    print(f"- Reachy host: {REACHY_HOST}") 
+    print(f"- Reachy host: {REACHY_HOST}")
+
+def get_model_config() -> Dict[str, Any]:
+    """
+    Get the current model configuration.
+    
+    Returns:
+        Dict[str, Any]: The model configuration.
+    """
+    return MODEL_CONFIG.copy()
+
+def update_model_config(config: Dict[str, Any]) -> None:
+    """
+    Update the model configuration.
+    
+    Args:
+        config: The new model configuration.
+    """
+    global MODEL, MODEL_TEMPERATURE, MODEL_MAX_TOKENS, MODEL_TOP_P
+    global MODEL_FREQUENCY_PENALTY, MODEL_PRESENCE_PENALTY, MODEL_CONFIG
+    
+    # Update global variables
+    if "model" in config:
+        MODEL = config["model"]
+    if "temperature" in config:
+        MODEL_TEMPERATURE = float(config["temperature"])
+    if "max_tokens" in config:
+        MODEL_MAX_TOKENS = int(config["max_tokens"])
+    if "top_p" in config:
+        MODEL_TOP_P = float(config["top_p"])
+    if "frequency_penalty" in config:
+        MODEL_FREQUENCY_PENALTY = float(config["frequency_penalty"])
+    if "presence_penalty" in config:
+        MODEL_PRESENCE_PENALTY = float(config["presence_penalty"])
+    
+    # Update the model configuration dictionary
+    MODEL_CONFIG = {
+        "model": MODEL,
+        "temperature": MODEL_TEMPERATURE,
+        "max_tokens": MODEL_MAX_TOKENS,
+        "top_p": MODEL_TOP_P,
+        "frequency_penalty": MODEL_FREQUENCY_PENALTY,
+        "presence_penalty": MODEL_PRESENCE_PENALTY,
+    } 

@@ -76,4 +76,7 @@ agent/tools/*_tools.py
 # Temporary files
 .tmp/
 tmp/
-temp/ 
+temp/
+
+# Keep test scripts
+!test_model_config.py 

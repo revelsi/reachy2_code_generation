@@ -18,6 +18,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added tool execution result notifications via WebSocket
 - Added error message display with auto-fade in the web interface
 - Added new connection manager module for centralized Reachy connection handling
+- Added dual-mode architecture supporting both function calling and code generation
+- Added code generation agent for translating natural language to Python code
+- Added basic code validation framework for generated code
+- Added centralized model configuration management system
+- Added UI components for switching between modes and configuring model parameters
+- Added CLI support for dual-mode operation
+- Added test script for verifying model configuration functionality
 
 ### Fixed
 - Tool discovery and generation now working correctly (208 tools loaded)
@@ -35,6 +42,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Improved WebSocket message handling in the frontend
 - Refactored tool generation to use consistent connection pattern
 - Migrated from `get_reachy_connection` to `get_reachy` for better connection management
+- Refactored API endpoints to support dual-mode architecture
+- Enhanced web interface to support both function calling and code generation modes
+- Restructured agent initialization to use centralized model configuration
 
 ## [0.1.0] - 2023-02-26
 

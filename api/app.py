@@ -23,8 +23,12 @@ if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
 # Import agent modules
-from agent.langgraph_agent import ReachyLangGraphAgent
+from agent.agent_router import AgentRouter, AgentMode
 from agent.cli import setup_agent, DEFAULT_MODULES
+from config import (
+    OPENAI_API_KEY, MODEL, DEBUG, DISABLE_WEBSOCKET, API_HOST, API_PORT,
+    get_model_config, update_model_config, AVAILABLE_MODELS
+)
 
 # Create Flask app
 app = Flask(__name__, static_folder='static')
@@ -36,33 +40,36 @@ agent = None
 
 def initialize_agent(
     api_key: Optional[str] = None,
-    model: Optional[str] = None,
+    model_config: Optional[Dict[str, Any]] = None,
     focus_modules: List[str] = None,
     regenerate_tools: bool = False,
+    mode: AgentMode = AgentMode.FUNCTION_CALLING,
 ) -> None:
     """
     Initialize the Reachy agent.
     
     Args:
         api_key: OpenAI API key. If None, will use OPENAI_API_KEY environment variable.
-        model: LLM model to use. If None, will use MODEL environment variable or default to gpt-4-turbo.
+        model_config: Model configuration. If None, will use the configuration from config.py.
         focus_modules: Optional list of module names to focus on (default: parts, orbita, utils).
         regenerate_tools: Whether to regenerate tool definitions and implementations.
+        mode: The agent mode to use (function_calling or code_generation).
     """
     global agent
     
-    # Use model from environment variable if not provided
-    if model is None:
-        model = os.environ.get("MODEL", "gpt-4-turbo")
+    # Use model configuration from config.py if not provided
+    if model_config is None:
+        model_config = get_model_config()
     
-    print(f"Initializing agent with model: {model}")
+    print(f"Initializing agent with model: {model_config.get('model', MODEL)}")
     
     # Initialize the agent
     agent = setup_agent(
         api_key=api_key,
-        model=model,
+        model_config=model_config,
         focus_modules=focus_modules,
         regenerate_tools=regenerate_tools,
+        mode=mode,
     )
 
 
@@ -79,7 +86,8 @@ def chat() -> Response:
     
     Request body:
         {
-            "message": "User message"
+            "message": "User message",
+            "mode": "function_calling" or "code_generation" (optional)
         }
     
     Returns:
@@ -98,71 +106,50 @@ def chat() -> Response:
     try:
         data = request.json
         if not data:
-            return jsonify({"error": "Request body must be valid JSON"}), 400
+            return jsonify({"error": "No data provided"}), 400
         
-        if "message" not in data:
-            return jsonify({"error": "Missing 'message' field in request body"}), 400
+        message = data.get("message")
+        if not message:
+            return jsonify({"error": "No message provided"}), 400
         
-        message = data["message"]
+        # Get mode from request (optional)
+        mode = data.get("mode")
+        if mode:
+            try:
+                agent.set_mode(AgentMode(mode))
+            except ValueError:
+                return jsonify({"error": f"Invalid mode: {mode}"}), 400
         
-        # Process the message
-        try:
-            response = agent.process_message(message)
-            
-            # Extract tool calls for visualization
-            tool_calls = []
-            for msg in agent.state.messages:
-                if hasattr(msg, "tool_calls") and msg.tool_calls:
-                    for tool_call in msg.tool_calls:
-                        # Find the corresponding result if available
-                        result = None
-                        if hasattr(agent.state, "tool_results"):
-                            for tool_result in agent.state.tool_results:
-                                if tool_result.tool_call_id == tool_call.get("id"):
-                                    result = tool_result.result
-                                    break
-                        
-                        # Add to tool calls
-                        tool_calls.append({
-                            "name": tool_call.get("function", {}).get("name", "unknown"),
-                            "arguments": tool_call.get("function", {}).get("arguments", {}),
-                            "result": result
-                        })
-            
-            return jsonify({
-                "response": response,
-                "tool_calls": tool_calls
-            })
+        # Process message
+        response = agent.process_message(message)
         
-        except Exception as e:
-            error_message = f"Error processing message: {str(e)}"
-            print(f"Error in chat endpoint: {error_message}")
-            import traceback
-            traceback.print_exc()
-            return jsonify({"error": error_message}), 500
-            
+        return jsonify(response)
+    
     except Exception as e:
-        return jsonify({"error": f"Invalid request: {str(e)}"}), 400
+        return jsonify({"error": str(e)}), 500
 
 
 @app.route("/api/reset", methods=["POST"])
 def reset() -> Response:
     """
-    Reset the conversation with the agent.
+    Reset the conversation state.
     
     Returns:
-        JSON response confirming the reset
+        JSON response indicating success
     """
     global agent
     
     # Check if agent is initialized
     if agent is None:
-        initialize_agent()
-    else:
-        # Reset the conversation
-        agent.reset_conversation()
+        try:
+            initialize_agent()
+        except Exception as e:
+            return jsonify({"error": f"Failed to initialize agent: {str(e)}"}), 500
     
-    return jsonify({"status": "Conversation reset successfully"})
+    # Reset conversation
+    agent.reset_conversation()
+    
+    return jsonify({"status": "success", "message": "Conversation reset"})
 
 
 @app.route("/api/tools", methods=["GET"])
@@ -171,15 +158,18 @@ def get_tools() -> Response:
     Get the list of available tools.
     
     Returns:
-        JSON response with the available tools
+        JSON response with the list of tools
     """
     global agent
     
     # Check if agent is initialized
     if agent is None:
-        initialize_agent()
+        try:
+            initialize_agent()
+        except Exception as e:
+            return jsonify({"error": f"Failed to initialize agent: {str(e)}"}), 500
     
-    # Get available tools
+    # Get tools
     tools = agent.get_available_tools()
     
     return jsonify({"tools": tools})
@@ -188,31 +178,27 @@ def get_tools() -> Response:
 @app.route("/api/status", methods=["GET"])
 def get_status() -> Response:
     """
-    Get the status of the robot and agent.
+    Get the status of the agent.
     
     Returns:
-        JSON response with the status information
+        JSON response with the agent status
     """
     global agent
     
     # Check if agent is initialized
     if agent is None:
-        return jsonify({"status": "Agent not initialized"}), 404
+        return jsonify({
+            "status": "not_initialized",
+            "message": "Agent not initialized"
+        })
     
     # Get agent status
     status = {
-        "agent_initialized": agent is not None,
-        "model": os.environ.get("MODEL", "gpt-4-turbo"),
+        "status": "ready",
+        "mode": agent.get_mode(),
+        "model_config": agent.get_model_config(),
+        "tools_count": len(agent.get_available_tools())
     }
-    
-    # Try to get robot status if available
-    try:
-        # This assumes the agent has a method to get robot status
-        # You may need to adjust this based on your actual implementation
-        robot_status = agent.get_robot_status()
-        status["robot"] = robot_status
-    except:
-        status["robot"] = {"status": "Unknown"}
     
     return jsonify(status)
 
@@ -222,72 +208,149 @@ def config() -> Response:
     """
     Get or update the agent configuration.
     
-    For GET:
-        Returns the current configuration
+    GET:
+        Returns the current configuration.
+    
+    POST:
+        Updates the configuration.
         
-    For POST:
         Request body:
             {
-                "model": "Model name",
-                "focus_modules": ["module1", "module2"],
-                "regenerate_tools": true/false
+                "model": "gpt-4-turbo",
+                "temperature": 0.2,
+                "max_tokens": 4000,
+                "mode": "function_calling" or "code_generation"
             }
-        
-        Returns the updated configuration
+    
+    Returns:
+        JSON response with the updated configuration
     """
     global agent
     
+    # Check if agent is initialized
+    if agent is None:
+        try:
+            initialize_agent()
+        except Exception as e:
+            return jsonify({"error": f"Failed to initialize agent: {str(e)}"}), 500
+    
     if request.method == "GET":
-        # Return current configuration
+        # Get current configuration
         config = {
-            "model": os.environ.get("MODEL", "gpt-4-turbo"),
-            "focus_modules": DEFAULT_MODULES,
+            "model_config": agent.get_model_config(),
+            "mode": agent.get_mode(),
+            "available_models": AVAILABLE_MODELS,
+            "available_modes": [mode.value for mode in AgentMode]
         }
+        
         return jsonify(config)
     
     elif request.method == "POST":
         # Update configuration
-        data = request.json
-        if not data:
-            return jsonify({"error": "Missing configuration data"}), 400
+        try:
+            data = request.json
+            if not data:
+                return jsonify({"error": "No data provided"}), 400
+            
+            # Update model configuration
+            model_config = {}
+            if "model" in data:
+                model_config["model"] = data["model"]
+            if "temperature" in data:
+                model_config["temperature"] = float(data["temperature"])
+            if "max_tokens" in data:
+                model_config["max_tokens"] = int(data["max_tokens"])
+            if "top_p" in data:
+                model_config["top_p"] = float(data["top_p"])
+            if "frequency_penalty" in data:
+                model_config["frequency_penalty"] = float(data["frequency_penalty"])
+            if "presence_penalty" in data:
+                model_config["presence_penalty"] = float(data["presence_penalty"])
+            
+            if model_config:
+                agent.update_model_config(model_config)
+            
+            # Update mode
+            if "mode" in data:
+                try:
+                    agent.set_mode(AgentMode(data["mode"]))
+                except ValueError:
+                    return jsonify({"error": f"Invalid mode: {data['mode']}"}), 400
+            
+            # Get updated configuration
+            updated_config = {
+                "model_config": agent.get_model_config(),
+                "mode": agent.get_mode()
+            }
+            
+            return jsonify(updated_config)
         
-        # Extract configuration values
-        model = data.get("model", os.environ.get("MODEL", "gpt-4-turbo"))
-        focus_modules = data.get("focus_modules", DEFAULT_MODULES)
-        regenerate_tools = data.get("regenerate_tools", False)
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/mode", methods=["GET", "POST"])
+def mode() -> Response:
+    """
+    Get or set the agent mode.
+    
+    GET:
+        Returns the current mode.
+    
+    POST:
+        Sets the mode.
         
-        # Reinitialize the agent with new configuration
-        initialize_agent(
-            model=model,
-            focus_modules=focus_modules,
-            regenerate_tools=regenerate_tools,
-        )
+        Request body:
+            {
+                "mode": "function_calling" or "code_generation"
+            }
+    
+    Returns:
+        JSON response with the updated mode
+    """
+    global agent
+    
+    # Check if agent is initialized
+    if agent is None:
+        try:
+            initialize_agent()
+        except Exception as e:
+            return jsonify({"error": f"Failed to initialize agent: {str(e)}"}), 500
+    
+    if request.method == "GET":
+        # Get current mode
+        return jsonify({"mode": agent.get_mode()})
+    
+    elif request.method == "POST":
+        # Set mode
+        try:
+            data = request.json
+            if not data:
+                return jsonify({"error": "No data provided"}), 400
+            
+            mode = data.get("mode")
+            if not mode:
+                return jsonify({"error": "No mode provided"}), 400
+            
+            try:
+                agent.set_mode(AgentMode(mode))
+            except ValueError:
+                return jsonify({"error": f"Invalid mode: {mode}"}), 400
+            
+            return jsonify({"mode": agent.get_mode()})
         
-        return jsonify({
-            "status": "Configuration updated",
-            "model": model,
-            "focus_modules": focus_modules,
-        })
+        except Exception as e:
+            return jsonify({"error": str(e)}), 500
+
+
+def main():
+    """Run the Flask app."""
+    # Initialize agent
+    initialize_agent()
+    
+    # Run app
+    app.run(host=API_HOST, port=API_PORT, debug=DEBUG)
 
 
 if __name__ == "__main__":
-    # Parse command-line arguments
-    import argparse
-    
-    parser = argparse.ArgumentParser(description="Reachy Agent API")
-    parser.add_argument("--host", default="0.0.0.0", help="Host to run the server on")
-    parser.add_argument("--port", type=int, default=5000, help="Port to run the server on")
-    parser.add_argument("--debug", action="store_true", help="Run in debug mode")
-    parser.add_argument("--model", help="LLM model to use")
-    parser.add_argument("--regenerate", action="store_true", help="Regenerate tool definitions")
-    
-    args = parser.parse_args()
-    
-    # Initialize the agent
-    initialize_agent(
-        model=args.model,
-        regenerate_tools=args.regenerate,
-    )
-    
-    # Run the Flask app
-    app.run(host=args.host, port=args.port, debug=args.debug) 
+    main() 

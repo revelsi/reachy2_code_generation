@@ -21,6 +21,18 @@
    - Updated import paths and references throughout the codebase
    - Implemented consistent connection pattern across all tools
 
+4. **✅ Dual-Mode Architecture Implementation**:
+   - Created mode selection mechanism (function calling vs. code generation)
+   - Implemented agent router to direct requests to appropriate mode
+   - Designed persistent state management across mode switches
+   - Developed mode-specific response formatting
+   - Added centralized model configuration management
+
+5. **✅ Code Generation Mode Development**:
+   - Implemented code generation agent using OpenAI API
+   - Created mechanism to translate natural language to executable code
+   - Added code validation framework for basic validation
+
 ## Current Issues
 
 1. **LangGraph Agent Integration**:
@@ -38,39 +50,85 @@
 
 ### High Priority
 
-1. **Connection Manager Enhancements**:
+1. **✅ Dual-Mode Architecture Implementation**:
+   - ✅ Create mode selection mechanism (function calling vs. code generation)
+   - ✅ Implement agent router to direct requests to appropriate mode
+   - ✅ Design persistent state management across mode switches
+   - ✅ Develop mode-specific response formatting
+
+2. **✅ Code Generation Mode Development**:
+   - ✅ Implement code generation agent using OpenAI API
+   - Create code templates for common Reachy operations
+   - ✅ Develop mechanism to translate natural language to executable code
+   - Support multi-step operations with proper sequencing
+
+3. **Code Validation Framework**:
+   - ✅ Implement basic code validation
+   - Create tool schema validation to verify correct tool usage
+   - Add type checking for parameters against function signatures
+   - Develop runtime simulation in sandboxed environment
+   - Build function signature validation against Reachy SDK
+
+4. **RAG Pipeline Integration**:
+   - Import and adapt RAG components from reachy_expert_agent
+   - Create embeddings for tool documentation and schemas
+   - Implement retrieval system for relevant code examples
+   - Develop context augmentation for improved code generation
+   - Add reference documentation lookup during code generation
+
+5. **Connection Manager Enhancements**:
    - Add connection pooling to handle multiple tool calls efficiently
    - Implement connection timeout and retry mechanisms
    - Add connection status monitoring and health checks
    - Create tests for connection edge cases
 
-2. **Tool Generation Improvements**:
+6. **Tool Generation Improvements**:
    - Add validation for generated tool implementations
    - Implement tool versioning to track changes
    - Add support for tool dependencies and ordering
    - Create tool generation report with statistics
 
-3. **Error Recovery**:
+7. **Error Recovery**:
    - Implement automatic reconnection on connection loss
    - Add graceful degradation for unavailable tools
    - Create error recovery strategies for common failures
    - Improve error reporting and diagnostics
 
+8. **Model Configuration Management**:
+   - ✅ Implement centralized model configuration
+   - ✅ Add ability to update model parameters at runtime
+   - ✅ Create UI components for model configuration
+   - Add model performance monitoring and optimization
+
 ### Medium Priority
 
-1. **Performance Optimization**:
+1. **UI for Dual-Mode**:
+   - ✅ Create mode toggle in user interface
+   - ✅ Develop code editor with syntax highlighting
+   - ✅ Implement code explanation view
+   - Add execution log and results visualization
+   - Create code history and versioning UI
+
+2. **Code Generation Enhancements**:
+   - Add support for generating test code
+   - Implement code optimization suggestions
+   - Create educational comments in generated code
+   - Support multiple programming styles (functional, OOP)
+   - Enable code snippets for common operations
+
+3. **Performance Optimization**:
    - Profile tool execution performance
    - Implement caching for frequently used tool results
    - Optimize connection management for concurrent operations
    - Add performance monitoring and metrics
 
-2. **Testing Enhancements**:
+4. **Testing Enhancements**:
    - Add integration tests for the entire tool pipeline
    - Create stress tests for connection management
    - Implement property-based testing for tool generation
    - Add benchmarking tests for performance monitoring
 
-3. **Documentation and Examples**:
+5. **Documentation and Examples**:
    - Create detailed tool usage examples
    - Document common error scenarios and solutions
    - Add troubleshooting guide for connection issues
@@ -78,13 +136,20 @@
 
 ### Low Priority
 
-1. **Development Tools**:
+1. **Advanced Code Generation Features**:
+   - Generate code in multiple languages (Python, JavaScript)
+   - Support code refactoring suggestions
+   - Implement complexity analysis of generated code
+   - Add advanced code optimization techniques
+   - Create interactive code tutorials
+
+2. **Development Tools**:
    - Create tool for analyzing tool usage patterns
    - Implement tool dependency visualization
    - Add development mode with enhanced logging
    - Create tool for testing tool implementations
 
-2. **UI Improvements**:
+3. **UI Improvements**:
    - Add connection status visualization
    - Implement tool execution progress tracking
    - Create interactive tool testing interface
@@ -92,13 +157,15 @@
 
 ## Notes for Next Session
 
-- Focus on implementing connection pooling and retry mechanisms
-- Add comprehensive tests for connection edge cases
-- Create detailed documentation for connection management
-- Consider implementing tool versioning system
+- Focus on enhancing the code validation framework
+- Begin implementing the RAG pipeline integration
+- Improve error recovery mechanisms
+- Enhance the code generation capabilities with templates and multi-step operations
+- Consider implementing code execution functionality
 
 ## References
 
 - LangGraph documentation: https://langchain-ai.github.io/langgraph/
 - OpenAI function calling documentation: https://platform.openai.com/docs/guides/function-calling
-- Reachy 2 SDK documentation: https://github.com/pollen-robotics/reachy2-sdk 
+- Reachy 2 SDK documentation: https://github.com/pollen-robotics/reachy2-sdk
+- RAG with LangChain: https://python.langchain.com/docs/use_cases/question_answering/ 
