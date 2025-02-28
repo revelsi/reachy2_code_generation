@@ -32,6 +32,8 @@
    - Implemented code generation agent using OpenAI API
    - Created mechanism to translate natural language to executable code
    - Added code validation framework for basic validation
+   - Enhanced API structure with clear type information and usage examples
+   - Simplified system prompt with clear initialization and cleanup phases
 
 ## Current Issues
 
@@ -58,43 +60,50 @@
 
 2. **✅ Code Generation Mode Development**:
    - ✅ Implement code generation agent using OpenAI API
-   - Create code templates for common Reachy operations
+   - ✅ Create code templates for common Reachy operations
    - ✅ Develop mechanism to translate natural language to executable code
-   - Support multi-step operations with proper sequencing
+   - ✅ Support multi-step operations with proper sequencing
 
 3. **Code Validation Framework**:
    - ✅ Implement basic code validation
-   - Create tool schema validation to verify correct tool usage
-   - Add type checking for parameters against function signatures
+   - ✅ Create tool schema validation to verify correct tool usage
+   - ✅ Add type checking for parameters against function signatures
    - Develop runtime simulation in sandboxed environment
    - Build function signature validation against Reachy SDK
 
-4. **RAG Pipeline Integration**:
+4. **✅ API Documentation Enhancement**:
+   - ✅ Create enhanced API structure with clear type information
+   - ✅ Add usage examples for each API component
+   - ✅ Develop common patterns for typical operations
+   - ✅ Implement hierarchical organization of API components
+   - ✅ Simplify system prompt with clear phase structure
+
+5. **RAG Pipeline Integration**:
    - Import and adapt RAG components from reachy_expert_agent
    - Create embeddings for tool documentation and schemas
    - Implement retrieval system for relevant code examples
    - Develop context augmentation for improved code generation
    - Add reference documentation lookup during code generation
 
-5. **Connection Manager Enhancements**:
+6. **Connection Manager Enhancements**:
    - Add connection pooling to handle multiple tool calls efficiently
    - Implement connection timeout and retry mechanisms
    - Add connection status monitoring and health checks
    - Create tests for connection edge cases
 
-6. **Tool Generation Improvements**:
+7. **Tool Generation Improvements**:
    - Add validation for generated tool implementations
    - Implement tool versioning to track changes
    - Add support for tool dependencies and ordering
    - Create tool generation report with statistics
 
-7. **Error Recovery**:
+8. **Error Recovery**:
    - Implement automatic reconnection on connection loss
    - Add graceful degradation for unavailable tools
    - Create error recovery strategies for common failures
    - Improve error reporting and diagnostics
 
-8. **Model Configuration Management**:
+9. **Model Configuration Management**:
    - ✅ Implement centralized model configuration
    - ✅ Add ability to update model parameters at runtime
    - ✅ Create UI components for model configuration

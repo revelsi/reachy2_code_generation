@@ -14,6 +14,8 @@ The LangGraph agent implementation has been significantly improved with the foll
 - ✅ Consistent tool implementation patterns across all generated tools
 - ✅ Dual-mode architecture supporting both function calling and code generation
 - ✅ Centralized model configuration management for easy customization
+- ✅ Enhanced API structure with clear type information and usage examples
+- ✅ Simplified system prompt with clear initialization and cleanup phases
 
 The agent uses real tool definitions from the Reachy 2 SDK but can operate with mock implementations when no physical robot is available.
 
@@ -307,3 +309,30 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Enhanced API Documentation Structure
+
+The project now includes an enhanced API documentation structure that provides clearer type information and usage examples for the Reachy 2 SDK. This improved structure helps the code generation agent produce more accurate and reliable code.
+
+### Key Features of the Enhanced API Structure
+
+- **Clear Type Information**: Explicit distinction between properties and methods
+- **Detailed Parameter Descriptions**: Comprehensive information about parameter types and purposes
+- **Usage Examples**: Concrete examples for each API component
+- **Common Patterns**: Ready-to-use code patterns for common operations
+- **Hierarchical Organization**: Structured representation of the API's modules, classes, and methods
+
+The enhanced API structure is stored in `agent/docs/enhanced_api_structure.json` and is used by the code generation agent to generate more accurate code.
+
+### Simplified System Prompt
+
+The code generation agent now uses a simplified system prompt with a clear three-phase structure:
+
+1. **Initialization Phase**: Steps for connecting to the robot and preparing it for use
+2. **Main Code Phase**: Guidelines for implementing the core functionality
+3. **Cleanup Phase**: Instructions for properly cleaning up resources
+
+This structured approach helps ensure that generated code follows best practices, including:
+- Always turning on the robot before use
+- Using proper error handling with try/finally blocks
+- Always turning off the robot smoothly and disconnecting when done

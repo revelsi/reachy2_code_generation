@@ -3,7 +3,7 @@
 Code Generation Agent for the Reachy 2 robot.
 
 This module provides an agent that generates Python code for interacting with the Reachy 2 robot
-based on natural language requests.
+based on natural language requests, using only the official Reachy 2 SDK API.
 """
 
 import os
@@ -11,10 +11,7 @@ import sys
 import json
 import logging
 import traceback
-from typing import Dict, List, Any, Optional, Literal, TypedDict, Annotated
-from dotenv import load_dotenv
-import time
-import asyncio
+from typing import Dict, List, Any, Optional, TypedDict
 from openai import OpenAI
 import httpx
 
@@ -23,25 +20,13 @@ logging.basicConfig(level=logging.INFO,
                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 logger = logging.getLogger("code_generation_agent")
 
-# Load environment variables
-load_dotenv()
-
 # Ensure the parent directory is in sys.path
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
 # Import configuration
-from config import get_model_config, OPENAI_API_KEY
-
-# Import LangChain message types
-from langchain_core.messages import (
-    AIMessage,
-    HumanMessage,
-    SystemMessage,
-    ToolMessage,
-    BaseMessage
-)
+from config import OPENAI_API_KEY, MODEL
 
 # Import WebSocket server for notifications
 from api.websocket import get_websocket_server
@@ -49,19 +34,18 @@ from api.websocket import get_websocket_server
 # Configure OpenAI client with custom settings
 client = OpenAI(
     api_key=os.getenv("OPENAI_API_KEY", OPENAI_API_KEY),
-    timeout=30.0,  # Increase timeout
-    max_retries=2,  # Add retries
-    base_url="https://api.openai.com/v1",  # Explicitly set base URL
+    timeout=30.0,
+    max_retries=2,
+    base_url="https://api.openai.com/v1",
     http_client=httpx.Client(
         transport=httpx.HTTPTransport(retries=2),
         timeout=30.0,
-        verify=True  # Ensure SSL verification is enabled
+        verify=True
     )
 )
 
 # WebSocket server for notifications
 websocket_server = get_websocket_server()
-websocket_clients = set()
 
 
 class CodeValidationResult(TypedDict):
@@ -69,6 +53,108 @@ class CodeValidationResult(TypedDict):
     valid: bool
     errors: List[str]
     warnings: List[str]
+
+
+def load_api_documentation():
+    """
+    Load the API documentation from the JSON file.
+    
+    Returns:
+        list: The API documentation.
+    """
+    try:
+        doc_path = os.path.join(os.path.dirname(__file__), "docs", "api_documentation.json")
+        with open(doc_path, "r") as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error(f"Error loading API documentation: {e}")
+        return []
+
+
+def generate_api_summary(api_docs):
+    """
+    Generate a summary of the API documentation.
+    
+    Args:
+        api_docs: The API documentation.
+        
+    Returns:
+        str: A summary of the API documentation.
+    """
+    if not api_docs:
+        return "No API documentation available."
+    
+    # Define the official API modules (these are the ones from the Reachy SDK)
+    official_api_modules = [
+        "reachy2_sdk.reachy_sdk",
+        "reachy2_sdk.parts",
+        "reachy2_sdk.utils",
+        "reachy2_sdk.config",
+        "reachy2_sdk.media",
+        "reachy2_sdk.orbita",
+        "reachy2_sdk.sensors"
+    ]
+    
+    # Extract classes and their methods
+    classes = {}
+    official_modules = set()
+    official_classes = set()
+    
+    for item in api_docs:
+        # Track official modules (only if they're in the official list)
+        if item.get("type") == "module":
+            module_name = item.get("name")
+            if module_name and any(module_name.startswith(prefix) for prefix in official_api_modules):
+                official_modules.add(module_name)
+        
+        # Process classes (only if they're from official modules)
+        if item.get("type") == "class":
+            class_name = item.get("name")
+            module_name = item.get("module", "")
+            
+            # Only include classes from official modules
+            if module_name and any(module_name.startswith(prefix) for prefix in official_api_modules):
+                # Add to official classes
+                if class_name:
+                    official_classes.add(class_name)
+                
+                methods = []
+                
+                # Get methods for this class
+                for method in item.get("methods", []):
+                    method_name = method.get("name")
+                    signature = method.get("signature", "")
+                    docstring = method.get("docstring", "").split("\n")[0] if method.get("docstring") else ""  # Get first line of docstring
+                    
+                    if method_name and not method_name.startswith("_"):  # Skip private methods
+                        methods.append(f"- {method_name}{signature}: {docstring}")
+                
+                if methods:
+                    classes[class_name] = methods
+    
+    # Format the summary
+    summary = []
+    
+    # Add official modules
+    summary.append("# Official Modules")
+    for module in sorted(official_modules):
+        summary.append(f"- {module}")
+    summary.append("")
+    
+    # Add official classes
+    summary.append("# Official Classes")
+    for class_name in sorted(official_classes):
+        summary.append(f"- {class_name}")
+    summary.append("")
+    
+    # Add class methods
+    summary.append("# Class Methods")
+    for class_name, methods in classes.items():
+        summary.append(f"## {class_name}")
+        summary.append("\n".join(methods))
+        summary.append("")
+    
+    return "\n".join(summary)
 
 
 class ReachyCodeGenerationAgent:
@@ -115,49 +201,86 @@ class ReachyCodeGenerationAgent:
         
         logger.debug(f"Initialized code generation agent with model: {model}")
         
-        # Tool schemas
-        self.tool_schemas = []
-        
         # Conversation history
         self.messages = []
         
+        # Load API documentation
+        self.api_docs = load_api_documentation()
+        self.api_summary = generate_api_summary(self.api_docs)
+        
+        # Extract official modules and classes for validation
+        self.official_modules = set()
+        self.official_classes = set()
+        self._extract_official_api_elements()
+        
         # System prompt for the agent
-        self.system_prompt = """
+        self.system_prompt = f"""
         You are an AI assistant that generates Python code for controlling a Reachy 2 robot.
         
-        When a user asks you to perform an action with the robot, analyze their request and generate
-        Python code that uses the Reachy 2 SDK to accomplish the task. Your code should be:
+        OFFICIAL REACHY 2 SDK MODULES:
+        - reachy2_sdk.reachy_sdk
+        - reachy2_sdk.parts
+        - reachy2_sdk.utils
+        - reachy2_sdk.config
+        - reachy2_sdk.media
+        - reachy2_sdk.orbita
+        - reachy2_sdk.sensors
         
-        1. Syntactically correct and executable
-        2. Well-structured and organized
-        3. Properly commented to explain key steps
-        4. Error-handled with try/except blocks
-        5. Safe and considerate of the robot's physical limitations
+        CRITICAL WARNINGS:
+        - NEVER use 'get_reachy()' or any functions from 'connection_manager.py'
+        - Carefully read the API documentation and make sure you follow the arguments and parameters guidelines.
+        - ALWAYS use properties correctly (e.g., reachy.r_arm NOT reachy.r_arm())
+        - For arm goto(), ALWAYS provide EXACTLY 7 joint values
         
-        Include imports, connection setup, and any necessary cleanup. Always use the connection manager
-        to get a connection to the robot using `get_reachy()` from `agent.tools.connection_manager`.
+        REQUIRED CODE STRUCTURE:
+        
+        1. INITIALIZATION PHASE:
+           - Import ReachySDK from reachy2_sdk.reachy_sdk
+           - Connect to the robot: reachy = ReachySDK(host="localhost")
+           - ALWAYS call reachy.turn_on() before any movement
+        
+        2. MAIN CODE PHASE:
+           - Always use try/finally blocks for error handling
+           - Access parts as properties (reachy.r_arm, reachy.head, etc.)
+           - Use proper method signatures from the API documentation
+        
+        3. CLEANUP PHASE:
+           - ALWAYS use reachy.turn_off_smoothly() (NOT turn_off())
+           - ALWAYS call reachy.disconnect()
+           - Put cleanup in a finally block
+        
+        EXAMPLE CODE TEMPLATE:
+        ```python
+        from reachy2_sdk.reachy_sdk import ReachySDK
+        
+        # Connect to the robot
+        reachy = ReachySDK(host="localhost")
+        
+        try:
+            # INITIALIZATION
+            reachy.turn_on()
+            
+            # MAIN CODE
+            # Your code here...
+            
+        finally:
+            # CLEANUP
+            reachy.turn_off_smoothly()
+            reachy.disconnect()
+        ```
+        
+        Here is a summary of the available API classes and methods:
+        
+        {self.api_summary}
         
         Format your response with:
         1. A brief explanation of what the code does
         2. The complete Python code in a code block
         3. An explanation of how the code works and any important considerations
-        
-        If you're unsure about a request or if it seems unsafe, explain your concerns and suggest
-        alternatives.
         """
         
         # Initialize conversation with system message
         self.reset_conversation()
-    
-    def set_tool_schemas(self, tool_schemas: List[Dict[str, Any]]) -> None:
-        """
-        Set the tool schemas for the agent.
-        
-        Args:
-            tool_schemas: List of tool schemas.
-        """
-        self.tool_schemas = tool_schemas
-        logger.info(f"Set {len(tool_schemas)} tool schemas")
     
     def reset_conversation(self) -> None:
         """Reset the conversation history."""
@@ -221,16 +344,6 @@ class ReachyCodeGenerationAgent:
             str: The generated code response.
         """
         try:
-            # Prepare tool schema information
-            tool_info = self._prepare_tool_info()
-            
-            # Add tool information to the conversation
-            if tool_info:
-                self.messages.append({
-                    "role": "system",
-                    "content": f"Available tools for the Reachy 2 robot:\n\n{tool_info}"
-                })
-            
             # Call the OpenAI API
             response = self.client.chat.completions.create(
                 model=self.model,
@@ -242,10 +355,6 @@ class ReachyCodeGenerationAgent:
                 presence_penalty=self.presence_penalty
             )
             
-            # Remove the tool information message to keep the conversation clean
-            if tool_info:
-                self.messages.pop()
-            
             # Extract and return the response content
             return response.choices[0].message.content
             
@@ -253,38 +362,6 @@ class ReachyCodeGenerationAgent:
             logger.error(f"Error generating code: {e}")
             logger.error(traceback.format_exc())
             raise RuntimeError(f"Failed to generate code: {e}")
-    
-    def _prepare_tool_info(self) -> str:
-        """
-        Prepare information about available tools for the code generation.
-        
-        Returns:
-            str: Formatted tool information.
-        """
-        if not self.tool_schemas:
-            return ""
-        
-        tool_info = []
-        for tool in self.tool_schemas:
-            if isinstance(tool, dict) and "function" in tool:
-                function = tool["function"]
-                name = function.get("name", "")
-                description = function.get("description", "")
-                parameters = function.get("parameters", {})
-                
-                # Format parameters
-                param_info = []
-                if "properties" in parameters:
-                    for param_name, param_details in parameters["properties"].items():
-                        param_type = param_details.get("type", "any")
-                        param_desc = param_details.get("description", "")
-                        required = "required" if param_name in parameters.get("required", []) else "optional"
-                        param_info.append(f"  - {param_name} ({param_type}, {required}): {param_desc}")
-                
-                # Add tool information
-                tool_info.append(f"Tool: {name}\nDescription: {description}\nParameters:\n" + "\n".join(param_info))
-        
-        return "\n\n".join(tool_info)
     
     def _extract_code_and_explanation(self, response: str) -> tuple[str, str]:
         """
@@ -311,6 +388,40 @@ class ReachyCodeGenerationAgent:
         else:
             # No code blocks found, return empty code and the full response as explanation
             return "", response
+    
+    def _extract_official_api_elements(self):
+        """Extract official modules and classes from the API documentation."""
+        if not self.api_docs:
+            logger.warning("No API documentation available for extracting official elements")
+            return
+        
+        # Define the official API modules (these are the ones from the Reachy SDK)
+        official_api_modules = [
+            "reachy2_sdk.reachy_sdk",
+            "reachy2_sdk.parts",
+            "reachy2_sdk.utils",
+            "reachy2_sdk.config",
+            "reachy2_sdk.media",
+            "reachy2_sdk.orbita",
+            "reachy2_sdk.sensors"
+        ]
+            
+        for item in self.api_docs:
+            if item.get("type") == "module":
+                module_name = item.get("name")
+                # Only include modules from the official list
+                if module_name and any(module_name.startswith(prefix) for prefix in official_api_modules):
+                    self.official_modules.add(module_name)
+            
+            if item.get("type") == "class":
+                class_name = item.get("name")
+                module_name = item.get("module", "")
+                # Only include classes from official modules
+                if module_name and any(module_name.startswith(prefix) for prefix in official_api_modules):
+                    if class_name:
+                        self.official_classes.add(class_name)
+        
+        logger.debug(f"Extracted {len(self.official_modules)} official modules and {len(self.official_classes)} official classes")
     
     def _validate_code(self, code: str) -> CodeValidationResult:
         """
@@ -339,24 +450,104 @@ class ReachyCodeGenerationAgent:
             errors.append(f"Syntax error: {str(e)}")
         
         # Check for required imports
-        if "from agent.tools.connection_manager import get_reachy" not in code:
-            warnings.append("Missing import for get_reachy from connection_manager")
+        if "from reachy2_sdk.reachy_sdk import ReachySDK" not in code:
+            warnings.append("Missing import for ReachySDK from reachy2_sdk.reachy_sdk")
         
         # Check for connection setup
-        if "get_reachy()" not in code:
-            warnings.append("Code does not use get_reachy() to establish a connection")
+        if "ReachySDK(" not in code:
+            warnings.append("Code does not initialize ReachySDK to establish a connection")
+        
+        # Check for turn_on
+        if "turn_on()" not in code:
+            warnings.append("CRITICAL: Missing reachy.turn_on() call. Always turn on the robot before using it.")
+        
+        # Check for turn_off_smoothly instead of turn_off
+        if "turn_off()" in code:
+            warnings.append("CRITICAL: Using turn_off() instead of turn_off_smoothly(). Always use turn_off_smoothly() to prevent damage to the robot.")
+        
+        if "turn_off_smoothly()" not in code:
+            warnings.append("CRITICAL: Missing reachy.turn_off_smoothly() call. Always turn off the robot smoothly when done.")
         
         # Check for error handling
         if "try:" not in code:
             warnings.append("No error handling (try/except) found in the code")
         
+        # Check for cleanup
+        if "disconnect()" not in code:
+            warnings.append("No disconnect operation found in the code")
+        
+        # Check for finally block
+        if "finally:" not in code:
+            warnings.append("No finally block found for ensuring cleanup operations")
+        
         # Check for potentially unsafe operations
         unsafe_patterns = [
-            "os.system", "subprocess", "eval(", "exec(", "import shutil"
+            "os.system", "subprocess", "eval(", "exec(", "import shutil",
+            "__import__", "open(", "pickle", "shelve", "marshal",
+            "socket", "requests.post", "requests.put", "requests.delete"
         ]
         for pattern in unsafe_patterns:
-            if pattern in code:
+            # Use more precise pattern matching to avoid false positives
+            if pattern == "file(":
+                # Check for the actual file() function, not substrings like "audio_file("
+                import re
+                if re.search(r'\bfile\(', code):
+                    errors.append(f"Potentially unsafe operation detected: {pattern}")
+            elif pattern in code:
                 errors.append(f"Potentially unsafe operation detected: {pattern}")
+        
+        # Check for non-API imports and functions
+        non_api_patterns = [
+            "import agent", 
+            "from agent", 
+            "connection_manager",
+            "get_reachy()",
+            "get_reachy ",
+            "connect_to_reachy",
+            "disconnect_reachy"
+        ]
+        for pattern in non_api_patterns:
+            if pattern in code:
+                errors.append(f"Non-API code detected: The code uses internal functions that are not part of the official Reachy 2 SDK API.")
+                break  # Only report this error once
+        
+        # Check for incorrect property usage (calling properties as methods)
+        property_patterns = [
+            "r_arm()", "l_arm()", "head()", "cameras()", 
+            "gripper()", "r_gripper()", "l_gripper()"
+        ]
+        for pattern in property_patterns:
+            if pattern in code:
+                errors.append(f"Incorrect property usage: '{pattern}' is a property, not a method. Use without parentheses.")
+        
+        # Check for incorrect arm goto usage
+        if "goto" in code:
+            import re
+            # Look for arm goto calls with incorrect number of joint positions
+            arm_goto_matches = re.findall(r'(?:r_arm|l_arm|right_arm|left_arm)\.goto\s*\(\s*\[(.*?)\]', code, re.DOTALL)
+            for match in arm_goto_matches:
+                # Count the number of values in the joint positions array
+                values = [v.strip() for v in match.split(',')]
+                if len(values) != 7:
+                    errors.append(f"Incorrect arm goto usage: The positions array must have exactly 7 values for the 7 joints, but found {len(values)}.")
+        
+        # Check for imports that are not in the official modules
+        import_lines = [line.strip() for line in code.split('\n') if line.strip().startswith(('import ', 'from '))]
+        for line in import_lines:
+            # Skip standard library imports
+            if any(line.startswith(f"import {mod}") or line.startswith(f"from {mod} import") 
+                  for mod in ['os', 'sys', 'time', 'math', 'random', 'json', 'datetime']):
+                continue
+                
+            # Check if the import is from an official module
+            is_official = False
+            for module in self.official_modules:
+                if line.startswith(f"import {module}") or line.startswith(f"from {module} import"):
+                    is_official = True
+                    break
+            
+            if not is_official and not line.startswith("from reachy2_sdk.reachy_sdk import ReachySDK"):
+                errors.append(f"Unofficial import detected: {line}. Only use modules from the official Reachy 2 SDK.")
         
         return {
             "valid": len(errors) == 0,
@@ -371,14 +562,18 @@ class ReachyCodeGenerationAgent:
         Args:
             data: The data to send.
         """
-        if websocket_server and websocket_server.is_running():
-            try:
+        try:
+            if websocket_server and hasattr(websocket_server, 'running') and websocket_server.running:
                 message = {
                     "type": "code_generation",
                     "data": data
                 }
-                websocket_server.broadcast(json.dumps(message))
-                logger.debug("Sent WebSocket notification")
-            except Exception as e:
-                logger.error(f"Error sending WebSocket notification: {e}")
-                logger.error(traceback.format_exc()) 
+                # Check if broadcast method exists
+                if hasattr(websocket_server, 'broadcast'):
+                    websocket_server.broadcast(json.dumps(message))
+                    logger.debug("Sent WebSocket notification")
+                else:
+                    logger.debug("WebSocket server does not have broadcast method")
+        except Exception as e:
+            logger.error(f"Error sending WebSocket notification: {e}")
+            logger.error(traceback.format_exc()) 
