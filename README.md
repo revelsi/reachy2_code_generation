@@ -16,6 +16,7 @@ The LangGraph agent implementation has been significantly improved with the foll
 - ✅ Centralized model configuration management for easy customization
 - ✅ Enhanced API structure with clear type information and usage examples
 - ✅ Simplified system prompt with clear initialization and cleanup phases
+- ✅ Enhanced API summary generation with detailed parameter information, constraints, and units
 
 The agent uses real tool definitions from the Reachy 2 SDK but can operate with mock implementations when no physical robot is available.
 
@@ -336,3 +337,33 @@ This structured approach helps ensure that generated code follows best practices
 - Always turning on the robot before use
 - Using proper error handling with try/finally blocks
 - Always turning off the robot smoothly and disconnecting when done
+
+## Enhanced API Documentation
+
+The project includes an enhanced API documentation system that significantly improves the code generation agent's ability to generate accurate code:
+
+### API Summary Enhancement
+
+The API summary generation has been enhanced to provide more detailed information about function parameters, including:
+
+1. **Parameter Types**: Extracted from function signatures
+2. **Parameter Descriptions**: Extracted from function docstrings
+3. **Parameter Constraints**: Extracted from docstrings and added manually for known problematic functions
+4. **Units Information**: Extracted from docstrings (e.g., degrees vs. radians)
+
+This enhancement addresses issues with improper function definitions and helps prevent common errors in the generated code.
+
+### Implementation Details
+
+The enhanced API summary generation includes:
+
+- **Parameter Details Extraction**: Robust parsing of function signatures and docstrings
+- **Special Constraints**: Additional constraints for known problematic functions
+- **Improved Format**: Hierarchical organization of API components with detailed parameter information
+
+### Testing
+
+The enhanced API summary generation has been thoroughly tested with:
+
+- **Unit Tests**: Verifying the extraction of parameter details
+- **Integration Tests**: Testing the code generation agent with the enhanced API summary

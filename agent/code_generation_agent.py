@@ -11,9 +11,10 @@ import sys
 import json
 import logging
 import traceback
-from typing import Dict, List, Any, Optional, TypedDict
+from typing import Dict, List, Any, Optional, TypedDict, Tuple
 from openai import OpenAI
 import httpx
+import re
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -71,9 +72,147 @@ def load_api_documentation():
         return []
 
 
+def extract_parameter_details(signature: str, docstring: str) -> Dict[str, Dict[str, Any]]:
+    """
+    Extract detailed parameter information from a function signature and docstring.
+    
+    Args:
+        signature: The function signature
+        docstring: The function docstring
+        
+    Returns:
+        Dict mapping parameter names to their details
+    """
+    param_details = {}
+    
+    # Extract parameter names and types from signature
+    if signature:
+        # Extract the part between parentheses
+        params_part = signature.split('(', 1)[1].rsplit(')', 1)[0] if '(' in signature else ""
+        
+        # Split by comma, but handle nested types with commas
+        params = []
+        current_param = ""
+        bracket_count = 0
+        
+        for char in params_part:
+            if char == ',' and bracket_count == 0:
+                params.append(current_param.strip())
+                current_param = ""
+            else:
+                current_param += char
+                if char in '[{(':
+                    bracket_count += 1
+                elif char in ']})':
+                    bracket_count -= 1
+        
+        if current_param:
+            params.append(current_param.strip())
+        
+        # Process each parameter
+        for param in params:
+            if ':' in param:
+                name, type_info = param.split(':', 1)
+                name = name.strip()
+                type_info = type_info.strip()
+                
+                # Skip 'self' parameter
+                if name == 'self':
+                    continue
+                
+                param_details[name] = {
+                    "type": type_info,
+                    "description": "",
+                    "constraints": []
+                }
+    
+    # Extract parameter descriptions from docstring
+    if docstring:
+        lines = docstring.split('\n')
+        in_args_section = False
+        current_param = None
+        
+        for line in lines:
+            line = line.strip()
+            
+            # Check if we're in the Args section
+            if line.startswith("Args:"):
+                in_args_section = True
+                continue
+            
+            # Check if we've left the Args section
+            if in_args_section and (not line or line.startswith("Returns:") or line.startswith("Raises:")):
+                in_args_section = False
+                current_param = None
+                continue
+            
+            # Process parameter descriptions
+            if in_args_section:
+                if ': ' in line:
+                    # New parameter
+                    param_name, param_desc = line.split(': ', 1)
+                    param_name = param_name.strip()
+                    
+                    if param_name in param_details:
+                        current_param = param_name
+                        param_details[param_name]["description"] = param_desc.strip()
+                        
+                        # Extract constraints from description
+                        desc_lower = param_desc.lower()
+                        if "must be" in desc_lower or "should be" in desc_lower or "required" in desc_lower:
+                            param_details[param_name]["constraints"].append(param_desc.strip())
+                        
+                        # Check for units information
+                        if "degrees" in desc_lower or "radians" in desc_lower:
+                            if "degrees" in desc_lower:
+                                param_details[param_name]["units"] = "degrees"
+                            else:
+                                param_details[param_name]["units"] = "radians"
+                elif current_param and line:
+                    # Continuation of previous parameter description
+                    param_details[current_param]["description"] += " " + line
+                    
+                    # Check for additional constraints
+                    line_lower = line.lower()
+                    if "must be" in line_lower or "should be" in line_lower or "required" in line_lower:
+                        param_details[current_param]["constraints"].append(line.strip())
+    
+    return param_details
+
+
+def add_special_constraints(class_name: str, method_name: str, param_details: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
+    """
+    Add special constraints for known problematic functions.
+    
+    Args:
+        class_name: The class name
+        method_name: The method name
+        param_details: The current parameter details
+        
+    Returns:
+        Updated parameter details
+    """
+    # Special case for Arm.goto
+    if class_name == "Arm" and method_name == "goto" and "target" in param_details:
+        if "constraints" not in param_details["target"]:
+            param_details["target"]["constraints"] = []
+        
+        param_details["target"]["constraints"].append("When target is a list, it MUST contain EXACTLY 7 joint values")
+        param_details["target"]["constraints"].append("When using degrees=True, values should be in degrees; otherwise in radians")
+    
+    # Special case for ReachySDK initialization
+    if class_name == "ReachySDK" and method_name == "__init__" and "host" in param_details:
+        if "constraints" not in param_details["host"]:
+            param_details["host"]["constraints"] = []
+        
+        param_details["host"]["constraints"].append("host parameter is REQUIRED (e.g., 'localhost' or IP address)")
+    
+    return param_details
+
+
 def generate_api_summary(api_docs):
     """
-    Generate a summary of the API documentation.
+    Generate a summary of the API documentation with enhanced parameter details.
     
     Args:
         api_docs: The API documentation.
@@ -95,7 +234,7 @@ def generate_api_summary(api_docs):
         "reachy2_sdk.sensors"
     ]
     
-    # Extract classes and their methods
+    # Extract classes and their methods with enhanced details
     classes = {}
     official_modules = set()
     official_classes = set()
@@ -124,15 +263,29 @@ def generate_api_summary(api_docs):
                 for method in item.get("methods", []):
                     method_name = method.get("name")
                     signature = method.get("signature", "")
-                    docstring = method.get("docstring", "").split("\n")[0] if method.get("docstring") else ""  # Get first line of docstring
+                    docstring = method.get("docstring", "")
                     
                     if method_name and not method_name.startswith("_"):  # Skip private methods
-                        methods.append(f"- {method_name}{signature}: {docstring}")
+                        # Extract parameter details
+                        param_details = extract_parameter_details(signature, docstring)
+                        
+                        # Add special constraints for known problematic functions
+                        param_details = add_special_constraints(class_name, method_name, param_details)
+                        
+                        # Format the method information
+                        method_info = {
+                            "name": method_name,
+                            "signature": signature,
+                            "docstring": docstring.split("\n")[0] if docstring else "",  # First line of docstring
+                            "parameters": param_details
+                        }
+                        
+                        methods.append(method_info)
                 
                 if methods:
                     classes[class_name] = methods
     
-    # Format the summary
+    # Format the enhanced summary
     summary = []
     
     # Add official modules
@@ -147,11 +300,41 @@ def generate_api_summary(api_docs):
         summary.append(f"- {class_name}")
     summary.append("")
     
-    # Add class methods
-    summary.append("# Class Methods")
-    for class_name, methods in classes.items():
+    # Add class methods with enhanced details
+    summary.append("# Class Methods with Parameter Details")
+    for class_name, methods in sorted(classes.items()):
         summary.append(f"## {class_name}")
-        summary.append("\n".join(methods))
+        
+        for method in sorted(methods, key=lambda x: x["name"]):
+            method_name = method["name"]
+            signature = method["signature"]
+            docstring = method["docstring"]
+            
+            summary.append(f"### {method_name}{signature}")
+            summary.append(f"{docstring.split('\n')[0] if docstring else ''}")
+            
+            # Add parameter details
+            if method["parameters"]:
+                summary.append("Parameters:")
+                for param_name, param_info in method["parameters"].items():
+                    param_type = param_info.get("type", "")
+                    param_desc = param_info.get("description", "")
+                    
+                    summary.append(f"- {param_name} ({param_type}): {param_desc}")
+                    
+                    # Add constraints if any
+                    constraints = param_info.get("constraints", [])
+                    if constraints:
+                        summary.append("  Constraints:")
+                        for constraint in constraints:
+                            summary.append(f"  * {constraint}")
+                    
+                    # Add units if specified
+                    if "units" in param_info:
+                        summary.append(f"  * Units: {param_info['units']}")
+            
+            summary.append("")
+        
         summary.append("")
     
     return "\n".join(summary)
@@ -238,6 +421,7 @@ class ReachyCodeGenerationAgent:
            - Import ReachySDK from reachy2_sdk.reachy_sdk
            - Connect to the robot: reachy = ReachySDK(host="localhost")
            - ALWAYS call reachy.turn_on() before any movement
+           - ALWAYS call reachy.goto_posture('default') before any movement to reset the posture
         
         2. MAIN CODE PHASE:
            - Always use try/finally blocks for error handling

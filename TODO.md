@@ -35,6 +35,13 @@
    - Enhanced API structure with clear type information and usage examples
    - Simplified system prompt with clear initialization and cleanup phases
 
+6. **✅ API Documentation Enhancement**:
+   - Enhanced API summary generation with detailed parameter information
+   - Implemented robust parameter details extraction from function signatures and docstrings
+   - Added special constraints for known problematic functions
+   - Included units information for parameters
+   - Created test scripts to verify the enhanced API summary generation
+
 ## Current Issues
 
 1. **LangGraph Agent Integration**:
@@ -77,6 +84,9 @@
    - ✅ Develop common patterns for typical operations
    - ✅ Implement hierarchical organization of API components
    - ✅ Simplify system prompt with clear phase structure
+   - ✅ Enhance parameter details extraction from function signatures and docstrings
+   - ✅ Add special constraints for known problematic functions
+   - ✅ Include units information for parameters
 
 5. **RAG Pipeline Integration**:
    - Import and adapt RAG components from reachy_expert_agent
@@ -84,6 +94,7 @@
    - Implement retrieval system for relevant code examples
    - Develop context augmentation for improved code generation
    - Add reference documentation lookup during code generation
+   - Integrate enhanced API summary with RAG system for better context
 
 6. **Connection Manager Enhancements**:
    - Add connection pooling to handle multiple tool calls efficiently
@@ -108,6 +119,13 @@
    - ✅ Add ability to update model parameters at runtime
    - ✅ Create UI components for model configuration
    - Add model performance monitoring and optimization
+
+10. **API Summary Enhancement Improvements**:
+    - Add more special constraints for other problematic functions
+    - Improve the extraction of parameter constraints from docstrings
+    - Add support for return type information
+    - Add support for exception information
+    - Create a visual representation of API structure
 
 ### Medium Priority
 
