@@ -343,6 +343,59 @@ def mode() -> Response:
             return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/execute", methods=["POST"])
+def execute_code() -> Response:
+    """
+    Execute code on the virtual Reachy robot.
+    
+    This endpoint takes Python code as input and executes it on the virtual Reachy robot.
+    It returns the execution result, including success status, output, and any errors.
+    
+    Returns:
+        Response: JSON response with execution results
+    """
+    global agent
+    
+    # Check if agent is initialized
+    if agent is None:
+        return jsonify({
+            "success": False,
+            "message": "Agent not initialized",
+            "output": ""
+        }), 500
+    
+    # Get code from request
+    data = request.json
+    if not data or "code" not in data:
+        return jsonify({
+            "success": False,
+            "message": "No code provided",
+            "output": ""
+        }), 400
+    
+    code = data["code"]
+    
+    try:
+        # Check if the agent has a code generation component
+        if hasattr(agent, 'code_generator') and agent.code_generator:
+            # Execute the code
+            result = agent.code_generator.execute_code(code, confirm=False)
+            return jsonify(result), 200
+        else:
+            return jsonify({
+                "success": False,
+                "message": "Code execution not supported by the current agent",
+                "output": ""
+            }), 400
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "message": f"Error executing code: {str(e)}",
+            "output": "",
+            "error": str(e)
+        }), 500
+
+
 def main():
     """Run the Flask app."""
     # Initialize agent

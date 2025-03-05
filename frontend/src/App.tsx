@@ -7,11 +7,13 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { Toaster } from "@/components/ui/toaster";
 import { useToast } from "@/hooks/use-toast";
 import { generateId } from "@/lib/utils";
+import { executeCode } from "@/services/api";
 
 export default function App() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
   const [codeOutput, setCodeOutput] = useState("");
+  const [isExecutingCode, setIsExecutingCode] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
   const [socket, setSocket] = useState<WebSocket | null>(null);
@@ -276,28 +278,92 @@ export default function App() {
     }
   };
   
+  // Handle code execution
+  const handleExecuteCode = async (code: string) => {
+    if (!code.trim()) return;
+    
+    setIsExecutingCode(true);
+    
+    try {
+      // Add a system message indicating code execution
+      const executionMessage: Message = {
+        id: generateId(),
+        content: "Executing code on the virtual Reachy robot...",
+        type: "system",
+        timestamp: new Date(),
+        thinking: "",
+        codeOutput: code
+      };
+      
+      setMessages(prevMessages => [...prevMessages, executionMessage]);
+      
+      // Execute the code
+      const result = await executeCode(code);
+      
+      // Update the execution message with the result
+      setMessages(prevMessages => {
+        const updatedMessages = [...prevMessages];
+        const executionMessageIndex = updatedMessages.findIndex(m => m.id === executionMessage.id);
+        
+        if (executionMessageIndex !== -1) {
+          updatedMessages[executionMessageIndex] = {
+            ...updatedMessages[executionMessageIndex],
+            content: result.success 
+              ? "✅ Code executed successfully!" 
+              : `❌ Code execution failed: ${result.message || "Unknown error"}`,
+            thinking: "",
+            codeOutput: result.output || ""
+          };
+        }
+        
+        return updatedMessages;
+      });
+      
+      // Show toast notification
+      toast({
+        title: result.success ? "Success" : "Error",
+        description: result.success 
+          ? "Code executed successfully on the virtual Reachy robot." 
+          : `Failed to execute code: ${result.message || "Unknown error"}`,
+        variant: result.success ? "default" : "destructive",
+      });
+      
+    } catch (error) {
+      console.error("Error executing code:", error);
+      
+      // Show error toast
+      toast({
+        title: "Error",
+        description: `Failed to execute code: ${error instanceof Error ? error.message : "Unknown error"}`,
+        variant: "destructive",
+      });
+      
+    } finally {
+      setIsExecutingCode(false);
+    }
+  };
+
   return (
     <Layout>
-      <div className="flex flex-col lg:flex-row w-full h-full gap-4 p-4">
-        {/* Chat Panel */}
-        <div className={isMobile ? "w-full h-1/2" : "w-2/3 h-full"}>
-          <ChatPanel 
+      <div className="flex flex-col md:flex-row h-full gap-4">
+        <div className="flex-1 min-w-0">
+          <ChatPanel
             messages={messages}
             onSendMessage={handleSendMessage}
             isProcessing={isProcessing}
-            chatEndRef={chatEndRef}
             onApproveFunction={handleApproveFunction}
             onRejectFunction={handleRejectFunction}
+            endRef={chatEndRef}
           />
         </div>
-        
-        {/* Code Panel */}
-        <div className={isMobile ? "w-full h-1/2" : "w-1/3 h-full"}>
-          <CodePanel code={codeOutput} />
+        <div className="w-full md:w-1/2 lg:w-2/5 h-full">
+          <CodePanel 
+            code={codeOutput} 
+            onExecuteCode={handleExecuteCode}
+            isExecuting={isExecutingCode}
+          />
         </div>
       </div>
-      
-      {/* Toast notifications */}
       <Toaster />
     </Layout>
   );

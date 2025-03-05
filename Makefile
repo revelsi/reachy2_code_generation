@@ -1,17 +1,35 @@
-.PHONY: setup clean test lint install run-cli run-web check-python create-venv setup-venv regenerate generate-tools refresh-sdk test-virtual demo-virtual test-agent test-unit test-integration
+.PHONY: setup clean test lint install run-cli run-web check-python create-venv setup-venv regenerate generate-tools refresh-sdk test-virtual demo-virtual test-agent test-unit test-integration install-reachy-sdk
 
 PYTHON_VERSION := 3.10
 VENV_NAME := venv_py310
 
 check-python:
-	@echo "Checking Python version..."
-	@python3 -c "import sys; v=sys.version_info; sys.exit(0 if v.major==3 and v.minor>=10 else 1)" || \
-		(echo "Python 3.10+ is required. Current version: $$(python3 --version)"; exit 1)
+	@echo "Checking for Python $(PYTHON_VERSION)..."
+	@if command -v python3.10 >/dev/null 2>&1; then \
+		PYTHON_CMD="python3.10"; \
+	elif command -v python$(PYTHON_VERSION) >/dev/null 2>&1; then \
+		PYTHON_CMD="python$(PYTHON_VERSION)"; \
+	elif command -v /usr/local/bin/python3.10 >/dev/null 2>&1; then \
+		PYTHON_CMD="/usr/local/bin/python3.10"; \
+	else \
+		echo "Python $(PYTHON_VERSION) not found. Please install Python $(PYTHON_VERSION)."; \
+		exit 1; \
+	fi; \
+	$$PYTHON_CMD --version
 
 create-venv: check-python
 	@echo "Creating virtual environment with Python $(PYTHON_VERSION)..."
 	@if [ ! -d "$(VENV_NAME)" ]; then \
-		python3 -m venv $(VENV_NAME); \
+		if command -v python3.10 >/dev/null 2>&1; then \
+			python3.10 -m venv $(VENV_NAME); \
+		elif command -v python$(PYTHON_VERSION) >/dev/null 2>&1; then \
+			python$(PYTHON_VERSION) -m venv $(VENV_NAME); \
+		elif command -v /usr/local/bin/python3.10 >/dev/null 2>&1; then \
+			/usr/local/bin/python3.10 -m venv $(VENV_NAME); \
+		else \
+			echo "Python $(PYTHON_VERSION) not found. Please install Python $(PYTHON_VERSION)."; \
+			exit 1; \
+		fi; \
 	else \
 		echo "Virtual environment $(VENV_NAME) already exists."; \
 	fi
@@ -19,6 +37,13 @@ create-venv: check-python
 setup-venv: create-venv
 	@echo "Installing dependencies in virtual environment..."
 	@. $(VENV_NAME)/bin/activate && pip install --upgrade pip && pip install -r requirements.txt
+	@$(MAKE) install-reachy-sdk
+
+install-reachy-sdk:
+	@echo "Installing Reachy2 SDK in editable mode..."
+	@. $(VENV_NAME)/bin/activate && pip install reachy2-sdk -e . || \
+		(echo "Warning: Failed to install Reachy2 SDK in editable mode. Some functionality may be limited."; \
+		echo "You may need to manually install it later with: pip install reachy2-sdk -e .")
 
 setup: setup-venv
 	@echo "Setup complete. Activate the virtual environment with: source $(VENV_NAME)/bin/activate"

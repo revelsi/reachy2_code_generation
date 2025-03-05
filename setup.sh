@@ -15,22 +15,27 @@ VENV_NAME="venv_py310"
 
 echo -e "${GREEN}Setting up Reachy Function Calling environment...${NC}"
 
-# Check Python version
-echo -e "${YELLOW}Checking Python version...${NC}"
-if command -v python3 &>/dev/null; then
-    PYTHON_CMD="python3"
-elif command -v python &>/dev/null; then
-    PYTHON_CMD="python"
+# Check for Python 3.10 specifically
+echo -e "${YELLOW}Checking for Python ${PYTHON_VERSION}...${NC}"
+if command -v python3.10 &>/dev/null; then
+    PYTHON_CMD="python3.10"
+elif command -v python${PYTHON_VERSION} &>/dev/null; then
+    PYTHON_CMD="python${PYTHON_VERSION}"
+elif command -v /usr/local/bin/python3.10 &>/dev/null; then
+    PYTHON_CMD="/usr/local/bin/python3.10"
 else
-    echo -e "${RED}Error: Python not found. Please install Python ${PYTHON_VERSION} or higher.${NC}"
+    echo -e "${RED}Error: Python ${PYTHON_VERSION} not found.${NC}"
+    echo -e "${YELLOW}Please install Python ${PYTHON_VERSION} and make sure it's in your PATH.${NC}"
+    echo -e "${YELLOW}On macOS, you can install it with: brew install python@${PYTHON_VERSION}${NC}"
+    echo -e "${YELLOW}On Ubuntu, you can install it with: sudo apt install python${PYTHON_VERSION}${NC}"
     exit 1
 fi
 
-# Check Python version
-$PYTHON_CMD -c "import sys; v=sys.version_info; exit(0 if v.major==3 and v.minor>=10 else 1)" 2>/dev/null
+# Verify Python version
+echo -e "${YELLOW}Verifying Python version...${NC}"
+$PYTHON_CMD --version
 if [ $? -ne 0 ]; then
-    echo -e "${RED}Error: Python ${PYTHON_VERSION}+ is required. Current version: $($PYTHON_CMD --version)${NC}"
-    echo -e "${YELLOW}Please install Python ${PYTHON_VERSION} or higher and try again.${NC}"
+    echo -e "${RED}Error: Failed to run Python ${PYTHON_VERSION}.${NC}"
     exit 1
 fi
 
@@ -59,6 +64,17 @@ if [ -f "$VENV_NAME/bin/activate" ]; then
         echo -e "${RED}Error: Failed to install dependencies.${NC}"
         exit 1
     fi
+    
+    # Install Reachy2 SDK with editable mode
+    echo -e "${YELLOW}Installing Reachy2 SDK in editable mode...${NC}"
+    pip install reachy2-sdk -e .
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}Warning: Failed to install Reachy2 SDK in editable mode. Some functionality may be limited.${NC}"
+        echo -e "${YELLOW}You may need to manually install it later with: pip install reachy2-sdk -e .${NC}"
+    else
+        echo -e "${GREEN}Reachy2 SDK installed successfully.${NC}"
+    fi
+    
     echo -e "${GREEN}Dependencies installed successfully.${NC}"
 else
     echo -e "${RED}Error: Virtual environment activation script not found.${NC}"

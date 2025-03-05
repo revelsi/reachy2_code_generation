@@ -1,7 +1,7 @@
 import { Tool } from "@/types/robot";
 
 // Use the correct API base URL
-const API_BASE_URL = process.env.NODE_ENV === 'production' ? "/api" : "http://localhost:5001/api";
+const API_BASE_URL = window.location.hostname === 'localhost' ? "http://localhost:5001/api" : "/api";
 
 export async function sendChatMessage(message: string) {
   try {
@@ -98,6 +98,28 @@ export async function updateConfig(config: {
     return await response.json();
   } catch (error) {
     console.error("Error updating config:", error);
+    throw error;
+  }
+}
+
+export async function executeCode(code: string) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/execute`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ code }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || "Failed to execute code");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error("Error executing code:", error);
     throw error;
   }
 } 

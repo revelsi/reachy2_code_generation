@@ -76,9 +76,6 @@ def connect_to_reachy(
         # Create Reachy instance using only the official parameters
         _REACHY_INSTANCE = reachy2_sdk.ReachySDK(
             host=host,
-            sdk_port=sdk_port,
-            audio_port=audio_port,
-            video_port=video_port
         )
         logger.info(f"Connected to Reachy SDK (mode: {_CONNECTION_TYPE})")
         

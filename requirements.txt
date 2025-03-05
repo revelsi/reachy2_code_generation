@@ -8,6 +8,9 @@ flask-cors>=4.0.0  # For CORS support
 websockets>=11.0.3,<12.0.0  # For WebSocket server
 psutil>=5.9.6  # For system monitoring
 
+# Robot-specific dependencies
+reachy2-sdk  # For Reachy 2 robot control
+
 # LangChain and LangGraph dependencies
 langchain>=0.3.18  # Latest stable version
 langchain-core>=0.1.20
@@ -28,10 +31,6 @@ isort>=5.12.0  # For import sorting
 
 # For visualization and data processing
 nbformat>=5.9.2
-matplotlib>=3.8.2
-networkx>=3.2.1
-numpy>=1.26.3
-pyquaternion>=0.9.9
 
 # For documentation extraction
 ast-comments>=1.0.1  # For extracting comments from AST

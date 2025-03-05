@@ -17,6 +17,8 @@ The LangGraph agent implementation has been significantly improved with the foll
 - ✅ Enhanced API structure with clear type information and usage examples
 - ✅ Simplified system prompt with clear initialization and cleanup phases
 - ✅ Enhanced API summary generation with detailed parameter information, constraints, and units
+- ✅ Direct code execution with validation and user confirmation
+- ✅ Improved connection handling with retry mechanisms for virtual Reachy
 
 The agent uses real tool definitions from the Reachy 2 SDK but can operate with mock implementations when no physical robot is available.
 
@@ -38,6 +40,9 @@ This repository contains a framework for transparent function calling with the R
 - **Automatic Tool Generation**: Tools are automatically generated from the Reachy 2 SDK documentation
 - **Dual-Mode Architecture**: Switch between function calling and code generation modes
 - **Centralized Model Configuration**: Easily customize model parameters across the application
+- **Direct Code Execution**: Execute generated code directly on the virtual Reachy robot
+- **Code Validation**: Validate generated code before execution to ensure safety
+- **Connection Retry**: Improved connection handling with retry mechanisms for virtual Reachy
 
 ## Dual-Mode Architecture
 
@@ -59,8 +64,29 @@ In this mode, the agent:
 - Validates the generated code for basic syntax and structure
 - Displays the code with explanations
 - Allows users to review and modify the code before execution
+- Executes the code directly on the virtual Reachy robot with user confirmation
 
 Users can switch between these modes through the web interface or CLI, providing flexibility in how they interact with the robot.
+
+## Code Execution Features
+
+The project now includes robust code execution capabilities:
+
+- **Direct Execution**: Execute generated code directly on the virtual Reachy robot
+- **Code Validation**: Validate code before execution to ensure safety
+- **User Confirmation**: Request user confirmation before executing code
+- **Safe Execution Wrapper**: Automatically wrap code in try/finally blocks to ensure proper cleanup
+- **Execution Results**: Display detailed execution results including output and errors
+- **Connection Retry**: Improved connection handling with retry mechanisms for virtual Reachy
+- **Force Execution**: Option to force execution even if validation fails (with appropriate warnings)
+
+### Code Execution Flow
+
+1. **Code Generation**: The agent generates Python code based on a natural language request
+2. **Code Validation**: The code is validated for syntax, imports, and safety
+3. **User Confirmation**: The user is asked to confirm execution
+4. **Safe Execution**: The code is wrapped in a safe execution wrapper and executed
+5. **Result Display**: Execution results are displayed, including output and any errors
 
 ## Model Configuration
 

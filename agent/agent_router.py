@@ -96,8 +96,11 @@ class AgentRouter:
     def _share_tool_definitions(self):
         """Share tool definitions between agents."""
         # Share tool schemas from function calling agent to code generation agent
-        self.code_generation_agent.set_tool_schemas(self.function_calling_agent.tools)
-        logger.info(f"Shared {len(self.function_calling_agent.tools)} tool definitions with code generation agent")
+        if hasattr(self.code_generation_agent, 'set_tool_schemas'):
+            self.code_generation_agent.set_tool_schemas(self.function_calling_agent.tools)
+            logger.info(f"Shared {len(self.function_calling_agent.tools)} tool definitions with code generation agent")
+        else:
+            logger.warning("Code generation agent does not support setting tool schemas")
     
     def set_mode(self, mode: AgentMode) -> None:
         """

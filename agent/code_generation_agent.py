@@ -311,7 +311,8 @@ def generate_api_summary(api_docs):
             docstring = method["docstring"]
             
             summary.append(f"### {method_name}{signature}")
-            summary.append(f"{docstring.split('\n')[0] if docstring else ''}")
+            first_line = docstring.split('\n')[0] if docstring else ''
+            summary.append(f"{first_line}")
             
             # Add parameter details
             if method["parameters"]:
@@ -418,7 +419,7 @@ class ReachyCodeGenerationAgent:
         REQUIRED CODE STRUCTURE:
         
         1. INITIALIZATION PHASE:
-           - Import ReachySDK from reachy2_sdk.reachy_sdk
+           - Import ReachySDK from reachy2_sdk
            - Connect to the robot: reachy = ReachySDK(host="localhost")
            - ALWAYS call reachy.turn_on() before any movement
            - ALWAYS call reachy.goto_posture('default') before any movement to reset the posture
@@ -435,7 +436,7 @@ class ReachyCodeGenerationAgent:
         
         EXAMPLE CODE TEMPLATE:
         ```python
-        from reachy2_sdk.reachy_sdk import ReachySDK
+        from reachy2_sdk import ReachySDK
         
         # Connect to the robot
         reachy = ReachySDK(host="localhost")
@@ -739,18 +740,242 @@ class ReachyCodeGenerationAgent:
             "warnings": warnings
         }
     
-    def _send_websocket_notification(self, data: Dict[str, Any]) -> None:
+    def execute_code(self, code: str, confirm: bool = True, force: bool = False) -> Dict[str, Any]:
+        """
+        Execute the generated code on the virtual Reachy robot.
+        
+        Args:
+            code: The generated code to execute.
+            confirm: Whether to ask for user confirmation before execution.
+            force: Whether to force execution even if validation fails.
+            
+        Returns:
+            Dict[str, Any]: The execution result.
+        """
+        if not code:
+            return {
+                "success": False,
+                "message": "No code provided for execution",
+                "output": ""
+            }
+        
+        # Validate the code first
+        validation_result = self._validate_code(code)
+        
+        # Check if the code is valid (but don't prevent execution if force=True)
+        if not validation_result["valid"] and not force:
+            # Instead of preventing execution, just add warnings and require confirmation
+            validation_result["warnings"].append("Code validation failed. Execution may be risky.")
+            
+            # Always require confirmation for invalid code
+            confirm = True
+        
+        # Check for critical warnings (but don't prevent execution if force=True)
+        critical_warnings = [w for w in validation_result["warnings"] if "CRITICAL" in w]
+        if critical_warnings and not force:
+            # Instead of preventing execution, just add warnings and require confirmation
+            validation_result["warnings"].append("Code contains critical issues that could damage the robot.")
+            
+            # Always require confirmation for code with critical warnings
+            confirm = True
+        
+        # Add safety wrapper around the code
+        # This ensures the robot is properly turned off even if the code fails
+        safe_code = self._create_safe_execution_wrapper(code)
+        
+        # If confirmation is required, return the code and validation for UI to handle
+        if confirm:
+            return {
+                "requires_confirmation": True,
+                "code": code,
+                "safe_code": safe_code,
+                "validation": validation_result,
+                "message": "Code is ready for execution. Please confirm to proceed."
+            }
+        
+        # Execute the code
+        try:
+            # Create a temporary file for the code
+            import tempfile
+            import os
+            import subprocess
+            import sys
+            
+            with tempfile.NamedTemporaryFile(suffix='.py', delete=False, mode='w') as temp_file:
+                temp_file.write(safe_code)
+                temp_file_path = temp_file.name
+            
+            # Execute the code in a separate process
+            logger.info(f"Executing code in {temp_file_path}")
+            
+            # Use the same Python interpreter that's running this code
+            python_executable = sys.executable
+            
+            # Execute the code
+            process = subprocess.Popen(
+                [python_executable, temp_file_path],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+                text=True
+            )
+            
+            # Get the output
+            stdout, stderr = process.communicate(timeout=60)  # 60 second timeout
+            
+            # Clean up the temporary file
+            try:
+                os.unlink(temp_file_path)
+            except Exception as e:
+                logger.warning(f"Failed to delete temporary file {temp_file_path}: {e}")
+            
+            # Check if the execution was successful
+            if process.returncode == 0:
+                return {
+                    "success": True,
+                    "message": "Code executed successfully",
+                    "output": stdout,
+                    "stderr": stderr,
+                    "return_code": process.returncode
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": f"Code execution failed with return code {process.returncode}",
+                    "output": stdout,
+                    "stderr": stderr,
+                    "return_code": process.returncode
+                }
+                
+        except Exception as e:
+            logger.error(f"Error executing code: {e}")
+            logger.error(traceback.format_exc())
+            return {
+                "success": False,
+                "message": f"Error executing code: {str(e)}",
+                "output": "",
+                "error": str(e)
+            }
+    
+    def _create_safe_execution_wrapper(self, code: str) -> str:
+        """
+        Create a safe execution wrapper around the code.
+        
+        This ensures that the robot is properly turned off even if the code fails.
+        
+        Args:
+            code: The code to wrap.
+            
+        Returns:
+            str: The wrapped code.
+        """
+        # Check if the code already has imports
+        has_imports = "import" in code
+        
+        # Add logging for better feedback
+        wrapper = """
+import logging
+import traceback
+import sys
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger("reachy_code_execution")
+
+logger.info("Starting code execution...")
+
+"""
+        
+        # Add the original code
+        if has_imports:
+            # If the code already has imports, just add it as is
+            wrapper += code
+        else:
+            # If the code doesn't have imports, add the necessary imports
+            wrapper += """
+from reachy2_sdk.reachy_sdk import ReachySDK
+
+""" + code
+        
+        # Add error handling if not already present
+        if "try:" not in code:
+            # Extract the main code (excluding imports)
+            import re
+            
+            # Find all import statements
+            import_lines = re.findall(r'^.*import.*$', code, re.MULTILINE)
+            
+            # Remove import statements from the code
+            main_code = code
+            for imp in import_lines:
+                main_code = main_code.replace(imp, "")
+            
+            # Create a new wrapped code with proper error handling
+            wrapper = """
+import logging
+import traceback
+import sys
+
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger("reachy_code_execution")
+
+logger.info("Starting code execution...")
+
+"""
+            # Add the original imports
+            for imp in import_lines:
+                wrapper += imp + "\n"
+            
+            # Add the main code with try/finally
+            wrapper += """
+try:
+    logger.info("Connecting to Reachy...")
+    reachy = ReachySDK(host="localhost")
+    
+    try:
+        logger.info("Turning on Reachy...")
+        reachy.turn_on()
+        
+        # Main code
+""" + "\n        ".join(main_code.strip().split("\n")) + """
+        
+    finally:
+        logger.info("Turning off Reachy...")
+        try:
+            reachy.turn_off_smoothly()
+        except Exception as e:
+            logger.error(f"Error turning off Reachy: {e}")
+        
+        logger.info("Disconnecting from Reachy...")
+        try:
+            reachy.disconnect()
+        except Exception as e:
+            logger.error(f"Error disconnecting from Reachy: {e}")
+            
+except Exception as e:
+    logger.error(f"Error in code execution: {e}")
+    logger.error(traceback.format_exc())
+    sys.exit(1)
+
+logger.info("Code execution completed successfully")
+"""
+        
+        return wrapper
+    
+    def _send_websocket_notification(self, response: Dict[str, Any]) -> None:
         """
         Send a notification via WebSocket.
         
         Args:
-            data: The data to send.
+            response: The response to send.
         """
         try:
             if websocket_server and hasattr(websocket_server, 'running') and websocket_server.running:
                 message = {
-                    "type": "code_generation",
-                    "data": data
+                    "type": "code_execution",
+                    "data": response
                 }
                 # Check if broadcast method exists
                 if hasattr(websocket_server, 'broadcast'):

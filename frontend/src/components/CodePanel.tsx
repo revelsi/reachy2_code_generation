@@ -1,15 +1,21 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Copy, Check } from "lucide-react";
+import { Copy, Check, Play } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 
 interface CodePanelProps {
   code: string;
+  onExecuteCode?: (code: string) => void;
+  isExecuting?: boolean;
 }
 
-export const CodePanel: React.FC<CodePanelProps> = ({ code }) => {
-  const [copied, setCopied] = React.useState(false);
+export const CodePanel: React.FC<CodePanelProps> = ({ 
+  code, 
+  onExecuteCode,
+  isExecuting = false
+}) => {
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
   
   const copyToClipboard = () => {
@@ -37,6 +43,11 @@ export const CodePanel: React.FC<CodePanelProps> = ({ code }) => {
         });
       });
   };
+
+  const handleExecuteCode = () => {
+    if (!code || !onExecuteCode) return;
+    onExecuteCode(code);
+  };
   
   return (
     <div className="flex flex-col h-full rounded-xl bg-card/80 backdrop-blur-sm shadow-sm">
@@ -44,26 +55,41 @@ export const CodePanel: React.FC<CodePanelProps> = ({ code }) => {
       <div className="p-4 border-b border-border/30 bg-card/80 backdrop-blur-sm rounded-t-xl flex justify-between items-center">
         <h2 className="text-lg font-medium text-card-foreground">Code Output</h2>
         
-        {code && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={copyToClipboard}
-            className="h-8 px-2 text-xs"
-          >
-            {copied ? (
-              <>
-                <Check className="h-3.5 w-3.5 mr-1" />
-                Copied
-              </>
-            ) : (
-              <>
-                <Copy className="h-3.5 w-3.5 mr-1" />
-                Copy
-              </>
-            )}
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {code && onExecuteCode && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleExecuteCode}
+              className="h-8 px-2 text-xs"
+              disabled={isExecuting}
+            >
+              <Play className="h-3.5 w-3.5 mr-1" />
+              {isExecuting ? "Executing..." : "Execute"}
+            </Button>
+          )}
+          
+          {code && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={copyToClipboard}
+              className="h-8 px-2 text-xs"
+            >
+              {copied ? (
+                <>
+                  <Check className="h-3.5 w-3.5 mr-1" />
+                  Copied
+                </>
+              ) : (
+                <>
+                  <Copy className="h-3.5 w-3.5 mr-1" />
+                  Copy
+                </>
+              )}
+            </Button>
+          )}
+        </div>
       </div>
       
       {/* Code Area */}
