@@ -43,6 +43,8 @@ This repository contains a framework for transparent function calling with the R
 - **Direct Code Execution**: Execute generated code directly on the virtual Reachy robot
 - **Code Validation**: Validate generated code before execution to ensure safety
 - **Connection Retry**: Improved connection handling with retry mechanisms for virtual Reachy
+- **Simplified Execution Workflow**: Streamlined code execution with minimal validation steps
+- **Model Flexibility**: Support for various OpenAI models including gpt-4o-mini for cost-effective operation
 
 ## Dual-Mode Architecture
 

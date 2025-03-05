@@ -9,7 +9,8 @@ websockets>=11.0.3,<12.0.0  # For WebSocket server
 psutil>=5.9.6  # For system monitoring
 
 # Robot-specific dependencies
-reachy2-sdk  # For Reachy 2 robot control
+reachy2-sdk==1.0.7  # For Reachy 2 robot control
+reachy2-sdk-api==1.0.15
 
 # LangChain and LangGraph dependencies
 langchain>=0.3.18  # Latest stable version

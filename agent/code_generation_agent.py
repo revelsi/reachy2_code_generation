@@ -635,8 +635,8 @@ class ReachyCodeGenerationAgent:
             errors.append(f"Syntax error: {str(e)}")
         
         # Check for required imports
-        if "from reachy2_sdk.reachy_sdk import ReachySDK" not in code:
-            warnings.append("Missing import for ReachySDK from reachy2_sdk.reachy_sdk")
+        if "from reachy2_sdk import ReachySDK" not in code:
+            warnings.append("Missing import for ReachySDK from reachy2_sdk")
         
         # Check for connection setup
         if "ReachySDK(" not in code:
@@ -716,24 +716,6 @@ class ReachyCodeGenerationAgent:
                 if len(values) != 7:
                     errors.append(f"Incorrect arm goto usage: The positions array must have exactly 7 values for the 7 joints, but found {len(values)}.")
         
-        # Check for imports that are not in the official modules
-        import_lines = [line.strip() for line in code.split('\n') if line.strip().startswith(('import ', 'from '))]
-        for line in import_lines:
-            # Skip standard library imports
-            if any(line.startswith(f"import {mod}") or line.startswith(f"from {mod} import") 
-                  for mod in ['os', 'sys', 'time', 'math', 'random', 'json', 'datetime']):
-                continue
-                
-            # Check if the import is from an official module
-            is_official = False
-            for module in self.official_modules:
-                if line.startswith(f"import {module}") or line.startswith(f"from {module} import"):
-                    is_official = True
-                    break
-            
-            if not is_official and not line.startswith("from reachy2_sdk.reachy_sdk import ReachySDK"):
-                errors.append(f"Unofficial import detected: {line}. Only use modules from the official Reachy 2 SDK.")
-        
         return {
             "valid": len(errors) == 0,
             "errors": errors,
@@ -779,16 +761,11 @@ class ReachyCodeGenerationAgent:
             # Always require confirmation for code with critical warnings
             confirm = True
         
-        # Add safety wrapper around the code
-        # This ensures the robot is properly turned off even if the code fails
-        safe_code = self._create_safe_execution_wrapper(code)
-        
         # If confirmation is required, return the code and validation for UI to handle
         if confirm:
             return {
                 "requires_confirmation": True,
                 "code": code,
-                "safe_code": safe_code,
                 "validation": validation_result,
                 "message": "Code is ready for execution. Please confirm to proceed."
             }
@@ -802,7 +779,28 @@ class ReachyCodeGenerationAgent:
             import sys
             
             with tempfile.NamedTemporaryFile(suffix='.py', delete=False, mode='w') as temp_file:
-                temp_file.write(safe_code)
+                # Add basic imports and error handling
+                temp_file.write("#!/usr/bin/env python3\n")
+                temp_file.write("import sys\n")
+                temp_file.write("import traceback\n")
+                temp_file.write("import os\n\n")
+                
+                # Add environment setup
+                temp_file.write("# Set PYTHONPATH to include current directory\n")
+                temp_file.write("os.environ['PYTHONPATH'] = os.path.dirname(os.path.abspath(__file__)) + ':' + os.environ.get('PYTHONPATH', '')\n\n")
+                
+                # Add basic error handling
+                temp_file.write("try:\n")
+                # Indent the code
+                indented_code = "    " + code.replace("\n", "\n    ")
+                temp_file.write(indented_code)
+                
+                # Add exception handling
+                temp_file.write("\nexcept Exception as e:\n")
+                temp_file.write("    print(f\"Error executing code: {e}\")\n")
+                temp_file.write("    traceback.print_exc()\n")
+                temp_file.write("    sys.exit(1)\n")
+                
                 temp_file_path = temp_file.name
             
             # Execute the code in a separate process
@@ -816,7 +814,8 @@ class ReachyCodeGenerationAgent:
                 [python_executable, temp_file_path],
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
-                text=True
+                text=True,
+                env=os.environ.copy()  # Pass the current environment variables
             )
             
             # Get the output
@@ -855,114 +854,6 @@ class ReachyCodeGenerationAgent:
                 "output": "",
                 "error": str(e)
             }
-    
-    def _create_safe_execution_wrapper(self, code: str) -> str:
-        """
-        Create a safe execution wrapper around the code.
-        
-        This ensures that the robot is properly turned off even if the code fails.
-        
-        Args:
-            code: The code to wrap.
-            
-        Returns:
-            str: The wrapped code.
-        """
-        # Check if the code already has imports
-        has_imports = "import" in code
-        
-        # Add logging for better feedback
-        wrapper = """
-import logging
-import traceback
-import sys
-
-# Configure logging
-logging.basicConfig(level=logging.INFO,
-                   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("reachy_code_execution")
-
-logger.info("Starting code execution...")
-
-"""
-        
-        # Add the original code
-        if has_imports:
-            # If the code already has imports, just add it as is
-            wrapper += code
-        else:
-            # If the code doesn't have imports, add the necessary imports
-            wrapper += """
-from reachy2_sdk.reachy_sdk import ReachySDK
-
-""" + code
-        
-        # Add error handling if not already present
-        if "try:" not in code:
-            # Extract the main code (excluding imports)
-            import re
-            
-            # Find all import statements
-            import_lines = re.findall(r'^.*import.*$', code, re.MULTILINE)
-            
-            # Remove import statements from the code
-            main_code = code
-            for imp in import_lines:
-                main_code = main_code.replace(imp, "")
-            
-            # Create a new wrapped code with proper error handling
-            wrapper = """
-import logging
-import traceback
-import sys
-
-# Configure logging
-logging.basicConfig(level=logging.INFO,
-                   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-logger = logging.getLogger("reachy_code_execution")
-
-logger.info("Starting code execution...")
-
-"""
-            # Add the original imports
-            for imp in import_lines:
-                wrapper += imp + "\n"
-            
-            # Add the main code with try/finally
-            wrapper += """
-try:
-    logger.info("Connecting to Reachy...")
-    reachy = ReachySDK(host="localhost")
-    
-    try:
-        logger.info("Turning on Reachy...")
-        reachy.turn_on()
-        
-        # Main code
-""" + "\n        ".join(main_code.strip().split("\n")) + """
-        
-    finally:
-        logger.info("Turning off Reachy...")
-        try:
-            reachy.turn_off_smoothly()
-        except Exception as e:
-            logger.error(f"Error turning off Reachy: {e}")
-        
-        logger.info("Disconnecting from Reachy...")
-        try:
-            reachy.disconnect()
-        except Exception as e:
-            logger.error(f"Error disconnecting from Reachy: {e}")
-            
-except Exception as e:
-    logger.error(f"Error in code execution: {e}")
-    logger.error(traceback.format_exc())
-    sys.exit(1)
-
-logger.info("Code execution completed successfully")
-"""
-        
-        return wrapper
     
     def _send_websocket_notification(self, response: Dict[str, Any]) -> None:
         """

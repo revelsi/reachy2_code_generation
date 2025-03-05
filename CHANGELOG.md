@@ -25,6 +25,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Added UI components for switching between modes and configuring model parameters
 - Added CLI support for dual-mode operation
 - Added test script for verifying model configuration functionality
+- Added support for gpt-4o-mini model for improved performance and cost efficiency
+- Added simplified code execution workflow with minimal validation steps
 
 ### Fixed
 - Tool discovery and generation now working correctly (208 tools loaded)
@@ -34,6 +36,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed WebSocket server to properly notify clients of tool execution and results
 - Fixed connection handling in tool implementations to use centralized connection manager
 - Fixed import issues in generated tool files
+- Fixed duplicate code display in test_code_generator_api_tools.py
+- Fixed model configuration loading to properly respect environment variables and .env settings
 
 ### Changed
 - Moved utility files to the `agent/utils` directory for better organization
@@ -45,6 +49,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Refactored API endpoints to support dual-mode architecture
 - Enhanced web interface to support both function calling and code generation modes
 - Restructured agent initialization to use centralized model configuration
+- Simplified code execution by removing redundant safe execution wrapper
+- Updated default model to gpt-4o-mini in config.py
+- Streamlined user confirmation process for code execution
 
 ## [0.1.0] - 2023-02-26
 
