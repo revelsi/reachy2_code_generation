@@ -4067,5 +4067,2928 @@
     ],
     "source": "reachy2_sdk.media.audio.Audio",
     "bases": []
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.vision_models.monocular_depth_estimation.depth_anything_wrapper",
+    "class": "DepthAnythingWrapper",
+    "signature": "(self) -> None",
+    "docstring": "",
+    "source_code": "nump",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.vision_models.monocular_depth_estimation.depth_anything_wrapper.DepthAnythingWrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_depth",
+    "module": "pollen_vision.vision_models.monocular_depth_estimation.depth_anything_wrapper",
+    "class": "DepthAnythingWrapper",
+    "signature": "(self, rgb: npt.NDArray[np.uint8]) -> npt.NDArray[np.float32]",
+    "docstring": "",
+    "source_code": " as ",
+    "return_type": "npt.NDArray[np.float32]",
+    "parameters": {
+      "self": "Any",
+      "rgb": "npt.NDArray[np.uint8]"
+    },
+    "source": "pollen_vision.vision_models.monocular_depth_estimation.depth_anything_wrapper.DepthAnythingWrapper.get_depth",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "DepthAnythingWrapper",
+    "module": "pollen_vision.vision_models.monocular_depth_estimation.depth_anything_wrapper",
+    "docstring": "",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.vision_models.monocular_depth_estimation.depth_anything_wrapper",
+        "class": "DepthAnythingWrapper",
+        "signature": "(self) -> None",
+        "docstring": "",
+        "source_code": "nump",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.vision_models.monocular_depth_estimation.depth_anything_wrapper.DepthAnythingWrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_depth",
+        "module": "pollen_vision.vision_models.monocular_depth_estimation.depth_anything_wrapper",
+        "class": "DepthAnythingWrapper",
+        "signature": "(self, rgb: npt.NDArray[np.uint8]) -> npt.NDArray[np.float32]",
+        "docstring": "",
+        "source_code": " as ",
+        "return_type": "npt.NDArray[np.float32]",
+        "parameters": {
+          "self": "Any",
+          "rgb": "npt.NDArray[np.uint8]"
+        },
+        "source": "pollen_vision.vision_models.monocular_depth_estimation.depth_anything_wrapper.DepthAnythingWrapper.get_depth",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.vision_models.monocular_depth_estimation.depth_anything_wrapper.DepthAnythingWrapper"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.vision_models.object_detection.owl_vit.owl_vit_wrapper",
+    "class": "OwlVitWrapper",
+    "signature": "(self) -> None",
+    "docstring": "",
+    "source_code": "impo",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.vision_models.object_detection.owl_vit.owl_vit_wrapper.OwlVitWrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "infer",
+    "module": "pollen_vision.vision_models.object_detection.owl_vit.owl_vit_wrapper",
+    "class": "OwlVitWrapper",
+    "signature": "(self, im: npt.NDArray[np.uint8], candidate_labels: List[str], detection_threshold: float) -> List[Dict]",
+    "docstring": "Returns a list of predictions found in the input image.\nArgs:\n    - im: the input image\n    - candidate_labels: a list of candidate labels\n    - detection_threshold: the detection threshold to filter out predictions with a score below this threshold\n\nReturns a list of predictions found in the input image.\n\nA prediction is a dictionary with the following keys:\n    - \"label\": the label of the object\n    - \"score\": the score of the prediction\n    - \"box\": the bounding box of the object, in the format [xmin, ymin, xmax, ymax]",
+    "source_code": "t Dict, List\n\nimport",
+    "return_type": "List[Dict]",
+    "parameters": {
+      "self": "Any",
+      "im": "npt.NDArray[np.uint8]",
+      "candidate_labels": "List[str]",
+      "detection_threshold": "float"
+    },
+    "source": "pollen_vision.vision_models.object_detection.owl_vit.owl_vit_wrapper.OwlVitWrapper.infer",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "OwlVitWrapper",
+    "module": "pollen_vision.vision_models.object_detection.owl_vit.owl_vit_wrapper",
+    "docstring": "A wrapper for the OwlVit model.",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.vision_models.object_detection.owl_vit.owl_vit_wrapper",
+        "class": "OwlVitWrapper",
+        "signature": "(self) -> None",
+        "docstring": "",
+        "source_code": "impo",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.vision_models.object_detection.owl_vit.owl_vit_wrapper.OwlVitWrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "infer",
+        "module": "pollen_vision.vision_models.object_detection.owl_vit.owl_vit_wrapper",
+        "class": "OwlVitWrapper",
+        "signature": "(self, im: npt.NDArray[np.uint8], candidate_labels: List[str], detection_threshold: float) -> List[Dict]",
+        "docstring": "Returns a list of predictions found in the input image.\nArgs:\n    - im: the input image\n    - candidate_labels: a list of candidate labels\n    - detection_threshold: the detection threshold to filter out predictions with a score below this threshold\n\nReturns a list of predictions found in the input image.\n\nA prediction is a dictionary with the following keys:\n    - \"label\": the label of the object\n    - \"score\": the score of the prediction\n    - \"box\": the bounding box of the object, in the format [xmin, ymin, xmax, ymax]",
+        "source_code": "t Dict, List\n\nimport",
+        "return_type": "List[Dict]",
+        "parameters": {
+          "self": "Any",
+          "im": "npt.NDArray[np.uint8]",
+          "candidate_labels": "List[str]",
+          "detection_threshold": "float"
+        },
+        "source": "pollen_vision.vision_models.object_detection.owl_vit.owl_vit_wrapper.OwlVitWrapper.infer",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.vision_models.object_detection.owl_vit.owl_vit_wrapper.OwlVitWrapper"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper",
+    "class": "YoloWorldWrapper",
+    "signature": "(self) -> None",
+    "docstring": "",
+    "source_code": "g i",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper.YoloWorldWrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "infer",
+    "module": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper",
+    "class": "YoloWorldWrapper",
+    "signature": "(self, im: npt.NDArray[np.uint8], candidate_labels: List[str], detection_threshold: float) -> List[Dict]",
+    "docstring": "Returns a list of predictions found in the input image.\nArgs:\n    - im: the input image\n    - candidate_labels: a list of candidate labels\n    - detection_threshold: the detection threshold to filter out predictions with a score below this threshold\n\nReturns a list of predictions found in the input image.\n\nA prediction is a dictionary with the following keys:\n    - \"label\": the label of the object\n    - \"score\": the score of the prediction\n    - \"box\": the bounding box of the object, in the format [xmin, ymin, xmax, ymax]",
+    "source_code": "port Dict, List\n\nimp",
+    "return_type": "List[Dict]",
+    "parameters": {
+      "self": "Any",
+      "im": "npt.NDArray[np.uint8]",
+      "candidate_labels": "List[str]",
+      "detection_threshold": "float"
+    },
+    "source": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper.YoloWorldWrapper.infer",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "set_classes",
+    "module": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper",
+    "class": "YoloWorldWrapper",
+    "signature": "(self, classes: List[str]) -> None",
+    "docstring": "",
+    "source_code": " numpy.typing as",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "classes": "List[str]"
+    },
+    "source": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper.YoloWorldWrapper.set_classes",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "YoloWorldWrapper",
+    "module": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper",
+    "docstring": "A wrapper for the YOLO World model.",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper",
+        "class": "YoloWorldWrapper",
+        "signature": "(self) -> None",
+        "docstring": "",
+        "source_code": "g i",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper.YoloWorldWrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "infer",
+        "module": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper",
+        "class": "YoloWorldWrapper",
+        "signature": "(self, im: npt.NDArray[np.uint8], candidate_labels: List[str], detection_threshold: float) -> List[Dict]",
+        "docstring": "Returns a list of predictions found in the input image.\nArgs:\n    - im: the input image\n    - candidate_labels: a list of candidate labels\n    - detection_threshold: the detection threshold to filter out predictions with a score below this threshold\n\nReturns a list of predictions found in the input image.\n\nA prediction is a dictionary with the following keys:\n    - \"label\": the label of the object\n    - \"score\": the score of the prediction\n    - \"box\": the bounding box of the object, in the format [xmin, ymin, xmax, ymax]",
+        "source_code": "port Dict, List\n\nimp",
+        "return_type": "List[Dict]",
+        "parameters": {
+          "self": "Any",
+          "im": "npt.NDArray[np.uint8]",
+          "candidate_labels": "List[str]",
+          "detection_threshold": "float"
+        },
+        "source": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper.YoloWorldWrapper.infer",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "set_classes",
+        "module": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper",
+        "class": "YoloWorldWrapper",
+        "signature": "(self, classes: List[str]) -> None",
+        "docstring": "",
+        "source_code": " numpy.typing as",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "classes": "List[str]"
+        },
+        "source": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper.YoloWorldWrapper.set_classes",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.vision_models.object_detection.yolo_world.yolo_world_wrapper.YoloWorldWrapper"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.vision_models.object_detection.recognize_anything.RAM_wrapper",
+    "class": "RAM_wrapper",
+    "signature": "(self, objects_descriptions_filename: str, objects_descriptions_folder_path: str) -> None",
+    "docstring": "Args:\n- objects_descriptions_filename: the name of the json file containing the descriptions of the objects.\n    Descriptions files are generated by generate_objects_descriptions.py\n- objects_descriptions_folder_path: path to the folder containing the descriptions of the objects.\n    Defaults to \"objects_descriptions\" in the same directory as this file.",
+    "source_code": "from typing import L",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "objects_descriptions_filename": "str",
+      "objects_descriptions_folder_path": "str"
+    },
+    "source": "pollen_vision.vision_models.object_detection.recognize_anything.RAM_wrapper.RAM_wrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "infer",
+    "module": "pollen_vision.vision_models.object_detection.recognize_anything.RAM_wrapper",
+    "class": "RAM_wrapper",
+    "signature": "(self, im: npt.NDArray[np.uint8]) -> List[str]",
+    "docstring": "Returns a list of labels found in the input image.",
+    "source_code": "umpy as np\ni",
+    "return_type": "List[str]",
+    "parameters": {
+      "self": "Any",
+      "im": "npt.NDArray[np.uint8]"
+    },
+    "source": "pollen_vision.vision_models.object_detection.recognize_anything.RAM_wrapper.RAM_wrapper.infer",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "RAM_wrapper",
+    "module": "pollen_vision.vision_models.object_detection.recognize_anything.RAM_wrapper",
+    "docstring": "A wrapper for the Recognize Anything Model (RAM).",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.vision_models.object_detection.recognize_anything.RAM_wrapper",
+        "class": "RAM_wrapper",
+        "signature": "(self, objects_descriptions_filename: str, objects_descriptions_folder_path: str) -> None",
+        "docstring": "Args:\n- objects_descriptions_filename: the name of the json file containing the descriptions of the objects.\n    Descriptions files are generated by generate_objects_descriptions.py\n- objects_descriptions_folder_path: path to the folder containing the descriptions of the objects.\n    Defaults to \"objects_descriptions\" in the same directory as this file.",
+        "source_code": "from typing import L",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "objects_descriptions_filename": "str",
+          "objects_descriptions_folder_path": "str"
+        },
+        "source": "pollen_vision.vision_models.object_detection.recognize_anything.RAM_wrapper.RAM_wrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "infer",
+        "module": "pollen_vision.vision_models.object_detection.recognize_anything.RAM_wrapper",
+        "class": "RAM_wrapper",
+        "signature": "(self, im: npt.NDArray[np.uint8]) -> List[str]",
+        "docstring": "Returns a list of labels found in the input image.",
+        "source_code": "umpy as np\ni",
+        "return_type": "List[str]",
+        "parameters": {
+          "self": "Any",
+          "im": "npt.NDArray[np.uint8]"
+        },
+        "source": "pollen_vision.vision_models.object_detection.recognize_anything.RAM_wrapper.RAM_wrapper.infer",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.vision_models.object_detection.recognize_anything.RAM_wrapper.RAM_wrapper"
+  },
+  {
+    "type": "module",
+    "name": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator",
+    "docstring": "Objects descriptions generator using OpenAI's GPT-3.5 model.\n\nThis module provides a class to generate descriptions for a list of objects using OpenAI's GPT-3.5 model.\nThe descriptions are saved to a JSON file in the objects_descriptions directory.\nThe descriptions can then be used with the recognize_anything model (RAM) to recognize whether objects\nare in a scene or not.\n\nUsage:\n    In CLI:\n    python objects_descriptions_generator.py -o 'robot' 'mug' -n 10 -f objects_descriptions\n\n    In code:\n    generator = ObjectDescriptionGenerator()\n    descriptions = generator.generate_descriptions([\"robot\", \"mug\"], 10)\n    generator.save_descriptions(descriptions, \"my_objects_descriptions\")",
+    "source": "vision_models.object_detection.recognize_anything.objects_descriptions_generator"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator",
+    "class": "ObjectDescriptionGenerator",
+    "signature": "(self, api_key: 'str | None') -> None",
+    "docstring": "Args:\n- api_key: the API key to use to authenticate to the OpenAI API. If None, the API key is read from the\n    OPENAI_API_KEY environment variable.",
+    "source_code": "generat",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "api_key": "'str | None'"
+    },
+    "source": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator.ObjectDescriptionGenerator.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "generate_descriptions",
+    "module": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator",
+    "class": "ObjectDescriptionGenerator",
+    "signature": "(self, objects: list[str], generation_nb_per_object: int) -> str | None",
+    "docstring": "Returns a dictionary containing the descriptions of the objects.",
+    "source_code": "r using OpenAI's GPT",
+    "return_type": "str | None",
+    "parameters": {
+      "self": "Any",
+      "objects": "list[str]",
+      "generation_nb_per_object": "int"
+    },
+    "source": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator.ObjectDescriptionGenerator.generate_descriptions",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "save_descriptions",
+    "module": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator",
+    "class": "ObjectDescriptionGenerator",
+    "signature": "(self, descriptions: str, descriptor_file_name: str) -> None",
+    "docstring": "Saves the descriptions to a JSON file.",
+    "source_code": " module pro",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "descriptions": "str",
+      "descriptor_file_name": "str"
+    },
+    "source": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator.ObjectDescriptionGenerator.save_descriptions",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "ObjectDescriptionGenerator",
+    "module": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator",
+    "docstring": "",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator",
+        "class": "ObjectDescriptionGenerator",
+        "signature": "(self, api_key: 'str | None') -> None",
+        "docstring": "Args:\n- api_key: the API key to use to authenticate to the OpenAI API. If None, the API key is read from the\n    OPENAI_API_KEY environment variable.",
+        "source_code": "generat",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "api_key": "'str | None'"
+        },
+        "source": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator.ObjectDescriptionGenerator.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "generate_descriptions",
+        "module": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator",
+        "class": "ObjectDescriptionGenerator",
+        "signature": "(self, objects: list[str], generation_nb_per_object: int) -> str | None",
+        "docstring": "Returns a dictionary containing the descriptions of the objects.",
+        "source_code": "r using OpenAI's GPT",
+        "return_type": "str | None",
+        "parameters": {
+          "self": "Any",
+          "objects": "list[str]",
+          "generation_nb_per_object": "int"
+        },
+        "source": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator.ObjectDescriptionGenerator.generate_descriptions",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "save_descriptions",
+        "module": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator",
+        "class": "ObjectDescriptionGenerator",
+        "signature": "(self, descriptions: str, descriptor_file_name: str) -> None",
+        "docstring": "Saves the descriptions to a JSON file.",
+        "source_code": " module pro",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "descriptions": "str",
+          "descriptor_file_name": "str"
+        },
+        "source": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator.ObjectDescriptionGenerator.save_descriptions",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.vision_models.object_detection.recognize_anything.objects_descriptions_generator.ObjectDescriptionGenerator"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.vision_models.object_segmentation.mobile_sam.mobile_sam_wrapper",
+    "class": "MobileSamWrapper",
+    "signature": "(self, checkpoint_name: str) -> None",
+    "docstring": "Args:\n- checkpoint_name: the name of the checkpoint to load",
+    "source_code": "import List\n\nimpor",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "checkpoint_name": "str"
+    },
+    "source": "pollen_vision.vision_models.object_segmentation.mobile_sam.mobile_sam_wrapper.MobileSamWrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "infer",
+    "module": "pollen_vision.vision_models.object_segmentation.mobile_sam.mobile_sam_wrapper",
+    "class": "MobileSamWrapper",
+    "signature": "(self, im: npt.NDArray[np.uint8], bboxes: List[List[np.uint8]], points_list: List[List[List[np.uint8]]]) -> List[npt.NDArray[np.uint8]]",
+    "docstring": "Returns a list of masks found in the input image.\nA mask is a binary image where the pixels inside the mask are set to 1 and the pixels outside the mask are set to 0.\n\nArgs:\n    - im: the input image (opencv image, numpy array)\n    - bboxes: a list of bounding boxes in the format [[xmin, ymin, xmax, ymax], ...]\n    - points: a list of list of points. One list of points per object to segment\n        For example, [[[x1, y1], [x2, y2], ...], [[x1, y1], [x2, y2], ...]]\n                               obj1                       obj2",
+    "source_code": " numpy as np\nimport ",
+    "return_type": "List[npt.NDArray[np.uint8]]",
+    "parameters": {
+      "self": "Any",
+      "im": "npt.NDArray[np.uint8]",
+      "bboxes": "List[List[np.uint8]]",
+      "points_list": "List[List[List[np.uint8]]]"
+    },
+    "source": "pollen_vision.vision_models.object_segmentation.mobile_sam.mobile_sam_wrapper.MobileSamWrapper.infer",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "MobileSamWrapper",
+    "module": "pollen_vision.vision_models.object_segmentation.mobile_sam.mobile_sam_wrapper",
+    "docstring": "A wrapper for the MobileSam model.",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.vision_models.object_segmentation.mobile_sam.mobile_sam_wrapper",
+        "class": "MobileSamWrapper",
+        "signature": "(self, checkpoint_name: str) -> None",
+        "docstring": "Args:\n- checkpoint_name: the name of the checkpoint to load",
+        "source_code": "import List\n\nimpor",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "checkpoint_name": "str"
+        },
+        "source": "pollen_vision.vision_models.object_segmentation.mobile_sam.mobile_sam_wrapper.MobileSamWrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "infer",
+        "module": "pollen_vision.vision_models.object_segmentation.mobile_sam.mobile_sam_wrapper",
+        "class": "MobileSamWrapper",
+        "signature": "(self, im: npt.NDArray[np.uint8], bboxes: List[List[np.uint8]], points_list: List[List[List[np.uint8]]]) -> List[npt.NDArray[np.uint8]]",
+        "docstring": "Returns a list of masks found in the input image.\nA mask is a binary image where the pixels inside the mask are set to 1 and the pixels outside the mask are set to 0.\n\nArgs:\n    - im: the input image (opencv image, numpy array)\n    - bboxes: a list of bounding boxes in the format [[xmin, ymin, xmax, ymax], ...]\n    - points: a list of list of points. One list of points per object to segment\n        For example, [[[x1, y1], [x2, y2], ...], [[x1, y1], [x2, y2], ...]]\n                               obj1                       obj2",
+        "source_code": " numpy as np\nimport ",
+        "return_type": "List[npt.NDArray[np.uint8]]",
+        "parameters": {
+          "self": "Any",
+          "im": "npt.NDArray[np.uint8]",
+          "bboxes": "List[List[np.uint8]]",
+          "points_list": "List[List[List[np.uint8]]]"
+        },
+        "source": "pollen_vision.vision_models.object_segmentation.mobile_sam.mobile_sam_wrapper.MobileSamWrapper.infer",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.vision_models.object_segmentation.mobile_sam.mobile_sam_wrapper.MobileSamWrapper"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper",
+    "class": "CotrackerWrapper",
+    "signature": "(self, initial_points: List[List[np.uint8]]) -> None",
+    "docstring": "",
+    "source_code": "ing import ",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "initial_points": "List[List[np.uint8]]"
+    },
+    "source": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper.CotrackerWrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "set_points",
+    "module": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper",
+    "class": "CotrackerWrapper",
+    "signature": "(self, points: List[List[np.uint8]]) -> None",
+    "docstring": "",
+    "source_code": "is",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "points": "List[List[np.uint8]]"
+    },
+    "source": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper.CotrackerWrapper.set_points",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "reset",
+    "module": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper",
+    "class": "CotrackerWrapper",
+    "signature": "(self) -> None",
+    "docstring": "",
+    "source_code": ", Opt",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper.CotrackerWrapper.reset",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "step",
+    "module": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper",
+    "class": "CotrackerWrapper",
+    "signature": "(self, frame: npt.NDArray[np.uint8]) -> Tuple[Optional[npt.NDArray[np.float32]], Optional[npt.NDArray[np.float32]]]",
+    "docstring": "",
+    "source_code": "onal, Tuple\n\nimport ",
+    "return_type": "Tuple[Optional[npt.NDArray[np.float32]], Optional[npt.NDArray[np.float32]]]",
+    "parameters": {
+      "self": "Any",
+      "frame": "npt.NDArray[np.uint8]"
+    },
+    "source": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper.CotrackerWrapper.step",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "CotrackerWrapper",
+    "module": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper",
+    "docstring": "",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper",
+        "class": "CotrackerWrapper",
+        "signature": "(self, initial_points: List[List[np.uint8]]) -> None",
+        "docstring": "",
+        "source_code": "ing import ",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "initial_points": "List[List[np.uint8]]"
+        },
+        "source": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper.CotrackerWrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "set_points",
+        "module": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper",
+        "class": "CotrackerWrapper",
+        "signature": "(self, points: List[List[np.uint8]]) -> None",
+        "docstring": "",
+        "source_code": "is",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "points": "List[List[np.uint8]]"
+        },
+        "source": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper.CotrackerWrapper.set_points",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "reset",
+        "module": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper",
+        "class": "CotrackerWrapper",
+        "signature": "(self) -> None",
+        "docstring": "",
+        "source_code": ", Opt",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper.CotrackerWrapper.reset",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "step",
+        "module": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper",
+        "class": "CotrackerWrapper",
+        "signature": "(self, frame: npt.NDArray[np.uint8]) -> Tuple[Optional[npt.NDArray[np.float32]], Optional[npt.NDArray[np.float32]]]",
+        "docstring": "",
+        "source_code": "onal, Tuple\n\nimport ",
+        "return_type": "Tuple[Optional[npt.NDArray[np.float32]], Optional[npt.NDArray[np.float32]]]",
+        "parameters": {
+          "self": "Any",
+          "frame": "npt.NDArray[np.uint8]"
+        },
+        "source": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper.CotrackerWrapper.step",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.vision_models.tracking.cotracker.cotracker_wrapper.CotrackerWrapper"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.perception.perception",
+    "class": "Perception",
+    "signature": "(self, camera_wrapper: CameraWrapper, T_world_cam: npt.NDArray[np.float32], freq: float, yolo_thres: float) -> None",
+    "docstring": "",
+    "source_code": "time\nfrom typing i",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "camera_wrapper": "CameraWrapper",
+      "T_world_cam": "npt.NDArray[np.float32]",
+      "freq": "float",
+      "yolo_thres": "float"
+    },
+    "source": "pollen_vision.perception.perception.Perception.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "start",
+    "module": "pollen_vision.perception.perception",
+    "class": "Perception",
+    "signature": "(self, visualize: bool) -> None",
+    "docstring": "",
+    "source_code": "port D",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "visualize": "bool"
+    },
+    "source": "pollen_vision.perception.perception.Perception.start",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "tick",
+    "module": "pollen_vision.perception.perception",
+    "class": "Perception",
+    "signature": "(self) -> None",
+    "docstring": "",
+    "source_code": "ct, List\n\nimport cv2",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.perception.perception.Perception.tick",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_objects_infos",
+    "module": "pollen_vision.perception.perception",
+    "class": "Perception",
+    "signature": "(self, threshold: float) -> List[Dict]",
+    "docstring": "Return list of filtered objects sorted by distance.",
+    "source_code": "rt numpy.typing as n",
+    "return_type": "List[Dict]",
+    "parameters": {
+      "self": "Any",
+      "threshold": "float"
+    },
+    "source": "pollen_vision.perception.perception.Perception.get_objects_infos",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "set_tracked_objects",
+    "module": "pollen_vision.perception.perception",
+    "class": "Perception",
+    "signature": "(self, objects: list[str]) -> None",
+    "docstring": "",
+    "source_code": "t\nfro",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "objects": "list[str]"
+    },
+    "source": "pollen_vision.perception.perception.Perception.set_tracked_objects",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "Perception",
+    "module": "pollen_vision.perception.perception",
+    "docstring": "",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.perception.perception",
+        "class": "Perception",
+        "signature": "(self, camera_wrapper: CameraWrapper, T_world_cam: npt.NDArray[np.float32], freq: float, yolo_thres: float) -> None",
+        "docstring": "",
+        "source_code": "time\nfrom typing i",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "camera_wrapper": "CameraWrapper",
+          "T_world_cam": "npt.NDArray[np.float32]",
+          "freq": "float",
+          "yolo_thres": "float"
+        },
+        "source": "pollen_vision.perception.perception.Perception.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "start",
+        "module": "pollen_vision.perception.perception",
+        "class": "Perception",
+        "signature": "(self, visualize: bool) -> None",
+        "docstring": "",
+        "source_code": "port D",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "visualize": "bool"
+        },
+        "source": "pollen_vision.perception.perception.Perception.start",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "tick",
+        "module": "pollen_vision.perception.perception",
+        "class": "Perception",
+        "signature": "(self) -> None",
+        "docstring": "",
+        "source_code": "ct, List\n\nimport cv2",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.perception.perception.Perception.tick",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_objects_infos",
+        "module": "pollen_vision.perception.perception",
+        "class": "Perception",
+        "signature": "(self, threshold: float) -> List[Dict]",
+        "docstring": "Return list of filtered objects sorted by distance.",
+        "source_code": "rt numpy.typing as n",
+        "return_type": "List[Dict]",
+        "parameters": {
+          "self": "Any",
+          "threshold": "float"
+        },
+        "source": "pollen_vision.perception.perception.Perception.get_objects_infos",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "set_tracked_objects",
+        "module": "pollen_vision.perception.perception",
+        "class": "Perception",
+        "signature": "(self, objects: list[str]) -> None",
+        "docstring": "",
+        "source_code": "t\nfro",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "objects": "list[str]"
+        },
+        "source": "pollen_vision.perception.perception.Perception.set_tracked_objects",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.perception.perception.Perception"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.perception.utils.labels",
+    "class": "Labels",
+    "signature": "(self) -> None",
+    "docstring": "",
+    "source_code": "ing",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.perception.utils.labels.Labels.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "push",
+    "module": "pollen_vision.perception.utils.labels",
+    "class": "Labels",
+    "signature": "(self, labels: List[str], colors: List[Tuple[int, int, int]]) -> None",
+    "docstring": "Pushes a list of labels and associated color to the main labels dictionary.\n\nIf the color list is not set, a random color will be assigned to each label not already in the dictionnary.",
+    "source_code": "import Dict, Li",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "labels": "List[str]",
+      "colors": "List[Tuple[int, int, int]]"
+    },
+    "source": "pollen_vision.perception.utils.labels.Labels.push",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_color",
+    "module": "pollen_vision.perception.utils.labels",
+    "class": "Labels",
+    "signature": "(self, label: str) -> Tuple[int, int, int]",
+    "docstring": "Returns the color of the label.",
+    "source_code": "t, ",
+    "return_type": "Tuple[int, int, int]",
+    "parameters": {
+      "self": "Any",
+      "label": "str"
+    },
+    "source": "pollen_vision.perception.utils.labels.Labels.get_color",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "random_color",
+    "module": "pollen_vision.perception.utils.labels",
+    "class": "Labels",
+    "signature": "(self) -> Tuple[int, int, int]",
+    "docstring": "Returns a random color.",
+    "source_code": "upl",
+    "return_type": "Tuple[int, int, int]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.perception.utils.labels.Labels.random_color",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "Labels",
+    "module": "pollen_vision.perception.utils.labels",
+    "docstring": "A class to store the labels and their colors.",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.perception.utils.labels",
+        "class": "Labels",
+        "signature": "(self) -> None",
+        "docstring": "",
+        "source_code": "ing",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.perception.utils.labels.Labels.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "push",
+        "module": "pollen_vision.perception.utils.labels",
+        "class": "Labels",
+        "signature": "(self, labels: List[str], colors: List[Tuple[int, int, int]]) -> None",
+        "docstring": "Pushes a list of labels and associated color to the main labels dictionary.\n\nIf the color list is not set, a random color will be assigned to each label not already in the dictionnary.",
+        "source_code": "import Dict, Li",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "labels": "List[str]",
+          "colors": "List[Tuple[int, int, int]]"
+        },
+        "source": "pollen_vision.perception.utils.labels.Labels.push",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_color",
+        "module": "pollen_vision.perception.utils.labels",
+        "class": "Labels",
+        "signature": "(self, label: str) -> Tuple[int, int, int]",
+        "docstring": "Returns the color of the label.",
+        "source_code": "t, ",
+        "return_type": "Tuple[int, int, int]",
+        "parameters": {
+          "self": "Any",
+          "label": "str"
+        },
+        "source": "pollen_vision.perception.utils.labels.Labels.get_color",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "random_color",
+        "module": "pollen_vision.perception.utils.labels",
+        "class": "Labels",
+        "signature": "(self) -> Tuple[int, int, int]",
+        "docstring": "Returns a random color.",
+        "source_code": "upl",
+        "return_type": "Tuple[int, int, int]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.perception.utils.labels.Labels.random_color",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.perception.utils.labels.Labels"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.perception.utils.pcl_visualizer",
+    "class": "PCLVisualizer",
+    "signature": "(self, K: npt.NDArray[np.float64], name: str) -> None",
+    "docstring": "",
+    "source_code": "y as np\nim",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "K": "npt.NDArray[np.float64]",
+      "name": "str"
+    },
+    "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "create_point_cloud_from_rgbd",
+    "module": "pollen_vision.perception.utils.pcl_visualizer",
+    "class": "PCLVisualizer",
+    "signature": "(self, rgb_image: npt.NDArray[np.uint8], depth_image: npt.NDArray[np.float32]) -> o3d.geometry.PointCloud",
+    "docstring": "",
+    "source_code": "ort numpy.typing",
+    "return_type": "o3d.geometry.PointCloud",
+    "parameters": {
+      "self": "Any",
+      "rgb_image": "npt.NDArray[np.uint8]",
+      "depth_image": "npt.NDArray[np.float32]"
+    },
+    "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.create_point_cloud_from_rgbd",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "add_frame",
+    "module": "pollen_vision.perception.utils.pcl_visualizer",
+    "class": "PCLVisualizer",
+    "signature": "(self, name: str, pose: npt.NDArray[np.float64]) -> None",
+    "docstring": "",
+    "source_code": "as npt\n\n",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "name": "str",
+      "pose": "npt.NDArray[np.float64]"
+    },
+    "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.add_frame",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "update",
+    "module": "pollen_vision.perception.utils.pcl_visualizer",
+    "class": "PCLVisualizer",
+    "signature": "(self, rgb: npt.NDArray[np.uint8], depth: npt.NDArray[np.float32]) -> None",
+    "docstring": "",
+    "source_code": "ry:\n    im",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "rgb": "npt.NDArray[np.uint8]",
+      "depth": "npt.NDArray[np.float32]"
+    },
+    "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.update",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "updateFramePose",
+    "module": "pollen_vision.perception.utils.pcl_visualizer",
+    "class": "PCLVisualizer",
+    "signature": "(self, name: str, pose: npt.NDArray[np.float64]) -> None",
+    "docstring": "",
+    "source_code": "ort open3d",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "name": "str",
+      "pose": "npt.NDArray[np.float64]"
+    },
+    "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.updateFramePose",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "tick",
+    "module": "pollen_vision.perception.utils.pcl_visualizer",
+    "class": "PCLVisualizer",
+    "signature": "(self) -> None",
+    "docstring": "",
+    "source_code": "as ",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.tick",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "PCLVisualizer",
+    "module": "pollen_vision.perception.utils.pcl_visualizer",
+    "docstring": "",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.perception.utils.pcl_visualizer",
+        "class": "PCLVisualizer",
+        "signature": "(self, K: npt.NDArray[np.float64], name: str) -> None",
+        "docstring": "",
+        "source_code": "y as np\nim",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "K": "npt.NDArray[np.float64]",
+          "name": "str"
+        },
+        "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "create_point_cloud_from_rgbd",
+        "module": "pollen_vision.perception.utils.pcl_visualizer",
+        "class": "PCLVisualizer",
+        "signature": "(self, rgb_image: npt.NDArray[np.uint8], depth_image: npt.NDArray[np.float32]) -> o3d.geometry.PointCloud",
+        "docstring": "",
+        "source_code": "ort numpy.typing",
+        "return_type": "o3d.geometry.PointCloud",
+        "parameters": {
+          "self": "Any",
+          "rgb_image": "npt.NDArray[np.uint8]",
+          "depth_image": "npt.NDArray[np.float32]"
+        },
+        "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.create_point_cloud_from_rgbd",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "add_frame",
+        "module": "pollen_vision.perception.utils.pcl_visualizer",
+        "class": "PCLVisualizer",
+        "signature": "(self, name: str, pose: npt.NDArray[np.float64]) -> None",
+        "docstring": "",
+        "source_code": "as npt\n\n",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "name": "str",
+          "pose": "npt.NDArray[np.float64]"
+        },
+        "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.add_frame",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "update",
+        "module": "pollen_vision.perception.utils.pcl_visualizer",
+        "class": "PCLVisualizer",
+        "signature": "(self, rgb: npt.NDArray[np.uint8], depth: npt.NDArray[np.float32]) -> None",
+        "docstring": "",
+        "source_code": "ry:\n    im",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "rgb": "npt.NDArray[np.uint8]",
+          "depth": "npt.NDArray[np.float32]"
+        },
+        "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.update",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "updateFramePose",
+        "module": "pollen_vision.perception.utils.pcl_visualizer",
+        "class": "PCLVisualizer",
+        "signature": "(self, name: str, pose: npt.NDArray[np.float64]) -> None",
+        "docstring": "",
+        "source_code": "ort open3d",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "name": "str",
+          "pose": "npt.NDArray[np.float64]"
+        },
+        "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.updateFramePose",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "tick",
+        "module": "pollen_vision.perception.utils.pcl_visualizer",
+        "class": "PCLVisualizer",
+        "signature": "(self) -> None",
+        "docstring": "",
+        "source_code": "as ",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer.tick",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.perception.utils.pcl_visualizer.PCLVisualizer"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.perception.utils.objects_filter",
+    "class": "ObjectsFilter",
+    "signature": "(self, max_objects_in_memory: int) -> None",
+    "docstring": "",
+    "source_code": "ping",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "max_objects_in_memory": "int"
+    },
+    "source": "pollen_vision.perception.utils.objects_filter.ObjectsFilter.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "tick",
+    "module": "pollen_vision.perception.utils.objects_filter",
+    "class": "ObjectsFilter",
+    "signature": "(self) -> None",
+    "docstring": "",
+    "source_code": "import Any, Dict, Li",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.perception.utils.objects_filter.ObjectsFilter.tick",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "push_observation",
+    "module": "pollen_vision.perception.utils.objects_filter",
+    "class": "ObjectsFilter",
+    "signature": "(self, object_name: str, pose: npt.NDArray[np.float32], bbox: List[List], mask: npt.NDArray[np.uint8], detection_score: float) -> None",
+    "docstring": "",
+    "source_code": " as np\nimport numpy.",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "object_name": "str",
+      "pose": "npt.NDArray[np.float32]",
+      "bbox": "List[List]",
+      "mask": "npt.NDArray[np.uint8]",
+      "detection_score": "float"
+    },
+    "source": "pollen_vision.perception.utils.objects_filter.ObjectsFilter.push_observation",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "show_objects",
+    "module": "pollen_vision.perception.utils.objects_filter",
+    "class": "ObjectsFilter",
+    "signature": "(self, threshold: float) -> None",
+    "docstring": "",
+    "source_code": "\n   ",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "threshold": "float"
+    },
+    "source": "pollen_vision.perception.utils.objects_filter.ObjectsFilter.show_objects",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_objects",
+    "module": "pollen_vision.perception.utils.objects_filter",
+    "class": "ObjectsFilter",
+    "signature": "(self, threshold: float) -> List[Dict]",
+    "docstring": "",
+    "source_code": "def",
+    "return_type": "List[Dict]",
+    "parameters": {
+      "self": "Any",
+      "threshold": "float"
+    },
+    "source": "pollen_vision.perception.utils.objects_filter.ObjectsFilter.get_objects",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "ObjectsFilter",
+    "module": "pollen_vision.perception.utils.objects_filter",
+    "docstring": "",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.perception.utils.objects_filter",
+        "class": "ObjectsFilter",
+        "signature": "(self, max_objects_in_memory: int) -> None",
+        "docstring": "",
+        "source_code": "ping",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "max_objects_in_memory": "int"
+        },
+        "source": "pollen_vision.perception.utils.objects_filter.ObjectsFilter.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "tick",
+        "module": "pollen_vision.perception.utils.objects_filter",
+        "class": "ObjectsFilter",
+        "signature": "(self) -> None",
+        "docstring": "",
+        "source_code": "import Any, Dict, Li",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.perception.utils.objects_filter.ObjectsFilter.tick",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "push_observation",
+        "module": "pollen_vision.perception.utils.objects_filter",
+        "class": "ObjectsFilter",
+        "signature": "(self, object_name: str, pose: npt.NDArray[np.float32], bbox: List[List], mask: npt.NDArray[np.uint8], detection_score: float) -> None",
+        "docstring": "",
+        "source_code": " as np\nimport numpy.",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "object_name": "str",
+          "pose": "npt.NDArray[np.float32]",
+          "bbox": "List[List]",
+          "mask": "npt.NDArray[np.uint8]",
+          "detection_score": "float"
+        },
+        "source": "pollen_vision.perception.utils.objects_filter.ObjectsFilter.push_observation",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "show_objects",
+        "module": "pollen_vision.perception.utils.objects_filter",
+        "class": "ObjectsFilter",
+        "signature": "(self, threshold: float) -> None",
+        "docstring": "",
+        "source_code": "\n   ",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "threshold": "float"
+        },
+        "source": "pollen_vision.perception.utils.objects_filter.ObjectsFilter.show_objects",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_objects",
+        "module": "pollen_vision.perception.utils.objects_filter",
+        "class": "ObjectsFilter",
+        "signature": "(self, threshold: float) -> List[Dict]",
+        "docstring": "",
+        "source_code": "def",
+        "return_type": "List[Dict]",
+        "parameters": {
+          "self": "Any",
+          "threshold": "float"
+        },
+        "source": "pollen_vision.perception.utils.objects_filter.ObjectsFilter.get_objects",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.perception.utils.objects_filter.ObjectsFilter"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.perception.utils.annotator",
+    "class": "Annotator",
+    "signature": "(self, labels: Labels) -> None",
+    "docstring": "",
+    "source_code": "ic",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "labels": "Labels"
+    },
+    "source": "pollen_vision.perception.utils.annotator.Annotator.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "annotate",
+    "module": "pollen_vision.perception.utils.annotator",
+    "class": "Annotator",
+    "signature": "(self, im: npt.NDArray[np.uint8], detection_predictions: List[Dict], masks: List[npt.NDArray[np.uint8]]) -> npt.NDArray[np.uint8]",
+    "docstring": "Draws the masks and labels on top of the input image and returns the annotated image.\n\nmasks arg is optional. If not set, masks will not be drawn.\n\nArgs:\n    - im: the input image\n    - detection_predictions: a dictionary containing the predictions of the object detection model. Keys are :\n        - \"box\": a dictionary containing the bounding box coordinates (xmin, ymin, xmax, ymax)\n        - \"label\": the label of the object\n        - \"score\": the confidence score of the prediction\n    - masks: a list of masks to draw on top of the image",
+    "source_code": ", List\n\nimport cv2\ni",
+    "return_type": "npt.NDArray[np.uint8]",
+    "parameters": {
+      "self": "Any",
+      "im": "npt.NDArray[np.uint8]",
+      "detection_predictions": "List[Dict]",
+      "masks": "List[npt.NDArray[np.uint8]]"
+    },
+    "source": "pollen_vision.perception.utils.annotator.Annotator.annotate",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "Annotator",
+    "module": "pollen_vision.perception.utils.annotator",
+    "docstring": "A class to annotate images with bounding boxes, masks and labels.\nThis class handles the persistance of the colors across frames.\n\nBy default, the colors are randomly assigned to the labels.\nYou can also set the colors manually by passing an instance of the Labels class to the constructor.\n\nAt any time, you can edit/push the colors of the labels by accessing the self.labels public attribute from outside",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.perception.utils.annotator",
+        "class": "Annotator",
+        "signature": "(self, labels: Labels) -> None",
+        "docstring": "",
+        "source_code": "ic",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "labels": "Labels"
+        },
+        "source": "pollen_vision.perception.utils.annotator.Annotator.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "annotate",
+        "module": "pollen_vision.perception.utils.annotator",
+        "class": "Annotator",
+        "signature": "(self, im: npt.NDArray[np.uint8], detection_predictions: List[Dict], masks: List[npt.NDArray[np.uint8]]) -> npt.NDArray[np.uint8]",
+        "docstring": "Draws the masks and labels on top of the input image and returns the annotated image.\n\nmasks arg is optional. If not set, masks will not be drawn.\n\nArgs:\n    - im: the input image\n    - detection_predictions: a dictionary containing the predictions of the object detection model. Keys are :\n        - \"box\": a dictionary containing the bounding box coordinates (xmin, ymin, xmax, ymax)\n        - \"label\": the label of the object\n        - \"score\": the confidence score of the prediction\n    - masks: a list of masks to draw on top of the image",
+        "source_code": ", List\n\nimport cv2\ni",
+        "return_type": "npt.NDArray[np.uint8]",
+        "parameters": {
+          "self": "Any",
+          "im": "npt.NDArray[np.uint8]",
+          "detection_predictions": "List[Dict]",
+          "masks": "List[npt.NDArray[np.uint8]]"
+        },
+        "source": "pollen_vision.perception.utils.annotator.Annotator.annotate",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.perception.utils.annotator.Annotator"
+  },
+  {
+    "type": "module",
+    "name": "pollen_vision.perception.utils.utils",
+    "docstring": "A collection of utility functions for the vision models wrappers",
+    "source": "perception.utils.utils"
+  },
+  {
+    "type": "function",
+    "name": "fuse_depths",
+    "module": "pollen_vision.perception.utils.utils",
+    "signature": "(stereo_depth: npt.NDArray[np.float32], mono_depth: npt.NDArray[np.float32], fit_rect: Optional[tuple[int, int, int, int]], poly_degree: int) -> npt.NDArray[np.float32]",
+    "docstring": "Fuse a stereo depth map and a monocular etimated depth map using a polynomial regression model.\n\nArgs:\n    stereo_depth: The stereo depth map, computed from a stereo camera (considered ground truth here)\n    mono_depth: The monocular estimated depth map, computed from a monocular depth estimation model\n    fit_rect: The rectangle in which to fit the model (xmin, ymin, xmax, ymax). None to fit the model on the whole image\n    poly_degree: The degree of the polynomial used in the regression",
+    "source_code": "ion of utility funct",
+    "return_type": "npt.NDArray[np.float32]",
+    "parameters": {
+      "stereo_depth": "npt.NDArray[np.float32]",
+      "mono_depth": "npt.NDArray[np.float32]",
+      "fit_rect": "Optional[tuple[int, int, int, int]]",
+      "poly_degree": "int"
+    },
+    "source": "pollen_vision.perception.utils.utils.fuse_depths",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_centroid",
+    "module": "pollen_vision.perception.utils.utils",
+    "signature": "(mask: npt.NDArray[np.uint8]) -> Tuple[int, int]",
+    "docstring": "",
+    "source_code": "s w",
+    "return_type": "Tuple[int, int]",
+    "parameters": {
+      "mask": "npt.NDArray[np.uint8]"
+    },
+    "source": "pollen_vision.perception.utils.utils.get_centroid",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "uv_to_xyz",
+    "module": "pollen_vision.perception.utils.utils",
+    "signature": "(z: float, u: float, v: float, K: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]",
+    "docstring": "",
+    "source_code": "ppers\"\"\"\n\nf",
+    "return_type": "npt.NDArray[np.float32]",
+    "parameters": {
+      "z": "float",
+      "u": "float",
+      "v": "float",
+      "K": "npt.NDArray[np.float32]"
+    },
+    "source": "pollen_vision.perception.utils.utils.uv_to_xyz",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_object_width_height",
+    "module": "pollen_vision.perception.utils.utils",
+    "signature": "(bbox: List[List], mask: npt.NDArray[np.uint8], K: npt.NDArray[np.float32]) -> Tuple[int, int]",
+    "docstring": "",
+    "source_code": " importlib.resources",
+    "return_type": "Tuple[int, int]",
+    "parameters": {
+      "bbox": "List[List]",
+      "mask": "npt.NDArray[np.uint8]",
+      "K": "npt.NDArray[np.float32]"
+    },
+    "source": "pollen_vision.perception.utils.utils.get_object_width_height",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_object_pose_in_world",
+    "module": "pollen_vision.perception.utils.utils",
+    "signature": "(depth: npt.NDArray[np.float32], mask: npt.NDArray[np.uint8], T_world_cam: npt.NDArray[np.float32], K: npt.NDArray[np.float32]) -> npt.NDArray[np.float32]",
+    "docstring": "",
+    "source_code": "ort files\nfrom typin",
+    "return_type": "npt.NDArray[np.float32]",
+    "parameters": {
+      "depth": "npt.NDArray[np.float32]",
+      "mask": "npt.NDArray[np.uint8]",
+      "T_world_cam": "npt.NDArray[np.float32]",
+      "K": "npt.NDArray[np.float32]"
+    },
+    "source": "pollen_vision.perception.utils.utils.get_object_pose_in_world",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_bboxes",
+    "module": "pollen_vision.perception.utils.utils",
+    "signature": "(predictions: List[Dict]) -> List[List]",
+    "docstring": "Returns a list of bounding boxes from the predictions.",
+    "source_code": "mport Any",
+    "return_type": "List[List]",
+    "parameters": {
+      "predictions": "List[Dict]"
+    },
+    "source": "pollen_vision.perception.utils.utils.get_bboxes",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_checkpoints_names",
+    "module": "pollen_vision.perception.utils.utils",
+    "signature": "() -> List[str]",
+    "docstring": "Returns the names of the checkpoints available in the checkpoints directory.",
+    "source_code": "Dict, List,",
+    "return_type": "List[str]",
+    "parameters": {},
+    "source": "pollen_vision.perception.utils.utils.get_checkpoints_names",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_checkpoint_path",
+    "module": "pollen_vision.perception.utils.utils",
+    "signature": "(name: str) -> Any",
+    "docstring": "Returns the path of the checkpoint based on its name.",
+    "source_code": "ptional",
+    "return_type": "Any",
+    "parameters": {
+      "name": "str"
+    },
+    "source": "pollen_vision.perception.utils.utils.get_checkpoint_path",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_labels",
+    "module": "pollen_vision.perception.utils.utils",
+    "signature": "(predictions: List[Dict]) -> List[str]",
+    "docstring": "Returns a list of labels from the predictions.",
+    "source_code": "Tuple\n\n",
+    "return_type": "List[str]",
+    "parameters": {
+      "predictions": "List[Dict]"
+    },
+    "source": "pollen_vision.perception.utils.utils.get_labels",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_scores",
+    "module": "pollen_vision.perception.utils.utils",
+    "signature": "(predictions: List[Dict]) -> List[float]",
+    "docstring": "Returns a list of scores from the predictions.",
+    "source_code": "port nu",
+    "return_type": "List[float]",
+    "parameters": {
+      "predictions": "List[Dict]"
+    },
+    "source": "pollen_vision.perception.utils.utils.get_scores",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.camera_wrappers.camera_wrapper",
+    "class": "CameraWrapper",
+    "signature": "(self) -> None",
+    "docstring": "",
+    "source_code": "gi",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.camera_wrapper.CameraWrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_data",
+    "module": "pollen_vision.camera_wrappers.camera_wrapper",
+    "class": "CameraWrapper",
+    "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "docstring": "",
+    "source_code": "\nfrom",
+    "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.camera_wrapper.CameraWrapper.get_data",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_K",
+    "module": "pollen_vision.camera_wrappers.camera_wrapper",
+    "class": "CameraWrapper",
+    "signature": "(self, left: bool) -> npt.NDArray[np.float32]",
+    "docstring": "",
+    "source_code": "bc ",
+    "return_type": "npt.NDArray[np.float32]",
+    "parameters": {
+      "self": "Any",
+      "left": "bool"
+    },
+    "source": "pollen_vision.camera_wrappers.camera_wrapper.CameraWrapper.get_K",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "CameraWrapper",
+    "module": "pollen_vision.camera_wrappers.camera_wrapper",
+    "docstring": "",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.camera_wrappers.camera_wrapper",
+        "class": "CameraWrapper",
+        "signature": "(self) -> None",
+        "docstring": "",
+        "source_code": "gi",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.camera_wrapper.CameraWrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_data",
+        "module": "pollen_vision.camera_wrappers.camera_wrapper",
+        "class": "CameraWrapper",
+        "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "docstring": "",
+        "source_code": "\nfrom",
+        "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.camera_wrapper.CameraWrapper.get_data",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_K",
+        "module": "pollen_vision.camera_wrappers.camera_wrapper",
+        "class": "CameraWrapper",
+        "signature": "(self, left: bool) -> npt.NDArray[np.float32]",
+        "docstring": "",
+        "source_code": "bc ",
+        "return_type": "npt.NDArray[np.float32]",
+        "parameters": {
+          "self": "Any",
+          "left": "bool"
+        },
+        "source": "pollen_vision.camera_wrappers.camera_wrapper.CameraWrapper.get_K",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.camera_wrappers.camera_wrapper.CameraWrapper"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper",
+    "class": "PollenSDKCameraWrapper",
+    "signature": "(self, robot: ReachySDK, cam: str) -> None",
+    "docstring": "",
+    "source_code": "from datetime im",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "robot": "ReachySDK",
+      "cam": "str"
+    },
+    "source": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper.PollenSDKCameraWrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_data",
+    "module": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper",
+    "class": "PollenSDKCameraWrapper",
+    "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "docstring": "",
+    "source_code": "t timedelta\nfrom typ",
+    "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper.PollenSDKCameraWrapper.get_data",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_K",
+    "module": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper",
+    "class": "PollenSDKCameraWrapper",
+    "signature": "(self, left: bool) -> Optional[npt.NDArray[np.float32]]",
+    "docstring": "",
+    "source_code": "Dict, Optional, Tup",
+    "return_type": "Optional[npt.NDArray[np.float32]]",
+    "parameters": {
+      "self": "Any",
+      "left": "bool"
+    },
+    "source": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper.PollenSDKCameraWrapper.get_K",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_depth_K",
+    "module": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper",
+    "class": "PollenSDKCameraWrapper",
+    "signature": "(self) -> Optional[npt.NDArray[np.float32]]",
+    "docstring": "",
+    "source_code": "e\n\nimport numpy ",
+    "return_type": "Optional[npt.NDArray[np.float32]]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper.PollenSDKCameraWrapper.get_depth_K",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "PollenSDKCameraWrapper",
+    "module": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper",
+    "docstring": "",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper",
+        "class": "PollenSDKCameraWrapper",
+        "signature": "(self, robot: ReachySDK, cam: str) -> None",
+        "docstring": "",
+        "source_code": "from datetime im",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "robot": "ReachySDK",
+          "cam": "str"
+        },
+        "source": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper.PollenSDKCameraWrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_data",
+        "module": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper",
+        "class": "PollenSDKCameraWrapper",
+        "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "docstring": "",
+        "source_code": "t timedelta\nfrom typ",
+        "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper.PollenSDKCameraWrapper.get_data",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_K",
+        "module": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper",
+        "class": "PollenSDKCameraWrapper",
+        "signature": "(self, left: bool) -> Optional[npt.NDArray[np.float32]]",
+        "docstring": "",
+        "source_code": "Dict, Optional, Tup",
+        "return_type": "Optional[npt.NDArray[np.float32]]",
+        "parameters": {
+          "self": "Any",
+          "left": "bool"
+        },
+        "source": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper.PollenSDKCameraWrapper.get_K",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_depth_K",
+        "module": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper",
+        "class": "PollenSDKCameraWrapper",
+        "signature": "(self) -> Optional[npt.NDArray[np.float32]]",
+        "docstring": "",
+        "source_code": "e\n\nimport numpy ",
+        "return_type": "Optional[npt.NDArray[np.float32]]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper.PollenSDKCameraWrapper.get_depth_K",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.camera_wrappers.pollen_sdk_camera.pollen_sdk_camera_wrapper.PollenSDKCameraWrapper"
+  },
+  {
+    "type": "module",
+    "name": "pollen_vision.camera_wrappers.depthai.wrapper",
+    "docstring": "Depthai Wrapper module.",
+    "source": "camera_wrappers.depthai.wrapper"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.camera_wrappers.depthai.wrapper",
+    "class": "DepthaiWrapper",
+    "signature": "(self, cam_config_json: str, fps: int, force_usb2: bool, resize: Tuple[int, int], rectify: bool, exposure_params: Tuple[int, int], mx_id: str, isp_scale: Tuple[int, int], encoder_quality: int) -> None",
+    "docstring": "",
+    "source_code": "import json\nimport o",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "cam_config_json": "str",
+      "fps": "int",
+      "force_usb2": "bool",
+      "resize": "Tuple[int, int]",
+      "rectify": "bool",
+      "exposure_params": "Tuple[int, int]",
+      "mx_id": "str",
+      "isp_scale": "Tuple[int, int]",
+      "encoder_quality": "int"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.wrapper.DepthaiWrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "print_info",
+    "module": "pollen_vision.camera_wrappers.depthai.wrapper",
+    "class": "DepthaiWrapper",
+    "signature": "(self) -> None",
+    "docstring": "Prints the camera configuration.",
+    "source_code": "tet",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.wrapper.DepthaiWrapper.print_info",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_data",
+    "module": "pollen_vision.camera_wrappers.depthai.wrapper",
+    "class": "DepthaiWrapper",
+    "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "docstring": "Gets the data from the camera.\n\nReturns a tuple containing the data, the latency and the timestamp.\ndata is a dict containing the left and right images as well as the depth map if it exists.\nThe content of data is defined by the queues created in the _create_queues method.",
+    "source_code": "me, timedelta\nfrom p",
+    "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.wrapper.DepthaiWrapper.get_data",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_K",
+    "module": "pollen_vision.camera_wrappers.depthai.wrapper",
+    "class": "DepthaiWrapper",
+    "signature": "(self, left: bool) -> npt.NDArray[np.float32]",
+    "docstring": "",
+    "source_code": "hl",
+    "return_type": "npt.NDArray[np.float32]",
+    "parameters": {
+      "self": "Any",
+      "left": "bool"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.wrapper.DepthaiWrapper.get_K",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "flash",
+    "module": "pollen_vision.camera_wrappers.depthai.wrapper",
+    "class": "DepthaiWrapper",
+    "signature": "(self, calib_json_file: str) -> None",
+    "docstring": "Flashes the calibration to the camera.\n\nThe calibration is read from the calib_json_file and flashed into the camera's eeprom.",
+    "source_code": "t\nfrom pollen_vision",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "calib_json_file": "str"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.wrapper.DepthaiWrapper.flash",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "DepthaiWrapper",
+    "module": "pollen_vision.camera_wrappers.depthai.wrapper",
+    "docstring": "Wrapper is an abstract class for luxonis cameras using the depthai library.\n\nIt factors out the common code between the different camera wrappers.",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.camera_wrappers.depthai.wrapper",
+        "class": "DepthaiWrapper",
+        "signature": "(self, cam_config_json: str, fps: int, force_usb2: bool, resize: Tuple[int, int], rectify: bool, exposure_params: Tuple[int, int], mx_id: str, isp_scale: Tuple[int, int], encoder_quality: int) -> None",
+        "docstring": "",
+        "source_code": "import json\nimport o",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "cam_config_json": "str",
+          "fps": "int",
+          "force_usb2": "bool",
+          "resize": "Tuple[int, int]",
+          "rectify": "bool",
+          "exposure_params": "Tuple[int, int]",
+          "mx_id": "str",
+          "isp_scale": "Tuple[int, int]",
+          "encoder_quality": "int"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.wrapper.DepthaiWrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "print_info",
+        "module": "pollen_vision.camera_wrappers.depthai.wrapper",
+        "class": "DepthaiWrapper",
+        "signature": "(self) -> None",
+        "docstring": "Prints the camera configuration.",
+        "source_code": "tet",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.wrapper.DepthaiWrapper.print_info",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_data",
+        "module": "pollen_vision.camera_wrappers.depthai.wrapper",
+        "class": "DepthaiWrapper",
+        "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "docstring": "Gets the data from the camera.\n\nReturns a tuple containing the data, the latency and the timestamp.\ndata is a dict containing the left and right images as well as the depth map if it exists.\nThe content of data is defined by the queues created in the _create_queues method.",
+        "source_code": "me, timedelta\nfrom p",
+        "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.wrapper.DepthaiWrapper.get_data",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_K",
+        "module": "pollen_vision.camera_wrappers.depthai.wrapper",
+        "class": "DepthaiWrapper",
+        "signature": "(self, left: bool) -> npt.NDArray[np.float32]",
+        "docstring": "",
+        "source_code": "hl",
+        "return_type": "npt.NDArray[np.float32]",
+        "parameters": {
+          "self": "Any",
+          "left": "bool"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.wrapper.DepthaiWrapper.get_K",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "flash",
+        "module": "pollen_vision.camera_wrappers.depthai.wrapper",
+        "class": "DepthaiWrapper",
+        "signature": "(self, calib_json_file: str) -> None",
+        "docstring": "Flashes the calibration to the camera.\n\nThe calibration is read from the calib_json_file and flashed into the camera's eeprom.",
+        "source_code": "t\nfrom pollen_vision",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "calib_json_file": "str"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.wrapper.DepthaiWrapper.flash",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.camera_wrappers.depthai.wrapper.DepthaiWrapper"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.camera_wrappers.depthai.sdk",
+    "class": "SDKWrapper",
+    "signature": "(self, cam_config_json: str, fps: int, force_usb2: bool, resize: Optional[Tuple[int, int]], rectify: bool, compute_depth: bool, exposure_params: Optional[Tuple[int, int]], mx_id: str, jpeg_output: bool, encoder_quality: int) -> None",
+    "docstring": "",
+    "source_code": "om typing import Dic",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "cam_config_json": "str",
+      "fps": "int",
+      "force_usb2": "bool",
+      "resize": "Optional[Tuple[int, int]]",
+      "rectify": "bool",
+      "compute_depth": "bool",
+      "exposure_params": "Optional[Tuple[int, int]]",
+      "mx_id": "str",
+      "jpeg_output": "bool",
+      "encoder_quality": "int"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.sdk.SDKWrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_data",
+    "module": "pollen_vision.camera_wrappers.depthai.sdk",
+    "class": "SDKWrapper",
+    "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "docstring": "Extends the base class method get_data() to return opencv frames.\nReturns:\n    - Tuple(data, latency, timestamp) : Tuple of dictionaries of opencv frames,\n        latencies and timestamps for each camera.",
+    "source_code": "nal, Tuple\n\ni",
+    "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.sdk.SDKWrapper.get_data",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_K",
+    "module": "pollen_vision.camera_wrappers.depthai.sdk",
+    "class": "SDKWrapper",
+    "signature": "(self) -> npt.NDArray[np.float32]",
+    "docstring": "",
+    "source_code": "po",
+    "return_type": "npt.NDArray[np.float32]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.sdk.SDKWrapper.get_K",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_depth_K",
+    "module": "pollen_vision.camera_wrappers.depthai.sdk",
+    "class": "SDKWrapper",
+    "signature": "(self) -> npt.NDArray[np.float32]",
+    "docstring": "",
+    "source_code": "t ",
+    "return_type": "npt.NDArray[np.float32]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.sdk.SDKWrapper.get_depth_K",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "SDKWrapper",
+    "module": "pollen_vision.camera_wrappers.depthai.sdk",
+    "docstring": "A wrapper for the depthai library that exposes only the relevant features for Pollen's reachy sdk.\n\nCalling get_data() returns the left and right images, and if compute_depth is True:\n- returns the depth and disparity maps\n- returns the rectified left and right images from the depthai's depth node (grayscale)\n\nIf jpeg_output is True, the left and right images are encoded in mjpeg.\n\nArgs:\n    - cam_config_json: path to the camera configuration json file\n    - fps: frames per second\n    - force_usb2: force the use of USB2\n    - resize: tuple of two integers (width, height) to resize the images\n    - rectify: rectify the images using the calibration data stored in the eeprom of the camera\n    - compute_depth: compute the depth and disparity maps\n    - exposure_params: tuple of two integers (exposure, gain) to set the exposure and gain of the camera\n    - mx_id: the id of the camera\n    - jpeg_output: encode the left and right images in mjpeg",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.camera_wrappers.depthai.sdk",
+        "class": "SDKWrapper",
+        "signature": "(self, cam_config_json: str, fps: int, force_usb2: bool, resize: Optional[Tuple[int, int]], rectify: bool, compute_depth: bool, exposure_params: Optional[Tuple[int, int]], mx_id: str, jpeg_output: bool, encoder_quality: int) -> None",
+        "docstring": "",
+        "source_code": "om typing import Dic",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "cam_config_json": "str",
+          "fps": "int",
+          "force_usb2": "bool",
+          "resize": "Optional[Tuple[int, int]]",
+          "rectify": "bool",
+          "compute_depth": "bool",
+          "exposure_params": "Optional[Tuple[int, int]]",
+          "mx_id": "str",
+          "jpeg_output": "bool",
+          "encoder_quality": "int"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.sdk.SDKWrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_data",
+        "module": "pollen_vision.camera_wrappers.depthai.sdk",
+        "class": "SDKWrapper",
+        "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "docstring": "Extends the base class method get_data() to return opencv frames.\nReturns:\n    - Tuple(data, latency, timestamp) : Tuple of dictionaries of opencv frames,\n        latencies and timestamps for each camera.",
+        "source_code": "nal, Tuple\n\ni",
+        "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.sdk.SDKWrapper.get_data",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_K",
+        "module": "pollen_vision.camera_wrappers.depthai.sdk",
+        "class": "SDKWrapper",
+        "signature": "(self) -> npt.NDArray[np.float32]",
+        "docstring": "",
+        "source_code": "po",
+        "return_type": "npt.NDArray[np.float32]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.sdk.SDKWrapper.get_K",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_depth_K",
+        "module": "pollen_vision.camera_wrappers.depthai.sdk",
+        "class": "SDKWrapper",
+        "signature": "(self) -> npt.NDArray[np.float32]",
+        "docstring": "",
+        "source_code": "t ",
+        "return_type": "npt.NDArray[np.float32]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.sdk.SDKWrapper.get_depth_K",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.camera_wrappers.depthai.sdk.SDKWrapper"
+  },
+  {
+    "type": "module",
+    "name": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "docstring": "Camera configuration class for depthai cameras.",
+    "source": "camera_wrappers.depthai.cam_config"
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self, cam_config_json: str, fps: int, resize: Tuple[int, int], exposure_params: Tuple[int, int], mx_id: str, isp_scale: Tuple[int, int], rectify: bool, force_usb2: bool, encoder_quality: int) -> None",
+    "docstring": "",
+    "source_code": "s for depthai camera",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "cam_config_json": "str",
+      "fps": "int",
+      "resize": "Tuple[int, int]",
+      "exposure_params": "Tuple[int, int]",
+      "mx_id": "str",
+      "isp_scale": "Tuple[int, int]",
+      "rectify": "bool",
+      "force_usb2": "bool",
+      "encoder_quality": "int"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_device_info",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self) -> dai.DeviceInfo",
+    "docstring": "Returns a dai.DeviceInfo object with the mx_id.\nThis allows connecting to multiple devices plugged in the host machine at the same time,\ndifferentiating them by their mx_id.",
+    "source_code": "yping i",
+    "return_type": "dai.DeviceInfo",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.get_device_info",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "set_sensor_resolution",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self, resolution: Tuple[int, int]) -> None",
+    "docstring": "",
+    "source_code": "port D",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "resolution": "Tuple[int, int]"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.set_sensor_resolution",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "set_undistort_resolution",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self, resolution: Tuple[int, int]) -> None",
+    "docstring": "",
+    "source_code": "ct",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "resolution": "Tuple[int, int]"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.set_undistort_resolution",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "set_resize_resolution",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self, resolution: Tuple[int, int]) -> None",
+    "docstring": "",
+    "source_code": " L",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "resolution": "Tuple[int, int]"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.set_resize_resolution",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "set_undistort_maps",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self, mapXL: npt.NDArray[np.float32], mapYL: npt.NDArray[np.float32], mapXR: npt.NDArray[np.float32], mapYR: npt.NDArray[np.float32]) -> None",
+    "docstring": "",
+    "source_code": "st, Optio",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "mapXL": "npt.NDArray[np.float32]",
+      "mapYL": "npt.NDArray[np.float32]",
+      "mapXR": "npt.NDArray[np.float32]",
+      "mapYR": "npt.NDArray[np.float32]"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.set_undistort_maps",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "set_calib",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self, calib: dai.CalibrationHandler) -> None",
+    "docstring": "",
+    "source_code": "al",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "calib": "dai.CalibrationHandler"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.set_calib",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_calib",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self) -> dai.CalibrationHandler",
+    "docstring": "Returns a dai.CalibrationHandler object with all the camera's calibration data.",
+    "source_code": " Tu",
+    "return_type": "dai.CalibrationHandler",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.get_calib",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_K_left",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self) -> npt.NDArray[np.float32]",
+    "docstring": "Returns the intrinsic matrix of the left camera.",
+    "source_code": "le\n\nimport c",
+    "return_type": "npt.NDArray[np.float32]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.get_K_left",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_K_right",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self) -> npt.NDArray[np.float32]",
+    "docstring": "Returns the intrinsic matrix of the right camera.",
+    "source_code": "2\nimport dep",
+    "return_type": "npt.NDArray[np.float32]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.get_K_right",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "to_string",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self) -> str",
+    "docstring": "",
+    "source_code": "hai as dai\nimpor",
+    "return_type": "str",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.to_string",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "compute_projection_matrices",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self) -> Tuple[cv2.UMat, cv2.UMat]",
+    "docstring": "",
+    "source_code": " numpy as np\nimport ",
+    "return_type": "Tuple[cv2.UMat, cv2.UMat]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.compute_projection_matrices",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "to_ROS_msg",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "class": "CamConfig",
+    "signature": "(self, side: str) -> Tuple[int, int, str, List[float], npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]",
+    "docstring": "",
+    "source_code": "y.typing as npt\nfrom",
+    "return_type": "Tuple[int, int, str, List[float], npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]",
+    "parameters": {
+      "self": "Any",
+      "side": "str"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.to_ROS_msg",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "CamConfig",
+    "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+    "docstring": "CamConfig handles some of the camera configuration for depthai cameras.\n\nNon self explanatory parameters:\n- exposure_params: a tuple of two integers, the first one is the exposure time in microseconds,\n                   the second one is the ISO value. Default means auto exposure.\n- isp_scale: a tuple of two integers. The first one is the numerator\n             and the second one is the denominator of the scale factor.\n             This is used to scale the image signal processor (ISP) output.\n- mx_id: the mx_id of the device.\n         This allows connecting to multiple devices plugged in the host machine at the same time,\n         differentiating them by their mx_id.\n- force_usb2: if True, forces the camera to use USB2 instead of USB3.",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self, cam_config_json: str, fps: int, resize: Tuple[int, int], exposure_params: Tuple[int, int], mx_id: str, isp_scale: Tuple[int, int], rectify: bool, force_usb2: bool, encoder_quality: int) -> None",
+        "docstring": "",
+        "source_code": "s for depthai camera",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "cam_config_json": "str",
+          "fps": "int",
+          "resize": "Tuple[int, int]",
+          "exposure_params": "Tuple[int, int]",
+          "mx_id": "str",
+          "isp_scale": "Tuple[int, int]",
+          "rectify": "bool",
+          "force_usb2": "bool",
+          "encoder_quality": "int"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_device_info",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self) -> dai.DeviceInfo",
+        "docstring": "Returns a dai.DeviceInfo object with the mx_id.\nThis allows connecting to multiple devices plugged in the host machine at the same time,\ndifferentiating them by their mx_id.",
+        "source_code": "yping i",
+        "return_type": "dai.DeviceInfo",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.get_device_info",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "set_sensor_resolution",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self, resolution: Tuple[int, int]) -> None",
+        "docstring": "",
+        "source_code": "port D",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "resolution": "Tuple[int, int]"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.set_sensor_resolution",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "set_undistort_resolution",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self, resolution: Tuple[int, int]) -> None",
+        "docstring": "",
+        "source_code": "ct",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "resolution": "Tuple[int, int]"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.set_undistort_resolution",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "set_resize_resolution",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self, resolution: Tuple[int, int]) -> None",
+        "docstring": "",
+        "source_code": " L",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "resolution": "Tuple[int, int]"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.set_resize_resolution",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "set_undistort_maps",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self, mapXL: npt.NDArray[np.float32], mapYL: npt.NDArray[np.float32], mapXR: npt.NDArray[np.float32], mapYR: npt.NDArray[np.float32]) -> None",
+        "docstring": "",
+        "source_code": "st, Optio",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "mapXL": "npt.NDArray[np.float32]",
+          "mapYL": "npt.NDArray[np.float32]",
+          "mapXR": "npt.NDArray[np.float32]",
+          "mapYR": "npt.NDArray[np.float32]"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.set_undistort_maps",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "set_calib",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self, calib: dai.CalibrationHandler) -> None",
+        "docstring": "",
+        "source_code": "al",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "calib": "dai.CalibrationHandler"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.set_calib",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_calib",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self) -> dai.CalibrationHandler",
+        "docstring": "Returns a dai.CalibrationHandler object with all the camera's calibration data.",
+        "source_code": " Tu",
+        "return_type": "dai.CalibrationHandler",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.get_calib",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_K_left",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self) -> npt.NDArray[np.float32]",
+        "docstring": "Returns the intrinsic matrix of the left camera.",
+        "source_code": "le\n\nimport c",
+        "return_type": "npt.NDArray[np.float32]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.get_K_left",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_K_right",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self) -> npt.NDArray[np.float32]",
+        "docstring": "Returns the intrinsic matrix of the right camera.",
+        "source_code": "2\nimport dep",
+        "return_type": "npt.NDArray[np.float32]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.get_K_right",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "to_string",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self) -> str",
+        "docstring": "",
+        "source_code": "hai as dai\nimpor",
+        "return_type": "str",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.to_string",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "compute_projection_matrices",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self) -> Tuple[cv2.UMat, cv2.UMat]",
+        "docstring": "",
+        "source_code": " numpy as np\nimport ",
+        "return_type": "Tuple[cv2.UMat, cv2.UMat]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.compute_projection_matrices",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "to_ROS_msg",
+        "module": "pollen_vision.camera_wrappers.depthai.cam_config",
+        "class": "CamConfig",
+        "signature": "(self, side: str) -> Tuple[int, int, str, List[float], npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]",
+        "docstring": "",
+        "source_code": "y.typing as npt\nfrom",
+        "return_type": "Tuple[int, int, str, List[float], npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]",
+        "parameters": {
+          "self": "Any",
+          "side": "str"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig.to_ROS_msg",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.camera_wrappers.depthai.cam_config.CamConfig"
+  },
+  {
+    "type": "module",
+    "name": "pollen_vision.camera_wrappers.depthai.utils",
+    "docstring": "A collection of utility functions for the depthai camera wrappers.",
+    "source": "camera_wrappers.depthai.utils"
+  },
+  {
+    "type": "function",
+    "name": "get_connected_devices",
+    "module": "pollen_vision.camera_wrappers.depthai.utils",
+    "signature": "() -> Dict[str, str]",
+    "docstring": "Returns a dictionary of connected devices and their types. Key is mx_id and value is type (IMX296 or other for now).",
+    "source_code": "functions for th",
+    "return_type": "Dict[str, str]",
+    "parameters": {},
+    "source": "pollen_vision.camera_wrappers.depthai.utils.get_connected_devices",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_socket_from_name",
+    "module": "pollen_vision.camera_wrappers.depthai.utils",
+    "signature": "(name: str, name_to_socket: Dict[str, str]) -> dai.CameraBoardSocket",
+    "docstring": "Returns the depthai.socket corresponding to the name.",
+    "source_code": "dep",
+    "return_type": "dai.CameraBoardSocket",
+    "parameters": {
+      "name": "str",
+      "name_to_socket": "Dict[str, str]"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.utils.get_socket_from_name",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_inv_R_T",
+    "module": "pollen_vision.camera_wrappers.depthai.utils",
+    "signature": "(R: npt.NDArray[Any], T: npt.NDArray[Any]) -> Tuple[npt.NDArray[Any], npt.NDArray[Any]]",
+    "docstring": "Builds the homogeneous transformation matrix from the rotation matrix and the translation vector,\nInverts it and returns the inverse rotation matrix and translation vector\n.",
+    "source_code": "ai camera wr",
+    "return_type": "Tuple[npt.NDArray[Any], npt.NDArray[Any]]",
+    "parameters": {
+      "R": "npt.NDArray[Any]",
+      "T": "npt.NDArray[Any]"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.utils.get_inv_R_T",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "drawEpiLines",
+    "module": "pollen_vision.camera_wrappers.depthai.utils",
+    "signature": "(left: npt.NDArray[Any], right: npt.NDArray[Any], aruco_dict: aruco.Dictionary) -> npt.NDArray[Any]",
+    "docstring": "Draws epipolar lines between the left and right images using the aruco markers,\nand computes the average slope of the lines.",
+    "source_code": "pers.\"\"\"\n\nimport log",
+    "return_type": "npt.NDArray[Any]",
+    "parameters": {
+      "left": "npt.NDArray[Any]",
+      "right": "npt.NDArray[Any]",
+      "aruco_dict": "aruco.Dictionary"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.utils.drawEpiLines",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_config_files_names",
+    "module": "pollen_vision.camera_wrappers.depthai.utils",
+    "signature": "() -> List[str]",
+    "docstring": "Returns the names of the config files.",
+    "source_code": "port ",
+    "return_type": "List[str]",
+    "parameters": {},
+    "source": "pollen_vision.camera_wrappers.depthai.utils.get_config_files_names",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_config_file_path",
+    "module": "pollen_vision.camera_wrappers.depthai.utils",
+    "signature": "(name: str) -> Any",
+    "docstring": "Returns the path of the config file based on its name.",
+    "source_code": "les\nfrom",
+    "return_type": "Any",
+    "parameters": {
+      "name": "str"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.utils.get_config_file_path",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.camera_wrappers.depthai.teleop",
+    "class": "TeleopWrapper",
+    "signature": "(self, cam_config_json: str, fps: int, force_usb2: bool, rectify: bool, exposure_params: Optional[Tuple[int, int]], mx_id: str) -> None",
+    "docstring": "",
+    "source_code": "medelta\nfrom typing ",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any",
+      "cam_config_json": "str",
+      "fps": "int",
+      "force_usb2": "bool",
+      "rectify": "bool",
+      "exposure_params": "Optional[Tuple[int, int]]",
+      "mx_id": "str"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.teleop.TeleopWrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_data_h264",
+    "module": "pollen_vision.camera_wrappers.depthai.teleop",
+    "class": "TeleopWrapper",
+    "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "docstring": "Extends the get_data method of the Wrapper class to return the h264 encoded left and right images.\n\nReturns:\n    - Tuple(data, latency, timestamp) : Tuple of dictionaries of h264 encoded left and right images,\n        latencies and timestamps for each camera.",
+    "source_code": "t, Optional, Tupl",
+    "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.teleop.TeleopWrapper.get_data_h264",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_data_mjpeg",
+    "module": "pollen_vision.camera_wrappers.depthai.teleop",
+    "class": "TeleopWrapper",
+    "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "docstring": "",
+    "source_code": "\n\nimport",
+    "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.teleop.TeleopWrapper.get_data_mjpeg",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "TeleopWrapper",
+    "module": "pollen_vision.camera_wrappers.depthai.teleop",
+    "docstring": "A wrapper for the depthai library that exposes only the relevant features for Pollen's teleoperation feature.\n\nCalling get_data() returns h264 encoded left and right images.\n\nArgs:\n    - cam_config_json: path to the camera configuration json file\n    - fps: frames per second\n    - force_usb2: force the use of USB2\n    - rectify: rectify the images using the calibration data stored in the eeprom of the camera\n    - exposure_params: tuple of two integers (exposure, gain) to set the exposure and gain of the camera\n    - mx_id: the id of the camera",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.camera_wrappers.depthai.teleop",
+        "class": "TeleopWrapper",
+        "signature": "(self, cam_config_json: str, fps: int, force_usb2: bool, rectify: bool, exposure_params: Optional[Tuple[int, int]], mx_id: str) -> None",
+        "docstring": "",
+        "source_code": "medelta\nfrom typing ",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any",
+          "cam_config_json": "str",
+          "fps": "int",
+          "force_usb2": "bool",
+          "rectify": "bool",
+          "exposure_params": "Optional[Tuple[int, int]]",
+          "mx_id": "str"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.teleop.TeleopWrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_data_h264",
+        "module": "pollen_vision.camera_wrappers.depthai.teleop",
+        "class": "TeleopWrapper",
+        "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "docstring": "Extends the get_data method of the Wrapper class to return the h264 encoded left and right images.\n\nReturns:\n    - Tuple(data, latency, timestamp) : Tuple of dictionaries of h264 encoded left and right images,\n        latencies and timestamps for each camera.",
+        "source_code": "t, Optional, Tupl",
+        "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.teleop.TeleopWrapper.get_data_h264",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_data_mjpeg",
+        "module": "pollen_vision.camera_wrappers.depthai.teleop",
+        "class": "TeleopWrapper",
+        "signature": "(self) -> Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "docstring": "",
+        "source_code": "\n\nimport",
+        "return_type": "Tuple[Dict[str, npt.NDArray[np.uint8]], Dict[str, float], Dict[str, timedelta]]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.depthai.teleop.TeleopWrapper.get_data_mjpeg",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.camera_wrappers.depthai.teleop.TeleopWrapper"
+  },
+  {
+    "type": "function",
+    "name": "compute_undistort_maps",
+    "module": "pollen_vision.camera_wrappers.depthai.calibration.undistort",
+    "signature": "(cam_config: CamConfig) -> Tuple[cv2.UMat, cv2.UMat, cv2.UMat, cv2.UMat]",
+    "docstring": "Pre-computes the undistort maps for the rectification.",
+    "source_code": "ng import List, Tupl",
+    "return_type": "Tuple[cv2.UMat, cv2.UMat, cv2.UMat, cv2.UMat]",
+    "parameters": {
+      "cam_config": "CamConfig"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.calibration.undistort.compute_undistort_maps",
+    "decorators": []
+  },
+  {
+    "type": "function",
+    "name": "get_mesh",
+    "module": "pollen_vision.camera_wrappers.depthai.calibration.undistort",
+    "signature": "(cam_config: CamConfig, cam_name: str) -> Tuple[List[dai.Point2f], int, int]",
+    "docstring": "Computes and returns the mesh for the rectification.\nThis mesh is used by setWarpMesh in the imageManip nodes.",
+    "source_code": "dai\nimport numpy as ",
+    "return_type": "Tuple[List[dai.Point2f], int, int]",
+    "parameters": {
+      "cam_config": "CamConfig",
+      "cam_name": "str"
+    },
+    "source": "pollen_vision.camera_wrappers.depthai.calibration.undistort.get_mesh",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "__init__",
+    "module": "pollen_vision.camera_wrappers.realsense.realsense_wrapper",
+    "class": "RealsenseWrapper",
+    "signature": "(self) -> None",
+    "docstring": "",
+    "source_code": "ime import timedelta",
+    "return_type": "None",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.realsense.realsense_wrapper.RealsenseWrapper.__init__",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_data",
+    "module": "pollen_vision.camera_wrappers.realsense.realsense_wrapper",
+    "class": "RealsenseWrapper",
+    "signature": "(self) -> Tuple[Optional[Dict[str, npt.NDArray[np.uint8]]], Optional[Dict[str, float]], Optional[Dict[str, timedelta]]]",
+    "docstring": "",
+    "source_code": " typing import Dict,",
+    "return_type": "Tuple[Optional[Dict[str, npt.NDArray[np.uint8]]], Optional[Dict[str, float]], Optional[Dict[str, timedelta]]]",
+    "parameters": {
+      "self": "Any"
+    },
+    "source": "pollen_vision.camera_wrappers.realsense.realsense_wrapper.RealsenseWrapper.get_data",
+    "decorators": []
+  },
+  {
+    "type": "method",
+    "name": "get_K",
+    "module": "pollen_vision.camera_wrappers.realsense.realsense_wrapper",
+    "class": "RealsenseWrapper",
+    "signature": "(self, left: bool) -> npt.NDArray[np.float32]",
+    "docstring": "",
+    "source_code": "Op",
+    "return_type": "npt.NDArray[np.float32]",
+    "parameters": {
+      "self": "Any",
+      "left": "bool"
+    },
+    "source": "pollen_vision.camera_wrappers.realsense.realsense_wrapper.RealsenseWrapper.get_K",
+    "decorators": []
+  },
+  {
+    "type": "class",
+    "name": "RealsenseWrapper",
+    "module": "pollen_vision.camera_wrappers.realsense.realsense_wrapper",
+    "docstring": "",
+    "methods": [
+      {
+        "type": "method",
+        "name": "__init__",
+        "module": "pollen_vision.camera_wrappers.realsense.realsense_wrapper",
+        "class": "RealsenseWrapper",
+        "signature": "(self) -> None",
+        "docstring": "",
+        "source_code": "ime import timedelta",
+        "return_type": "None",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.realsense.realsense_wrapper.RealsenseWrapper.__init__",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_data",
+        "module": "pollen_vision.camera_wrappers.realsense.realsense_wrapper",
+        "class": "RealsenseWrapper",
+        "signature": "(self) -> Tuple[Optional[Dict[str, npt.NDArray[np.uint8]]], Optional[Dict[str, float]], Optional[Dict[str, timedelta]]]",
+        "docstring": "",
+        "source_code": " typing import Dict,",
+        "return_type": "Tuple[Optional[Dict[str, npt.NDArray[np.uint8]]], Optional[Dict[str, float]], Optional[Dict[str, timedelta]]]",
+        "parameters": {
+          "self": "Any"
+        },
+        "source": "pollen_vision.camera_wrappers.realsense.realsense_wrapper.RealsenseWrapper.get_data",
+        "decorators": []
+      },
+      {
+        "type": "method",
+        "name": "get_K",
+        "module": "pollen_vision.camera_wrappers.realsense.realsense_wrapper",
+        "class": "RealsenseWrapper",
+        "signature": "(self, left: bool) -> npt.NDArray[np.float32]",
+        "docstring": "",
+        "source_code": "Op",
+        "return_type": "npt.NDArray[np.float32]",
+        "parameters": {
+          "self": "Any",
+          "left": "bool"
+        },
+        "source": "pollen_vision.camera_wrappers.realsense.realsense_wrapper.RealsenseWrapper.get_K",
+        "decorators": []
+      }
+    ],
+    "source": "pollen_vision.camera_wrappers.realsense.realsense_wrapper.RealsenseWrapper"
   }
 ]
