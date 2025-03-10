@@ -177,6 +177,12 @@ def main():
         
         print("\n" + "=" * 80)
         print(f"VALIDATION: {'✅ Valid' if validation_result.get('valid', False) else '❌ Invalid'}")
+        
+        # Display correction attempts information if available
+        correction_attempts = response.get("correction_attempts", 0)
+        if correction_attempts > 0:
+            print(f"\nCode was automatically corrected after {correction_attempts} attempt(s)")
+            
         if validation_result.get("errors", []):
             print("\nErrors:")
             for error in validation_result.get("errors", []):

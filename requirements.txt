@@ -10,7 +10,7 @@ psutil>=5.9.6  # For system monitoring
 
 # Robot-specific dependencies
 reachy2-sdk # for Reachy 2 robot control
-#pollen-vision[vision] @ git+https://github.com/pollen-robotics/pollen-vision.git@main  # for Reachy's vision capabilities
+# pollen-vision[vision] @ git+https://github.com/pollen-robotics/pollen-vision.git@main  # for Reachy's vision capabilities
 #pollen-vision[vision] @ git+https://github.com/pollen-robotics/pollen-vision.git@159-release-dependency-constraints
 
 # LangChain and LangGraph dependencies

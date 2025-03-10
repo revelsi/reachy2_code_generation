@@ -36,6 +36,11 @@ python?-venv/
 *.swp
 *.swo
 .DS_Store
+.cursor/
+.cursor-rules/
+cursorrules.json
+*agentrules*
+*cursorrules*
 
 # Logs
 logs/

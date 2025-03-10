@@ -231,7 +231,8 @@ def generate_api_summary(api_docs):
         "reachy2_sdk.config",
         "reachy2_sdk.media",
         "reachy2_sdk.orbita",
-        "reachy2_sdk.sensors"
+        "reachy2_sdk.sensors",
+        "pollen_vision"
     ]
     
     # Extract classes and their methods with enhanced details
@@ -351,7 +352,7 @@ class ReachyCodeGenerationAgent:
     
     def __init__(
         self, 
-        model: str = "gpt-4-turbo", 
+        model: str = "gpt-4o-mini", 
         api_key: Optional[str] = None,
         temperature: float = 0.2,
         max_tokens: int = 4000,
@@ -409,6 +410,7 @@ class ReachyCodeGenerationAgent:
         - reachy2_sdk.media
         - reachy2_sdk.orbita
         - reachy2_sdk.sensors
+        - pollen_vision
         
         CRITICAL WARNINGS:
         - NEVER use 'get_reachy()' or any functions from 'connection_manager.py'
@@ -454,6 +456,82 @@ class ReachyCodeGenerationAgent:
             reachy.disconnect()
         ```
         
+        POLLEN VISION USAGE EXAMPLES:
+        
+        1. Object Detection with OwlVitWrapper:
+        ```python
+        from reachy2_sdk import ReachySDK
+        from pollen_vision.vision_models.object_detection import OwlVitWrapper
+        import numpy as np
+        
+        # Connect to the robot
+        reachy = ReachySDK(host="localhost")
+        
+        try:
+            # INITIALIZATION
+            reachy.turn_on()
+            
+            # Access the camera
+            camera = reachy.cameras.teleop()
+            
+            # Capture an image
+            frame, _ = camera.get_frame(view=camera.CameraView.LEFT)
+            
+            # Initialize object detection
+            detector = OwlVitWrapper()
+            
+            # Detect objects
+            candidate_labels = ["apple", "banana", "cup"]
+            detection_threshold = 0.1
+            predictions = detector.infer(frame, candidate_labels, detection_threshold)
+            
+            # Process predictions
+            if predictions:
+                print(f"Detected {{len(predictions)}} objects")
+                for pred in predictions:
+                    print(f"Found {{pred['label']}} with confidence {{pred['confidence']}}")
+            
+        finally:
+            # CLEANUP
+            reachy.turn_off_smoothly()
+            reachy.disconnect()
+        ```
+        
+        2. Depth Estimation with DepthAnythingWrapper:
+        ```python
+        from reachy2_sdk import ReachySDK
+        from pollen_vision.vision_models.monocular_depth_estimation import DepthAnythingWrapper
+        import numpy as np
+        
+        # Connect to the robot
+        reachy = ReachySDK(host="localhost")
+        
+        try:
+            # INITIALIZATION
+            reachy.turn_on()
+            
+            # Access the camera
+            camera = reachy.cameras.teleop()
+            
+            # Capture an image
+            frame, _ = camera.get_frame(view=camera.CameraView.LEFT)
+            
+            # Initialize depth estimation
+            depth_estimator = DepthAnythingWrapper()
+            
+            # Get depth information
+            depth_map = depth_estimator.get_depth(frame)
+            
+            # Process depth information
+            print(f"Depth map shape: {{depth_map.shape}}")
+            print(f"Average depth: {{np.mean(depth_map)}}")
+            
+        finally:
+            # CLEANUP
+            reachy.turn_off_smoothly()
+            reachy.disconnect()
+        ```
+        
         Here is a summary of the available API classes and methods:
         
         {self.api_summary}
@@ -474,12 +552,13 @@ class ReachyCodeGenerationAgent:
         ]
         logger.debug("Reset conversation history")
     
-    def process_message(self, message: str) -> Dict[str, Any]:
+    def process_message(self, message: str, max_correction_attempts: int = 3) -> Dict[str, Any]:
         """
-        Process a user message and generate Python code.
+        Process a user message and generate code.
         
         Args:
             message: The user message.
+            max_correction_attempts: Maximum number of attempts to correct validation errors.
             
         Returns:
             Dict[str, Any]: The response, including generated code and validation results.
@@ -497,7 +576,35 @@ class ReachyCodeGenerationAgent:
             # Validate code
             validation_result = self._validate_code(code)
             
-            # Add assistant response to conversation history
+            # Attempt to correct validation errors recursively
+            correction_attempts = 0
+            while not validation_result["valid"] and correction_attempts < max_correction_attempts:
+                correction_attempts += 1
+                logger.info(f"Validation failed. Attempting correction (attempt {correction_attempts}/{max_correction_attempts})")
+                
+                # Create error feedback message
+                error_feedback = f"The code you generated has the following errors that need to be fixed:\n"
+                for error in validation_result["errors"]:
+                    error_feedback += f"- {error}\n"
+                
+                # Add error feedback to conversation history
+                self.messages.append({"role": "user", "content": error_feedback})
+                
+                # Generate corrected code
+                code_response = self._generate_code()
+                
+                # Extract corrected code
+                code, explanation = self._extract_code_and_explanation(code_response)
+                
+                # Validate corrected code
+                validation_result = self._validate_code(code)
+                
+                # If validation passes, break the loop
+                if validation_result["valid"]:
+                    logger.info(f"Code corrected successfully after {correction_attempts} attempts")
+                    break
+            
+            # Add final assistant response to conversation history
             self.messages.append({"role": "assistant", "content": code_response})
             
             # Prepare response
@@ -505,7 +612,8 @@ class ReachyCodeGenerationAgent:
                 "message": explanation,
                 "code": code,
                 "validation": validation_result,
-                "raw_response": code_response
+                "raw_response": code_response,
+                "correction_attempts": correction_attempts
             }
             
             # Send notification via WebSocket
@@ -588,7 +696,8 @@ class ReachyCodeGenerationAgent:
             "reachy2_sdk.config",
             "reachy2_sdk.media",
             "reachy2_sdk.orbita",
-            "reachy2_sdk.sensors"
+            "reachy2_sdk.sensors",
+            "pollen_vision"
         ]
             
         for item in self.api_docs:
