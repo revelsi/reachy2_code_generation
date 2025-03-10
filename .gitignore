@@ -84,4 +84,10 @@ tmp/
 temp/
 
 # Keep test scripts
-!test_model_config.py 
+!test_model_config.py
+!test_code_generator_api_tools.py
+!launch_code_gen.py
+
+# Gradio cache
+.gradio/
+gradio_cached_examples/ 

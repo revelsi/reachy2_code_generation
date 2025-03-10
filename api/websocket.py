@@ -63,16 +63,14 @@ class WebSocketServer:
     def start(self) -> None:
         """Start the WebSocket server."""
         if self.running:
-            print("WebSocket server is already running")
             return
         
-        # Start the server in a separate thread
+        self.running = True
         self.update_thread = threading.Thread(target=self._run_server)
         self.update_thread.daemon = True
         self.update_thread.start()
         
         print(f"WebSocket server started on ws://{self.host}:{self.port}")
-        self.running = True
     
     def stop(self) -> None:
         """Stop the WebSocket server."""
@@ -429,6 +427,20 @@ class WebSocketServer:
             print(f"Error scheduling task: {e}")
             traceback.print_exc()
 
+    def set_port(self, port: int) -> None:
+        """
+        Set the port for the WebSocket server.
+        
+        Args:
+            port: The port to use.
+        """
+        if self.running:
+            print(f"Warning: Cannot change port while server is running. Stop the server first.")
+            return
+        
+        self.port = port
+        print(f"WebSocket server port set to {self.port}")
+
 
 # Global WebSocket server instance
 _WS_SERVER = None
@@ -449,6 +461,9 @@ def get_websocket_server(host: str = "0.0.0.0", port: int = 8765) -> WebSocketSe
     
     if _WS_SERVER is None:
         _WS_SERVER = WebSocketServer(host=host, port=port)
+    elif port != 8765 and not _WS_SERVER.running:
+        # Update the port if it's different from the default and the server is not running
+        _WS_SERVER.set_port(port)
     
     return _WS_SERVER
 

@@ -28,21 +28,30 @@
    - Developed mode-specific response formatting
    - Added centralized model configuration management
 
-5. **✅ Code Generation Mode Development**:
+5. **✅ Gradio Interface for Code Generation**:
+   - Created dedicated Gradio interface for code generation
+   - Implemented real-time status updates during code generation process
+   - Added automatic code validation and recursive correction
+   - Integrated code execution with detailed feedback
+   - Implemented correction history display for transparency
+   - Added robot connection status indicator
+   - Created simple launcher script for easy access
+
+6. **✅ Code Generation Mode Development**:
    - Implemented code generation agent using OpenAI API
    - Created mechanism to translate natural language to executable code
    - Added code validation framework for basic validation
    - Enhanced API structure with clear type information and usage examples
    - Simplified system prompt with clear initialization and cleanup phases
 
-6. **✅ API Documentation Enhancement**:
+7. **✅ API Documentation Enhancement**:
    - Enhanced API summary generation with detailed parameter information
    - Implemented robust parameter details extraction from function signatures and docstrings
    - Added special constraints for known problematic functions
    - Included units information for parameters
    - Created test scripts to verify the enhanced API summary generation
 
-7. **✅ Code Execution Implementation**:
+8. **✅ Code Execution Implementation**:
    - Implemented direct code execution on the virtual Reachy robot
    - Added code validation before execution
    - Created user confirmation flow for code execution
@@ -53,7 +62,7 @@
    - Simplified code execution workflow with reduced validation steps
    - Removed redundant safe execution wrapper for more direct execution
 
-8. **✅ Model Configuration Updates**:
+9. **✅ Model Configuration Updates**:
    - Updated default model to gpt-4o-mini for improved performance and cost efficiency
    - Added gpt-4o-mini to available models list in UI
    - Ensured proper configuration loading from environment variables and .env file

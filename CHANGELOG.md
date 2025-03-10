@@ -10,6 +10,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Added pollen-vision to official API modules for vision capabilities
 - Implemented recursive code correction for validation errors (up to 3 attempts)
 - Updated .gitignore to exclude cursor-related files and directories
+- Created dedicated Gradio interface for code generation with real-time status updates
+- Added automatic code validation and correction in the Gradio interface
+- Implemented correction history display for transparency
+- Added robot connection status indicator
+- Created simple launcher script (launch_code_gen.py) for easy access
+- Enhanced error handling for inverse kinematics and other common errors
 
 ## [2025-03-05]
 

@@ -831,6 +831,58 @@ class ReachyCodeGenerationAgent:
             "warnings": warnings
         }
     
+    def _analyze_execution_error(self, stderr: str, output: str) -> str:
+        """
+        Analyze execution errors and provide helpful feedback.
+        
+        Args:
+            stderr: Standard error output.
+            output: Standard output.
+            
+        Returns:
+            str: Helpful feedback about the error.
+        """
+        feedback = ""
+        
+        # Check for inverse kinematics errors
+        if "No solution found for the given target" in stderr or "No solution found for the given target" in output:
+            feedback += "INVERSE KINEMATICS ERROR: The target pose is not reachable by the robot arm.\n\n"
+            feedback += "Suggestions:\n"
+            feedback += "1. Try a position closer to the robot's body\n"
+            feedback += "2. Use a simpler orientation (e.g., facing forward)\n"
+            feedback += "3. Check that the position values are within the robot's reach (typically within 0.6 meters)\n"
+            feedback += "4. Consider using joint angles directly instead of inverse kinematics\n"
+        
+        # Check for connection errors
+        elif "Failed to connect to" in stderr or "Connection refused" in stderr:
+            feedback += "CONNECTION ERROR: Could not connect to the robot or simulator.\n\n"
+            feedback += "Suggestions:\n"
+            feedback += "1. Make sure the robot or simulator is running\n"
+            feedback += "2. Check that you're connecting to the correct IP address and port\n"
+            feedback += "3. Verify that there are no firewall issues blocking the connection\n"
+        
+        # Check for import errors
+        elif "ImportError" in stderr or "ModuleNotFoundError" in stderr:
+            feedback += "IMPORT ERROR: Could not import required modules.\n\n"
+            feedback += "Suggestions:\n"
+            feedback += "1. Make sure all required packages are installed\n"
+            feedback += "2. Check for typos in import statements\n"
+            feedback += "3. Verify that the module paths are correct\n"
+        
+        # Check for syntax errors
+        elif "SyntaxError" in stderr:
+            feedback += "SYNTAX ERROR: There's a syntax error in the generated code.\n\n"
+            feedback += "Suggestions:\n"
+            feedback += "1. Check for missing parentheses, brackets, or quotes\n"
+            feedback += "2. Verify that indentation is correct\n"
+            feedback += "3. Look for typos or invalid syntax\n"
+        
+        # If no specific error was identified, provide general feedback
+        if not feedback:
+            feedback = "An error occurred during execution. Please check the error message for details."
+        
+        return feedback
+
     def execute_code(self, code: str, confirm: bool = True, force: bool = False) -> Dict[str, Any]:
         """
         Execute the generated code on the virtual Reachy robot.
@@ -905,7 +957,21 @@ class ReachyCodeGenerationAgent:
                 temp_file.write(indented_code)
                 
                 # Add exception handling
-                temp_file.write("\nexcept Exception as e:\n")
+                temp_file.write("\nexcept ValueError as e:\n")
+                temp_file.write("    if 'No solution found for the given target' in str(e):\n")
+                temp_file.write("        print(\"ERROR: Inverse Kinematics Failed\\n\")\n")
+                temp_file.write("        print(f\"{e}\\n\")\n")
+                temp_file.write("        print(\"The target pose is not reachable by the robot arm. This could be because:\\n\")\n")
+                temp_file.write("        print(\"1. The position is outside the robot's workspace\")\n")
+                temp_file.write("        print(\"2. The orientation is not achievable with the robot's joint configuration\")\n")
+                temp_file.write("        print(\"3. The arm would collide with itself or other parts of the robot\\n\")\n")
+                temp_file.write("        print(\"Try adjusting the target position to be closer to the robot,\")\n")
+                temp_file.write("        print(\"or use a different orientation that's easier for the robot to achieve.\")\n")
+                temp_file.write("    else:\n")
+                temp_file.write("        print(f\"Error executing code: {e}\")\n")
+                temp_file.write("    traceback.print_exc()\n")
+                temp_file.write("    sys.exit(1)\n")
+                temp_file.write("except Exception as e:\n")
                 temp_file.write("    print(f\"Error executing code: {e}\")\n")
                 temp_file.write("    traceback.print_exc()\n")
                 temp_file.write("    sys.exit(1)\n")
@@ -946,12 +1012,16 @@ class ReachyCodeGenerationAgent:
                     "return_code": process.returncode
                 }
             else:
+                # Analyze the error and provide helpful feedback
+                feedback = self._analyze_execution_error(stderr, stdout)
+                
                 return {
                     "success": False,
                     "message": f"Code execution failed with return code {process.returncode}",
                     "output": stdout,
                     "stderr": stderr,
-                    "return_code": process.returncode
+                    "return_code": process.returncode,
+                    "feedback": feedback
                 }
                 
         except Exception as e:

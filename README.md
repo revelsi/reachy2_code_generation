@@ -21,6 +21,7 @@ The LangGraph agent implementation has been significantly improved with the foll
 - ✅ Improved connection handling with retry mechanisms for virtual Reachy
 - ✅ Pollen Vision Integration: Support for Reachy's vision capabilities through pollen-vision library
 - ✅ Recursive Code Correction: Automatic correction of validation errors in generated code (up to 3 attempts)
+- ✅ Gradio Interface for Code Generation: Dedicated web interface with real-time status updates and feedback
 
 The agent uses real tool definitions from the Reachy 2 SDK but can operate with mock implementations when no physical robot is available.
 
@@ -49,6 +50,7 @@ This repository contains a framework for transparent function calling with the R
 - **Model Flexibility**: Support for various OpenAI models including gpt-4o-mini for cost-effective operation
 - **Pollen Vision Integration**: Support for Reachy's vision capabilities through pollen-vision library
 - **Recursive Code Correction**: Automatic correction of validation errors in generated code (up to 3 attempts)
+- **Gradio Interface for Code Generation**: Dedicated web interface with real-time status updates and feedback
 
 ## Dual-Mode Architecture
 
@@ -401,3 +403,40 @@ The enhanced API summary generation has been thoroughly tested with:
 
 - **Unit Tests**: Verifying the extraction of parameter details
 - **Integration Tests**: Testing the code generation agent with the enhanced API summary
+
+## Quick Start
+
+### Running the Code Generation Interface
+
+To quickly start the code generation interface, run:
+
+```bash
+python launch_code_gen.py
+```
+
+This will launch a Gradio web interface at http://localhost:7860 where you can:
+- Generate Python code for the Reachy robot using natural language
+- See real-time status updates during the generation process
+- View code validation results and automatic corrections
+- Execute the generated code and see detailed feedback
+
+The interface uses GPT-4o-mini, which is optimized for Reachy 2 code generation, providing a good balance between performance and cost efficiency.
+
+#### Code Validation Process
+
+When code is generated, it goes through these validation steps:
+1. **Syntax Check**: Ensures the code has valid Python syntax
+2. **Import Validation**: Verifies all imports are available
+3. **API Usage Check**: Confirms correct usage of the Reachy API
+4. **Safety Check**: Looks for potentially harmful operations
+
+When issues are found, the model will attempt to fix them automatically (up to 3 correction attempts). The interface provides transparency about this process, showing:
+- What issues were found
+- Whether they were successfully fixed
+- A detailed correction history
+
+You can customize the interface with command-line arguments:
+
+```bash
+python launch_code_gen.py --temperature 0.3 --max-tokens 5000 --port 7861 --websocket-port 8766
+```
