@@ -14,6 +14,8 @@ import logging
 import time
 from typing import Dict, List, Any, Tuple
 from dotenv import load_dotenv
+import numpy as np
+import traceback
 
 # Load environment variables from .env file
 load_dotenv()
@@ -34,57 +36,139 @@ from config import OPENAI_API_KEY, MODEL, AVAILABLE_MODELS, get_model_config
 # Import Gradio
 import gradio as gr
 
-# Import the code generation agent
-from agent.code_generation_agent import ReachyCodeGenerationAgent
+# Import the OpenAI client
+from openai import OpenAI
 
 
 class CodeGenerationInterface:
-    """Simple Gradio interface for the Reachy 2 Code Generation Agent."""
-    
+    """Interface for code generation using OpenAI API."""
+
     def __init__(
         self,
-        api_key: str = None,
-        model: str = "gpt-4o-mini",  # Hardcoded to gpt-4o-mini
+        api_key: str,
+        model: str = "gpt-4o-mini",
         temperature: float = 0.2,
-        max_tokens: int = 4000,
-        websocket_port: int = None,
+        max_tokens: int = 4096,
+        top_p: float = 0.95,
+        frequency_penalty: float = 0,
+        presence_penalty: float = 0,
+        websocket_port: int = None
     ):
-        """
-        Initialize the code generation interface.
-        
+        """Initialize the code generation interface.
+
         Args:
-            api_key: OpenAI API key. If None, will use OPENAI_API_KEY environment variable.
-            temperature: The temperature to use for code generation.
+            api_key: The OpenAI API key.
+            model: The OpenAI model to use.
+            temperature: The temperature for the model (0.0 to 1.0).
             max_tokens: The maximum number of tokens to generate.
-            websocket_port: The port to use for the WebSocket server. If None, will use the default port.
+            top_p: The top_p value for the model (0.0 to 1.0).
+            frequency_penalty: The frequency penalty for the model (-2.0 to 2.0).
+            presence_penalty: The presence penalty for the model (-2.0 to 2.0).
+            websocket_port: Port for the WebSocket server (default is 8765).
         """
-        # Configure WebSocket port if provided
-        if websocket_port is not None:
-            # Import here to avoid circular imports
-            from api.websocket import get_websocket_server
-            websocket_server = get_websocket_server(port=websocket_port)
-        
-        # Initialize the code generation agent
-        self.agent = ReachyCodeGenerationAgent(
-            api_key=api_key,
-            model=model,  # Always use gpt-4o-mini
-            temperature=temperature,
-            max_tokens=max_tokens
-        )
+        self.model = model
+        self.temperature = temperature
+        self.max_tokens = max_tokens
+        self.top_p = top_p
+        self.frequency_penalty = frequency_penalty
+        self.presence_penalty = presence_penalty
+        self.websocket_port = websocket_port
         
         # Initialize chat history
         self.chat_history = []
         
-        # Store model configuration
-        self.model_config = {
-            "model": model,
-            "temperature": temperature,
-            "max_tokens": max_tokens
-        }
+        # Initialize OpenAI client
+        self.client = OpenAI(api_key=api_key)
         
-        # Initialize Reachy availability
-        self.reachy_available = False
+        logger.debug(f"Initialized code generation interface with model: {model}")
+
+    def generate_code(self, system_prompt: str, user_prompt: str) -> Dict[str, Any]:
+        """Generate code using the OpenAI API.
+
+        Args:
+            system_prompt: The system prompt to use.
+            user_prompt: The user prompt to use.
+
+        Returns:
+            Dict[str, Any]: The response from the API, including generated code.
+        """
+        try:
+            logger.debug(f"Generating code with model: {self.model}")
+            
+            # Create messages for the API
+            messages = [
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_prompt}
+            ]
+            
+            # Call the OpenAI API
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=messages,
+                temperature=self.temperature,
+                max_tokens=self.max_tokens,
+                top_p=self.top_p,
+                frequency_penalty=self.frequency_penalty,
+                presence_penalty=self.presence_penalty
+            )
+            
+            # Extract code and explanation from the response
+            content = response.choices[0].message.content
+            code, explanation = self._extract_code_and_explanation(content)
+            
+            # Prepare the response
+            result = {
+                "message": explanation,
+                "code": code,
+                "raw_response": content
+            }
+            
+            logger.debug("Code generation successful")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Error generating code: {e}")
+            logger.error(traceback.format_exc())
+            return {
+                "error": str(e),
+                "message": f"Error generating code: {str(e)}",
+                "code": "",
+                "raw_response": ""
+            }
     
+    def _extract_code_and_explanation(self, response: str) -> tuple[str, str]:
+        """Extract code and explanation from the response.
+
+        Args:
+            response: The response from the API.
+
+        Returns:
+            tuple[str, str]: The extracted code and explanation.
+        """
+        # Default values
+        code = ""
+        explanation = response
+        
+        # Check if the response contains a code block
+        if "```python" in response:
+            # Split by Python code blocks
+            parts = response.split("```python")
+            
+            if len(parts) > 1:
+                # Get the first part as the explanation (before the code block)
+                explanation = parts[0].strip()
+                
+                # Get the code from the first code block
+                code_parts = parts[1].split("```", 1)
+                if len(code_parts) > 0:
+                    code = code_parts[0].strip()
+                
+                # If there's content after the code block, add it to the explanation
+                if len(code_parts) > 1 and code_parts[1].strip():
+                    explanation += "\n\n" + code_parts[1].strip()
+        
+        return code, explanation
+
     def process_message(self, message: str, history: List[List[str]]) -> Tuple[List[List[str]], str, Dict[str, Any], str, str]:
         """
         Process a user message and update the chat history.
@@ -98,16 +182,32 @@ class CodeGenerationInterface:
         """
         try:
             # Add a status message to the chat
-            history.append([message, "Thinking... Generating code based on your request. This may take a moment."])
+            history.append([message, "Generating code..."])
             self.chat_history = history
             
-            # Process the message with recursive correction
-            response_data = self.agent.process_message(message, max_correction_attempts=3)
+            # Import the agent here to avoid circular imports
+            from agent.code_generation_agent import ReachyCodeGenerationAgent
+            
+            # Create a temporary agent to get the system prompt
+            # We only need the system prompt, not the full agent functionality
+            temp_agent = ReachyCodeGenerationAgent(
+                api_key=self.client.api_key,
+                model=self.model
+            )
+            
+            # Get the system prompt from the agent
+            system_prompt = temp_agent._build_system_prompt()
+            
+            # Process the message without recursive correction
+            response_data = self.generate_code(system_prompt=system_prompt, user_prompt=message)
             
             # Extract the message from the response
             response_message = response_data.get("message", "")
             if response_data.get("error"):
                 response_message = f"Error: {response_data.get('error')}"
+            else:
+                # Make the response more concise - focus on the code
+                response_message = "Code generated based on your request."
             
             # Update chat history with the actual response
             history[-1] = [message, response_message]
@@ -121,56 +221,42 @@ class CodeGenerationInterface:
             correction_count = response_data.get("correction_count", 0)
             correction_info = ""
             if correction_count > 0:
-                correction_info = f" (Automatically corrected {correction_count} time{'s' if correction_count > 1 else ''})"
+                correction_info = f" (Corrected {correction_count}x)"
             
             # Create a status message
-            status = f"✅ Code generated successfully{correction_info}."
+            status = f"✅ Code generated{correction_info}"
             if not generated_code:
-                status = "❌ No code was generated. Please try again with a different request."
+                status = "❌ No code generated. Try a different request."
             elif not code_validation.get("valid", False):
-                status = f"⚠️ Code generated with validation issues{correction_info}. Check the validation results."
+                status = f"⚠️ Code has validation issues{correction_info}"
             
-            # Create correction history
+            # Create simplified correction history
             correction_history = ""
             corrections = response_data.get("corrections", [])
             if corrections:
-                correction_history = "### Code Correction History\n\n"
+                correction_history = "### Code Corrections\n\n"
                 for i, correction in enumerate(corrections):
                     correction_history += f"**Correction {i+1}:**\n"
                     issues = correction.get('issues', [])
                     fixed = correction.get('fixed', False)
                     correction_history += f"- Issues: {', '.join(issues)}\n"
-                    correction_history += f"- Fixed: {fixed}\n"
-                    if fixed:
-                        correction_history += "- ✅ The model successfully fixed these issues\n\n"
-                    else:
-                        correction_history += "- ❌ The model was unable to fix these issues\n\n"
-                
-                # Add explanation of validation process
-                correction_history += "### Validation Process\n\n"
-                correction_history += "The code goes through these validation steps:\n"
-                correction_history += "1. **Syntax Check**: Ensures the code has valid Python syntax\n"
-                correction_history += "2. **Import Validation**: Verifies all imports are available\n"
-                correction_history += "3. **API Usage Check**: Confirms correct usage of the Reachy API\n"
-                correction_history += "4. **Safety Check**: Looks for potentially harmful operations\n\n"
-                correction_history += "When issues are found, the model attempts to fix them automatically."
+                    correction_history += f"- {'✅ Fixed' if fixed else '❌ Not fixed'}\n\n"
             
             return history, generated_code, code_validation, status, correction_history
         except Exception as e:
             logger.error(f"Error processing message: {e}")
-            error_message = f"An error occurred: {str(e)}"
+            error_message = f"Error: {str(e)}"
             history.append([message, error_message])
-            return history, "", {"valid": False, "errors": [error_message], "warnings": []}, "❌ Error occurred during processing", ""
+            return history, "", {"valid": False, "errors": [error_message], "warnings": []}, "❌ Error occurred", ""
     
     def reset_chat(self) -> Tuple[List[List[str]], str, Dict[str, Any], str, str]:
         """
-        Reset the chat history.
+        Reset the chat history and clear all outputs.
         
         Returns:
             Tuple: Empty chat history, empty code, empty validation, status message, and empty correction history.
         """
         self.chat_history = []
-        self.agent.reset_conversation()
         return [], "", {"valid": False, "errors": [], "warnings": []}, "Chat reset. Ready for new requests.", ""
     
     def update_model_config(self, temperature: float, max_tokens: int) -> Dict[str, Any]:
@@ -192,11 +278,11 @@ class CodeGenerationInterface:
         }
         
         # Reinitialize the agent with the new configuration
-        self.agent = ReachyCodeGenerationAgent(
-            model="gpt-4o-mini",  # Always use gpt-4o-mini
-            temperature=temperature,
-            max_tokens=max_tokens
-        )
+        # self.agent = ReachyCodeGenerationAgent(
+        #     model="gpt-4o-mini",  # Always use gpt-4o-mini
+        #     temperature=temperature,
+        #     max_tokens=max_tokens
+        # )
         
         # Check if Reachy is available
         self.reachy_available = self.check_reachy_available()
@@ -214,6 +300,12 @@ class CodeGenerationInterface:
             Dict: The execution result.
         """
         try:
+            # Store the code being executed
+            self.last_executed_code = code
+            
+            # Log the code being executed
+            logger.info(f"Executing code:\n{code}")
+            
             # Check if Reachy is available
             import socket
             reachy_available = False
@@ -230,20 +322,29 @@ class CodeGenerationInterface:
             if not reachy_available:
                 return {
                     "success": False,
-                    "message": "Reachy robot is not available. Please make sure the robot or simulator is running.",
+                    "error": "Reachy robot is not available",
                     "output": "Cannot execute code because the Reachy robot or simulator is not running or not accessible.",
-                    "stderr": "Connection to Reachy robot failed. The robot or simulator must be running on localhost:50051.",
                     "status": "❌ Robot connection failed"
                 }
             
-            # Execute the code
-            result = self.agent.execute_code(code, confirm=False)
+            # Import the agent here to avoid circular imports
+            from agent.code_generation_agent import ReachyCodeGenerationAgent
             
-            # Add a status message
-            if result.get("success", False):
-                result["status"] = "✅ Code executed successfully"
-            else:
-                result["status"] = "❌ Code execution failed"
+            # Create a temporary agent to execute the code
+            temp_agent = ReachyCodeGenerationAgent(
+                api_key=self.client.api_key,
+                model=self.model
+            )
+            
+            # Execute the code using the agent's execute_code method
+            result = temp_agent.execute_code(code, confirm=False)
+            
+            # Add a status message if not already present
+            if "status" not in result:
+                if result.get("success", False):
+                    result["status"] = "✅ Code executed successfully"
+                else:
+                    result["status"] = "❌ Code execution failed"
             
             return result
         except Exception as e:
@@ -252,7 +353,6 @@ class CodeGenerationInterface:
                 "success": False,
                 "error": str(e),
                 "output": "",
-                "result": None,
                 "status": "❌ Error during execution"
             }
     
@@ -300,13 +400,6 @@ class CodeGenerationInterface:
             gr.Markdown("""
             This interface allows you to generate Python code for the Reachy 2 robot using natural language.
             Simply describe what you want the robot to do, and the agent will generate the appropriate code.
-            
-            **Features:**
-            - Automatic code validation
-            - Recursive code correction (fixes issues automatically)
-            - Code execution with detailed feedback
-            
-            **Model: GPT-4o-mini** - Optimized for code generation with the Reachy 2 robot
             """)
             
             # Reachy status
@@ -316,29 +409,6 @@ class CodeGenerationInterface:
             
             # Process status indicator
             process_status = gr.Markdown("### Status: Ready")
-            
-            # Model configuration
-            with gr.Group():
-                gr.Markdown("### Generation Parameters")
-                with gr.Row():
-                    temperature_slider = gr.Slider(
-                        minimum=0.0,
-                        maximum=1.0,
-                        value=self.model_config.get("temperature", 0.2),
-                        step=0.1,
-                        label="Temperature",
-                        info="Higher values make output more random, lower values more deterministic"
-                    )
-                    max_tokens_slider = gr.Slider(
-                        minimum=1000,
-                        maximum=8000,
-                        value=self.model_config.get("max_tokens", 4000),
-                        step=500,
-                        label="Max Tokens",
-                        info="Maximum number of tokens to generate"
-                    )
-                
-                update_model_btn = gr.Button("Update Parameters", variant="secondary")
             
             with gr.Row():
                 with gr.Column(scale=3):
@@ -377,13 +447,7 @@ class CodeGenerationInterface:
                     validation_explanation = gr.Markdown("""
                     ### Code Validation
                     
-                    When code is generated, it goes through these validation steps:
-                    1. **Syntax Check**: Ensures the code has valid Python syntax
-                    2. **Import Validation**: Verifies all imports are available
-                    3. **API Usage Check**: Confirms correct usage of the Reachy API
-                    4. **Safety Check**: Looks for potentially harmful operations
-                    
-                    Issues found during validation will be shown below:
+                    Validation: **Syntax** | **Imports** | **API Usage** | **Safety**
                     """)
                     
                     validation_json = gr.JSON(
@@ -397,7 +461,10 @@ class CodeGenerationInterface:
                     # Execution status
                     execution_status = gr.Markdown("No code executed yet.")
                     
-                    execute_btn = gr.Button("Execute Code", variant="primary")
+                    # Execution buttons
+                    with gr.Row():
+                        execute_btn = gr.Button("Execute Code", variant="primary")
+                    
                     execution_result = gr.JSON(
                         value={},
                         label="Execution Result",
@@ -412,60 +479,25 @@ class CodeGenerationInterface:
                         lines=5,
                     )
             
-            # Model configuration output
-            model_config_json = gr.JSON(
-                value=self.model_config,
-                label="Current Model Configuration",
-                visible=False
-            )
-            
             # Set up event handlers
-            
-            # Update model configuration
-            update_model_btn.click(
-                fn=lambda: "### Status: Updating generation parameters...",
-                outputs=[process_status],
-            ).then(
-                fn=self.update_model_config,
-                inputs=[temperature_slider, max_tokens_slider],
-                outputs=[model_config_json],
-            ).then(
-                fn=lambda: "### Status: Generation parameters updated",
-                outputs=[process_status],
-            ).then(
-                fn=lambda: "Generation parameters updated successfully.",
-                outputs=[status_msg],
-            )
             
             # Generate code
             def update_process_status(step):
                 return f"### Status: {step}"
             
-            # Define the code generation pipeline with detailed status updates
+            # Generate code
             submit_btn.click(
-                fn=lambda: update_process_status("Starting code generation..."),
+                fn=lambda: update_process_status("Generating..."),
                 outputs=[process_status],
             ).then(
-                fn=lambda: "Generating code based on your request. This may take a moment...",
+                fn=lambda: "Working on it...",
                 outputs=[status_msg],
-            ).then(
-                fn=lambda: update_process_status("Analyzing request..."),
-                outputs=[process_status],
-            ).then(
-                fn=lambda: time.sleep(1) or update_process_status("Generating code..."),
-                outputs=[process_status],
-            ).then(
-                fn=lambda: update_process_status("Validating code (syntax, imports, API usage, safety)..."),
-                outputs=[process_status],
-            ).then(
-                fn=lambda: time.sleep(1) or update_process_status("Applying automatic corrections if needed..."),
-                outputs=[process_status],
             ).then(
                 fn=self.process_message,
                 inputs=[msg, chatbot],
                 outputs=[chatbot, code_editor, validation_json, status_msg, correction_history_md],
             ).then(
-                fn=lambda: update_process_status("Code generation complete"),
+                fn=lambda: update_process_status("Complete"),
                 outputs=[process_status],
             ).then(
                 fn=lambda: "",
@@ -474,29 +506,17 @@ class CodeGenerationInterface:
             
             # Same for message submission
             msg.submit(
-                fn=lambda: update_process_status("Starting code generation..."),
+                fn=lambda: update_process_status("Generating..."),
                 outputs=[process_status],
             ).then(
-                fn=lambda: "Generating code based on your request. This may take a moment...",
+                fn=lambda: "Working on it...",
                 outputs=[status_msg],
-            ).then(
-                fn=lambda: update_process_status("Analyzing request..."),
-                outputs=[process_status],
-            ).then(
-                fn=lambda: time.sleep(1) or update_process_status("Generating code..."),
-                outputs=[process_status],
-            ).then(
-                fn=lambda: update_process_status("Validating code (syntax, imports, API usage, safety)..."),
-                outputs=[process_status],
-            ).then(
-                fn=lambda: time.sleep(1) or update_process_status("Applying automatic corrections if needed..."),
-                outputs=[process_status],
             ).then(
                 fn=self.process_message,
                 inputs=[msg, chatbot],
                 outputs=[chatbot, code_editor, validation_json, status_msg, correction_history_md],
             ).then(
-                fn=lambda: update_process_status("Code generation complete"),
+                fn=lambda: update_process_status("Complete"),
                 outputs=[process_status],
             ).then(
                 fn=lambda: "",
@@ -505,11 +525,20 @@ class CodeGenerationInterface:
             
             # Reset chat
             reset_btn.click(
-                fn=lambda: update_process_status("Resetting chat..."),
+                fn=lambda: update_process_status("Resetting..."),
                 outputs=[process_status],
             ).then(
                 fn=self.reset_chat,
                 outputs=[chatbot, code_editor, validation_json, status_msg, correction_history_md],
+            ).then(
+                fn=lambda: "",
+                outputs=[execution_status],
+            ).then(
+                fn=lambda: "",
+                outputs=[execution_feedback],
+            ).then(
+                fn=lambda: {},
+                outputs=[execution_result],
             ).then(
                 fn=lambda: update_process_status("Ready"),
                 outputs=[process_status],
@@ -517,10 +546,47 @@ class CodeGenerationInterface:
             
             # Define a function to extract feedback from execution result
             def extract_feedback(result):
-                feedback = result.get("feedback", "")
-                if not feedback and not result.get("success", True):
-                    # If no feedback but execution failed, provide a basic message
-                    feedback = "Execution failed. Check the execution result for details."
+                feedback = ""
+                
+                # If execution failed, provide error details
+                if not result.get("success", True):
+                    error = result.get("error", "")
+                    stderr = result.get("stderr", "")
+                    output = result.get("output", "")
+                    feedback_msg = result.get("feedback", "")
+                    message = result.get("message", "")
+                    
+                    # If we have specific feedback, use it first
+                    if feedback_msg:
+                        feedback += f"{feedback_msg}\n\n"
+                    
+                    # Add the error message if available
+                    if error:
+                        feedback += f"Error: {error}\n\n"
+                    
+                    # Add the message if available and not already included
+                    if message and "Error" not in message and message not in feedback:
+                        feedback += f"{message}\n\n"
+                    
+                    # Add stderr if available
+                    if stderr:
+                        feedback += f"Details: {stderr}\n\n"
+                    
+                    # Add output if available
+                    if output:
+                        feedback += f"Output: {output}\n\n"
+                    
+                    if not feedback:
+                        feedback = "Execution failed. Check the execution result for details."
+                
+                # If execution succeeded, provide a success message
+                else:
+                    output = result.get("output", "")
+                    if output:
+                        feedback = f"Execution successful!\n\nOutput:\n{output}"
+                    else:
+                        feedback = "Execution successful!"
+                
                 return feedback
             
             # Define a function to extract status from execution result
@@ -529,41 +595,35 @@ class CodeGenerationInterface:
             
             # Execute code
             execute_btn.click(
-                fn=lambda: update_process_status("Executing code..."),
+                fn=lambda: update_process_status("Executing..."),
                 outputs=[process_status],
             ).then(
-                fn=lambda: "Executing code. This may take a moment...",
+                fn=lambda: "Running code...",
                 outputs=[execution_status],
             ).then(
                 fn=self.execute_code,
                 inputs=[code_editor],
                 outputs=[execution_result],
             ).then(
-                fn=extract_feedback,
-                inputs=[execution_result],
-                outputs=[execution_feedback],
-            ).then(
                 fn=extract_status,
                 inputs=[execution_result],
                 outputs=[execution_status],
             ).then(
-                fn=lambda: update_process_status("Code execution complete"),
+                fn=extract_feedback,
+                inputs=[execution_result],
+                outputs=[execution_feedback],
+            ).then(
+                fn=lambda: update_process_status("Ready"),
                 outputs=[process_status],
             )
             
             # Refresh robot status
             refresh_btn.click(
-                fn=lambda: update_process_status("Checking robot connection..."),
+                fn=lambda: update_process_status("Checking connection..."),
                 outputs=[process_status],
-            ).then(
-                fn=lambda: "Checking robot connection...",
-                outputs=[status_msg],
             ).then(
                 fn=self.check_reachy_status,
                 outputs=[reachy_status_md],
-            ).then(
-                fn=lambda: "Robot status updated.",
-                outputs=[status_msg],
             ).then(
                 fn=lambda: update_process_status("Ready"),
                 outputs=[process_status],
@@ -577,8 +637,6 @@ def main():
     """Main entry point for the code generation interface."""
     parser = argparse.ArgumentParser(description="Reachy 2 Code Generation Interface")
     parser.add_argument("--api-key", help="OpenAI API key (if not provided, will use OPENAI_API_KEY environment variable)")
-    parser.add_argument("--temperature", type=float, default=0.2, help="Model temperature (0.0 to 1.0)")
-    parser.add_argument("--max-tokens", type=int, default=4000, help="Maximum tokens to generate")
     parser.add_argument("--share", action="store_true", help="Create a public link")
     parser.add_argument("--port", type=int, default=7860, help="Port to run the server on")
     parser.add_argument("--websocket-port", type=int, help="Port for the WebSocket server (default is 8765)")
@@ -587,12 +645,12 @@ def main():
     
     print(f"Starting Reachy 2 Code Generation Interface with model: gpt-4o-mini")
     
-    # Create interface
+    # Create interface with default temperature and max_tokens
     interface = CodeGenerationInterface(
         api_key=args.api_key,
         model="gpt-4o-mini",  # Always use gpt-4o-mini
-        temperature=args.temperature,
-        max_tokens=args.max_tokens,
+        temperature=0.2,      # Default temperature
+        max_tokens=4000,      # Default max_tokens
         websocket_port=args.websocket_port,
     )
     

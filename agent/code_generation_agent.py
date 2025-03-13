@@ -11,10 +11,13 @@ import sys
 import json
 import logging
 import traceback
-from typing import Dict, List, Any, Optional, TypedDict, Tuple
+from typing import Dict, List, Any, Optional, TypedDict, Tuple, Union
 from openai import OpenAI
 import httpx
 import re
+
+from .code_generation_interface import CodeGenerationInterface
+from .prompt_config import get_prompt_sections, get_default_prompt_order
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -70,6 +73,22 @@ def load_api_documentation():
     except Exception as e:
         logger.error(f"Error loading API documentation: {e}")
         return []
+
+
+def load_kinematics_guide():
+    """
+    Load the kinematics guide from the markdown file.
+    
+    Returns:
+        str: The kinematics guide content.
+    """
+    try:
+        guide_path = os.path.join(os.path.dirname(__file__), "docs", "reachy2_kinematics_prompt.md")
+        with open(guide_path, "r") as f:
+            return f.read()
+    except Exception as e:
+        logger.error(f"Error loading kinematics guide: {e}")
+        return "ARM KINEMATICS GUIDE NOT FOUND"
 
 
 def extract_parameter_details(signature: str, docstring: str) -> Dict[str, Dict[str, Any]]:
@@ -212,7 +231,8 @@ def add_special_constraints(class_name: str, method_name: str, param_details: Di
 
 def generate_api_summary(api_docs):
     """
-    Generate a summary of the API documentation with enhanced parameter details.
+    Generate a concise summary of the API documentation with essential parameter details,
+    focusing only on the most commonly used classes and methods.
     
     Args:
         api_docs: The API documentation.
@@ -235,30 +255,45 @@ def generate_api_summary(api_docs):
         "pollen_vision"
     ]
     
+    # Define the most commonly used classes
+    common_classes = [
+        "ReachySDK",  # Main SDK class
+        "Arm",        # Arm control
+        "Head",       # Head control
+        "MobileBase", # Mobile base control
+        "Hand",       # Hand/gripper control
+        "OrbitaJoint" # Joint control
+    ]
+    
     # Extract classes and their methods with enhanced details
     classes = {}
-    official_modules = set()
     official_classes = set()
     
     for item in api_docs:
-        # Track official modules (only if they're in the official list)
-        if item.get("type") == "module":
-            module_name = item.get("name")
-            if module_name and any(module_name.startswith(prefix) for prefix in official_api_modules):
-                official_modules.add(module_name)
-        
-        # Process classes (only if they're from official modules)
+        # Process classes (only if they're from official modules and in common_classes)
         if item.get("type") == "class":
             class_name = item.get("name")
             module_name = item.get("module", "")
             
-            # Only include classes from official modules
-            if module_name and any(module_name.startswith(prefix) for prefix in official_api_modules):
+            # Only include classes from official modules and in common_classes
+            if (module_name and any(module_name.startswith(prefix) for prefix in official_api_modules) 
+                and class_name in common_classes):
                 # Add to official classes
                 if class_name:
                     official_classes.add(class_name)
                 
                 methods = []
+                
+                # Define commonly used methods for each class
+                common_methods = {
+                    "ReachySDK": ["__init__", "connect", "disconnect", "turn_on", "turn_off_smoothly", 
+                                 "goto_posture", "r_arm", "l_arm", "head", "mobile_base"],
+                    "Arm": ["goto", "inverse_kinematics", "get_current_positions", "goto_posture"],
+                    "Head": ["look_at", "goto", "rotate_by", "get_current_positions"],
+                    "MobileBase": ["goto", "rotate_by", "translate_by", "set_goal_speed"],
+                    "Hand": ["open", "close", "set_opening"],
+                    "OrbitaJoint": ["goal_position", "present_position", "goto"]
+                }
                 
                 # Get methods for this class
                 for method in item.get("methods", []):
@@ -266,7 +301,10 @@ def generate_api_summary(api_docs):
                     signature = method.get("signature", "")
                     docstring = method.get("docstring", "")
                     
-                    if method_name and not method_name.startswith("_"):  # Skip private methods
+                    # Only include common methods for this class
+                    if (method_name and not method_name.startswith("_") and  # Skip private methods
+                        (method_name in common_methods.get(class_name, []) or method_name == "__init__")):  # Always include constructor
+                        
                         # Extract parameter details
                         param_details = extract_parameter_details(signature, docstring)
                         
@@ -289,55 +327,97 @@ def generate_api_summary(api_docs):
     # Format the enhanced summary
     summary = []
     
-    # Add official modules
-    summary.append("# Official Modules")
-    for module in sorted(official_modules):
-        summary.append(f"- {module}")
-    summary.append("")
-    
-    # Add official classes
-    summary.append("# Official Classes")
-    for class_name in sorted(official_classes):
-        summary.append(f"- {class_name}")
+    # Add a concise header with common classes
+    summary.append("# Common Classes and Methods")
+    summary.append(", ".join(sorted(official_classes)))
     summary.append("")
     
     # Add class methods with enhanced details
-    summary.append("# Class Methods with Parameter Details")
     for class_name, methods in sorted(classes.items()):
         summary.append(f"## {class_name}")
         
         for method in sorted(methods, key=lambda x: x["name"]):
             method_name = method["name"]
-            signature = method["signature"]
+            
+            # Simplify signature display - only show if it's not a standard method
+            if method_name in ["__init__", "goto", "inverse_kinematics"]:
+                signature = method["signature"]
+                # Simplify signature by removing return type annotations for clarity
+                if " -> " in signature:
+                    signature = signature.split(" -> ")[0] + ")"
+            else:
+                # For other methods, don't show the full signature
+                signature = "()"
+                
             docstring = method["docstring"]
             
+            # Add method name and simplified signature
             summary.append(f"### {method_name}{signature}")
-            first_line = docstring.split('\n')[0] if docstring else ''
-            summary.append(f"{first_line}")
             
-            # Add parameter details
+            # Add first line of docstring if it exists and is meaningful
+            if docstring and len(docstring) > 5:  # Only add if docstring has substance
+                summary.append(f"{docstring}")
+            
+            # Add parameter details - but only for parameters with constraints or important info
             if method["parameters"]:
-                summary.append("Parameters:")
+                has_important_params = False
+                param_lines = []
+                
                 for param_name, param_info in method["parameters"].items():
+                    # Skip parameters without descriptions or constraints
+                    if not param_info.get("description") and not param_info.get("constraints"):
+                        continue
+                        
+                    has_important_params = True
                     param_type = param_info.get("type", "")
                     param_desc = param_info.get("description", "")
                     
-                    summary.append(f"- {param_name} ({param_type}): {param_desc}")
+                    # Simplify parameter type display
+                    if param_type and len(param_type) > 20:
+                        # For complex types, simplify
+                        if "List" in param_type:
+                            param_type = "List"
+                        elif "Optional" in param_type:
+                            param_type = "Optional"
+                        elif "Dict" in param_type:
+                            param_type = "Dict"
+                        elif "float | int" in param_type:
+                            param_type = "number"
+                        elif "npt.NDArray" in param_type:
+                            param_type = "array"
                     
-                    # Add constraints if any
+                    # Add parameter with type and description
+                    param_line = f"- {param_name}"
+                    if param_type:
+                        param_line += f" ({param_type})"
+                    if param_desc:
+                        param_line += f": {param_desc}"
+                    
+                    param_lines.append(param_line)
+                    
+                    # Add constraints if any - these are critical for safety
                     constraints = param_info.get("constraints", [])
                     if constraints:
-                        summary.append("  Constraints:")
                         for constraint in constraints:
-                            summary.append(f"  * {constraint}")
+                            param_lines.append(f"  * {constraint}")
                     
-                    # Add units if specified
+                    # Add units if specified - important for correct usage
                     if "units" in param_info:
-                        summary.append(f"  * Units: {param_info['units']}")
+                        param_lines.append(f"  * Units: {param_info['units']}")
+                
+                # Only add Parameters section if there are important parameters
+                if has_important_params:
+                    summary.append("Parameters:")
+                    summary.extend(param_lines)
             
             summary.append("")
         
         summary.append("")
+    
+    # Add a note about additional classes
+    summary.append("# Note")
+    summary.append("This is a focused summary of the most commonly used classes and methods.")
+    summary.append("For details on other classes and methods, please refer to the full API documentation.")
     
     return "\n".join(summary)
 
@@ -351,283 +431,80 @@ class ReachyCodeGenerationAgent:
     """
     
     def __init__(
-        self, 
-        model: str = "gpt-4o-mini", 
-        api_key: Optional[str] = None,
+        self,
+        api_key: str,
+        model: str = "gpt-4o-mini",
         temperature: float = 0.2,
-        max_tokens: int = 4000,
-        top_p: float = 0.95,
-        frequency_penalty: float = 0,
-        presence_penalty: float = 0
+        max_tokens: int = 4096,
+        kinematics_guide_path: str = "agent/docs/reachy2_kinematics_prompt.md",
     ):
-        """
-        Initialize the code generation agent.
-        
+        """Initialize the code generation agent.
+
         Args:
+            api_key: The OpenAI API key.
             model: The OpenAI model to use.
-            api_key: The OpenAI API key. If None, will use OPENAI_API_KEY environment variable.
             temperature: The temperature for the model (0.0 to 1.0).
             max_tokens: The maximum number of tokens to generate.
-            top_p: The top_p value for the model (0.0 to 1.0).
-            frequency_penalty: The frequency penalty for the model (-2.0 to 2.0).
-            presence_penalty: The presence penalty for the model (-2.0 to 2.0).
+            kinematics_guide_path: Path to the kinematics guide.
         """
+        self.api_key = api_key
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
-        self.top_p = top_p
-        self.frequency_penalty = frequency_penalty
-        self.presence_penalty = presence_penalty
+        self.kinematics_guide_path = kinematics_guide_path
         
-        if api_key:
-            self.client = OpenAI(api_key=api_key)
-        else:
-            self.client = client  # Use the configured client
+        # Initialize logger
+        self.logger = logging.getLogger("code_generation_agent")
         
-        logger.debug(f"Initialized code generation agent with model: {model}")
+        # Initialize conversation history
+        self.conversation_history = []
         
-        # Conversation history
-        self.messages = []
+        # Initialize OpenAI client
+        self.client = OpenAI(api_key=api_key)
         
-        # Load API documentation
+        # Initialize API documentation and official elements
         self.api_docs = load_api_documentation()
-        self.api_summary = generate_api_summary(self.api_docs)
-        
-        # Extract official modules and classes for validation
         self.official_modules = set()
         self.official_classes = set()
+        
+        # Initialize code generation interface
+        self.interface = CodeGenerationInterface(
+            api_key=api_key,
+            model=model,
+            temperature=temperature,
+            max_tokens=max_tokens
+        )
+        
+        # Extract official API elements
         self._extract_official_api_elements()
         
-        # System prompt for the agent
-        self.system_prompt = f"""
-        You are an AI assistant that generates Python code for controlling a Reachy 2 robot.
-        
-        OFFICIAL REACHY 2 SDK MODULES:
-        - reachy2_sdk.reachy_sdk
-        - reachy2_sdk.parts
-        - reachy2_sdk.utils
-        - reachy2_sdk.config
-        - reachy2_sdk.media
-        - reachy2_sdk.orbita
-        - reachy2_sdk.sensors
-        - pollen_vision
-        
-        CRITICAL WARNINGS:
-        - NEVER use 'get_reachy()' or any functions from 'connection_manager.py'
-        - Carefully read the API documentation and make sure you follow the arguments and parameters guidelines.
-        - ALWAYS use properties correctly (e.g., reachy.r_arm NOT reachy.r_arm())
-        - For arm goto(), ALWAYS provide EXACTLY 7 joint values
-        
-        REQUIRED CODE STRUCTURE:
-        
-        1. INITIALIZATION PHASE:
-           - Import ReachySDK from reachy2_sdk
-           - Connect to the robot: reachy = ReachySDK(host="localhost")
-           - ALWAYS call reachy.turn_on() before any movement
-           - ALWAYS call reachy.goto_posture('default') before any movement to reset the posture
-        
-        2. MAIN CODE PHASE:
-           - Always use try/finally blocks for error handling
-           - Access parts as properties (reachy.r_arm, reachy.head, etc.)
-           - Use proper method signatures from the API documentation
-        
-        3. CLEANUP PHASE:
-           - ALWAYS use reachy.turn_off_smoothly() (NOT turn_off())
-           - ALWAYS call reachy.disconnect()
-           - Put cleanup in a finally block
-        
-        EXAMPLE CODE TEMPLATE:
-        ```python
-        from reachy2_sdk import ReachySDK
-        
-        # Connect to the robot
-        reachy = ReachySDK(host="localhost")
-        
-        try:
-            # INITIALIZATION
-            reachy.turn_on()
-            
-            # MAIN CODE
-            # Your code here...
-            
-        finally:
-            # CLEANUP
-            reachy.turn_off_smoothly()
-            reachy.disconnect()
-        ```
-        
-        POLLEN VISION USAGE EXAMPLES:
-        
-        1. Object Detection with OwlVitWrapper:
-        ```python
-        from reachy2_sdk import ReachySDK
-        from pollen_vision.vision_models.object_detection import OwlVitWrapper
-        import numpy as np
-        
-        # Connect to the robot
-        reachy = ReachySDK(host="localhost")
-        
-        try:
-            # INITIALIZATION
-            reachy.turn_on()
-            
-            # Access the camera
-            camera = reachy.cameras.teleop()
-            
-            # Capture an image
-            frame, _ = camera.get_frame(view=camera.CameraView.LEFT)
-            
-            # Initialize object detection
-            detector = OwlVitWrapper()
-            
-            # Detect objects
-            candidate_labels = ["apple", "banana", "cup"]
-            detection_threshold = 0.1
-            predictions = detector.infer(frame, candidate_labels, detection_threshold)
-            
-            # Process predictions
-            if predictions:
-                print(f"Detected {{len(predictions)}} objects")
-                for pred in predictions:
-                    print(f"Found {{pred['label']}} with confidence {{pred['confidence']}}")
-            
-        finally:
-            # CLEANUP
-            reachy.turn_off_smoothly()
-            reachy.disconnect()
-        ```
-        
-        2. Depth Estimation with DepthAnythingWrapper:
-        ```python
-        from reachy2_sdk import ReachySDK
-        from pollen_vision.vision_models.monocular_depth_estimation import DepthAnythingWrapper
-        import numpy as np
-        
-        # Connect to the robot
-        reachy = ReachySDK(host="localhost")
-        
-        try:
-            # INITIALIZATION
-            reachy.turn_on()
-            
-            # Access the camera
-            camera = reachy.cameras.teleop()
-            
-            # Capture an image
-            frame, _ = camera.get_frame(view=camera.CameraView.LEFT)
-            
-            # Initialize depth estimation
-            depth_estimator = DepthAnythingWrapper()
-            
-            # Get depth information
-            depth_map = depth_estimator.get_depth(frame)
-            
-            # Process depth information
-            print(f"Depth map shape: {{depth_map.shape}}")
-            print(f"Average depth: {{np.mean(depth_map)}}")
-            
-        finally:
-            # CLEANUP
-            reachy.turn_off_smoothly()
-            reachy.disconnect()
-        ```
-        
-        Here is a summary of the available API classes and methods:
-        
-        {self.api_summary}
-        
-        Format your response with:
-        1. A brief explanation of what the code does
-        2. The complete Python code in a code block
-        3. An explanation of how the code works and any important considerations
-        """
-        
-        # Initialize conversation with system message
-        self.reset_conversation()
+        self.logger.debug(f"Initialized code generation agent with model: {model}")
     
     def reset_conversation(self) -> None:
         """Reset the conversation history."""
         self.messages = [
-            {"role": "system", "content": self.system_prompt}
+            {"role": "system", "content": self._build_system_prompt()}
         ]
         logger.debug("Reset conversation history")
     
-    def process_message(self, message: str, max_correction_attempts: int = 3) -> Dict[str, Any]:
-        """
-        Process a user message and generate code.
-        
+    def process_message(self, message: str) -> Dict[str, Any]:
+        """Process a message from the user.
+
         Args:
-            message: The user message.
-            max_correction_attempts: Maximum number of attempts to correct validation errors.
-            
+            message: The message from the user.
+
         Returns:
-            Dict[str, Any]: The response, including generated code and validation results.
+            Dict[str, Any]: The response from the agent.
         """
-        try:
-            # Add user message to conversation history
-            self.messages.append({"role": "user", "content": message})
-            
-            # Generate code
-            code_response = self._generate_code()
-            
-            # Extract code from response
-            code, explanation = self._extract_code_and_explanation(code_response)
-            
-            # Validate code
-            validation_result = self._validate_code(code)
-            
-            # Attempt to correct validation errors recursively
-            correction_attempts = 0
-            while not validation_result["valid"] and correction_attempts < max_correction_attempts:
-                correction_attempts += 1
-                logger.info(f"Validation failed. Attempting correction (attempt {correction_attempts}/{max_correction_attempts})")
-                
-                # Create error feedback message
-                error_feedback = f"The code you generated has the following errors that need to be fixed:\n"
-                for error in validation_result["errors"]:
-                    error_feedback += f"- {error}\n"
-                
-                # Add error feedback to conversation history
-                self.messages.append({"role": "user", "content": error_feedback})
-                
-                # Generate corrected code
-                code_response = self._generate_code()
-                
-                # Extract corrected code
-                code, explanation = self._extract_code_and_explanation(code_response)
-                
-                # Validate corrected code
-                validation_result = self._validate_code(code)
-                
-                # If validation passes, break the loop
-                if validation_result["valid"]:
-                    logger.info(f"Code corrected successfully after {correction_attempts} attempts")
-                    break
-            
-            # Add final assistant response to conversation history
-            self.messages.append({"role": "assistant", "content": code_response})
-            
-            # Prepare response
-            response = {
-                "message": explanation,
-                "code": code,
-                "validation": validation_result,
-                "raw_response": code_response,
-                "correction_attempts": correction_attempts
-            }
-            
-            # Send notification via WebSocket
-            self._send_websocket_notification(response)
-            
-            return response
-            
-        except Exception as e:
-            logger.error(f"Error processing message: {e}")
-            logger.error(traceback.format_exc())
-            return {
-                "error": str(e),
-                "message": f"Error generating code: {str(e)}"
-            }
+        system_prompt = self._build_system_prompt()
+        
+        # Generate code using the interface
+        response = self.interface.generate_code(
+            system_prompt=system_prompt,
+            user_prompt=message,
+        )
+        
+        return response
     
     def _generate_code(self) -> str:
         """
@@ -638,18 +515,13 @@ class ReachyCodeGenerationAgent:
         """
         try:
             # Call the OpenAI API
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=self.messages,
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-                top_p=self.top_p,
-                frequency_penalty=self.frequency_penalty,
-                presence_penalty=self.presence_penalty
+            response = self.interface.generate_code(
+                system_prompt=self.system_prompt,
+                user_prompt=self.messages[-1]["content"]
             )
             
             # Extract and return the response content
-            return response.choices[0].message.content
+            return response
             
         except Exception as e:
             logger.error(f"Error generating code: {e}")
@@ -684,8 +556,15 @@ class ReachyCodeGenerationAgent:
     
     def _extract_official_api_elements(self):
         """Extract official modules and classes from the API documentation."""
-        if not self.api_docs:
-            logger.warning("No API documentation available for extracting official elements")
+        # Initialize sets if they don't exist
+        if not hasattr(self, 'official_modules'):
+            self.official_modules = set()
+        if not hasattr(self, 'official_classes'):
+            self.official_classes = set()
+            
+        # Check if API docs are available
+        if not hasattr(self, 'api_docs') or not self.api_docs:
+            self.logger.warning("No API documentation available for extracting official elements")
             return
         
         # Define the official API modules (these are the ones from the Reachy SDK)
@@ -715,7 +594,7 @@ class ReachyCodeGenerationAgent:
                     if class_name:
                         self.official_classes.add(class_name)
         
-        logger.debug(f"Extracted {len(self.official_modules)} official modules and {len(self.official_classes)} official classes")
+        self.logger.debug(f"Extracted {len(self.official_modules)} official modules and {len(self.official_classes)} official classes")
     
     def _validate_code(self, code: str) -> CodeValidationResult:
         """
@@ -769,7 +648,7 @@ class ReachyCodeGenerationAgent:
         # Check for cleanup
         if "disconnect()" not in code:
             warnings.append("No disconnect operation found in the code")
-        
+            
         # Check for finally block
         if "finally:" not in code:
             warnings.append("No finally block found for ensuring cleanup operations")
@@ -824,12 +703,74 @@ class ReachyCodeGenerationAgent:
                 values = [v.strip() for v in match.split(',')]
                 if len(values) != 7:
                     errors.append(f"Incorrect arm goto usage: The positions array must have exactly 7 values for the 7 joints, but found {len(values)}.")
+            
+        # Check for potential workspace issues
+        workspace_warnings = self._check_workspace_issues(code)
+        if workspace_warnings:
+            warnings.extend(workspace_warnings)
         
         return {
             "valid": len(errors) == 0,
             "errors": errors,
             "warnings": warnings
         }
+        
+    def _check_workspace_issues(self, code: str) -> List[str]:
+        """
+        Check for potential workspace issues in the generated code.
+        
+        Args:
+            code: The generated code.
+            
+        Returns:
+            List[str]: List of warnings about potential workspace issues.
+        """
+        warnings = []
+        
+        # Define safe ranges
+        safe_ranges = {
+            "r_arm": {
+                "x": (0.2, 0.4),  # forward from chest (meters)
+                "y": (-0.3, -0.1),  # to the right of center (meters)
+                "z": (-0.1, 0.3),  # vertical position (meters)
+            },
+            "l_arm": {
+                "x": (0.2, 0.4),  # forward from chest (meters)
+                "y": (0.1, 0.3),  # to the left of center (meters)
+                "z": (-0.1, 0.3),  # vertical position (meters)
+            }
+        }
+        
+        # Check for potential out-of-range X values
+        if "0.5" in code and ("x" in code.lower() or "position" in code.lower()):
+            warnings.append("CRITICAL: Potential unreachable target - X value may be too large (> 0.4m)")
+        
+        # Check for potential out-of-range Y values for right arm
+        if "y" in code.lower() and "-0.4" in code:
+            warnings.append("CRITICAL: Potential unreachable target - Y value for right arm may be too far right (< -0.3m)")
+        
+        # Check for potential out-of-range Y values for left arm
+        if "y" in code.lower() and "0.4" in code:
+            warnings.append("CRITICAL: Potential unreachable target - Y value for left arm may be too far left (> 0.3m)")
+        
+        # Check for potential out-of-range Z values
+        if "z" in code.lower() and ("0.4" in code or "-0.2" in code):
+            warnings.append("CRITICAL: Potential unreachable target - Z value may be outside safe range (-0.1m to 0.3m)")
+        
+        # Check for numpy arrays that might define target positions
+        if "np.array" in code and "[[" in code:
+            # Look for potential transformation matrices
+            if not all(limit in code for limit in ["0.2", "0.3", "0.4"]):
+                warnings.append("CRITICAL: Target positions may be outside safe workspace limits. Ensure X: 0.2-0.4m, Y: ±0.1-0.3m, Z: -0.1-0.3m")
+        
+        # Check if the code includes reachability checks
+        if "inverse_kinematics" in code and "try:" in code and "except" in code:
+            # Code has proper error handling for inverse kinematics
+            pass
+        elif "inverse_kinematics" in code:
+            warnings.append("CRITICAL: Using inverse_kinematics without proper error handling. Always use try/except to handle unreachable targets.")
+        
+        return warnings
     
     def _analyze_execution_error(self, stderr: str, output: str) -> str:
         """
@@ -844,8 +785,17 @@ class ReachyCodeGenerationAgent:
         """
         feedback = ""
         
+        # Check for "Target was not reachable" message in output
+        if "Target was not reachable" in output:
+            feedback += "UNREACHABLE TARGET ERROR: The target pose is not reachable by the robot arm.\n\n"
+            feedback += "Suggestions:\n"
+            feedback += "1. Try a position closer to the robot's body\n"
+            feedback += "2. Use a simpler orientation (e.g., facing forward)\n"
+            feedback += "3. Check that the position values are within the robot's reach (typically within 0.6 meters)\n"
+            feedback += "4. Consider using joint angles directly instead of inverse kinematics or target poses\n"
+        
         # Check for inverse kinematics errors
-        if "No solution found for the given target" in stderr or "No solution found for the given target" in output:
+        elif "No solution found for the given target" in stderr or "No solution found for the given target" in output:
             feedback += "INVERSE KINEMATICS ERROR: The target pose is not reachable by the robot arm.\n\n"
             feedback += "Suggestions:\n"
             feedback += "1. Try a position closer to the robot's body\n"
@@ -979,7 +929,7 @@ class ReachyCodeGenerationAgent:
                 temp_file_path = temp_file.name
             
             # Execute the code in a separate process
-            logger.info(f"Executing code in {temp_file_path}")
+            self.logger.info(f"Executing code in {temp_file_path}")
             
             # Use the same Python interpreter that's running this code
             python_executable = sys.executable
@@ -1000,17 +950,31 @@ class ReachyCodeGenerationAgent:
             try:
                 os.unlink(temp_file_path)
             except Exception as e:
-                logger.warning(f"Failed to delete temporary file {temp_file_path}: {e}")
+                self.logger.warning(f"Failed to delete temporary file {temp_file_path}: {e}")
             
             # Check if the execution was successful
             if process.returncode == 0:
-                return {
-                    "success": True,
-                    "message": "Code executed successfully",
-                    "output": stdout,
-                    "stderr": stderr,
-                    "return_code": process.returncode
-                }
+                # Even if the return code is 0, check for specific error messages in the output
+                if "Target was not reachable" in stdout:
+                    # Analyze the error and provide helpful feedback
+                    feedback = self._analyze_execution_error(stderr, stdout)
+                    
+                    return {
+                        "success": False,
+                        "message": "Code execution failed: Target was not reachable",
+                        "output": stdout,
+                        "stderr": stderr,
+                        "return_code": process.returncode,
+                        "feedback": feedback
+                    }
+                else:
+                    return {
+                        "success": True,
+                        "message": "Code executed successfully",
+                        "output": stdout,
+                        "stderr": stderr,
+                        "return_code": process.returncode
+                    }
             else:
                 # Analyze the error and provide helpful feedback
                 feedback = self._analyze_execution_error(stderr, stdout)
@@ -1025,8 +989,8 @@ class ReachyCodeGenerationAgent:
                 }
                 
         except Exception as e:
-            logger.error(f"Error executing code: {e}")
-            logger.error(traceback.format_exc())
+            self.logger.error(f"Error executing code: {e}")
+            self.logger.error(traceback.format_exc())
             return {
                 "success": False,
                 "message": f"Error executing code: {str(e)}",
@@ -1055,4 +1019,51 @@ class ReachyCodeGenerationAgent:
                     logger.debug("WebSocket server does not have broadcast method")
         except Exception as e:
             logger.error(f"Error sending WebSocket notification: {e}")
-            logger.error(traceback.format_exc()) 
+            logger.error(traceback.format_exc())
+
+    def _build_system_prompt(self) -> str:
+        """Build the system prompt for the code generation agent.
+        
+        Returns:
+            str: The system prompt.
+        """
+        # Get prompt sections and default order
+        sections = get_prompt_sections()
+        section_order = get_default_prompt_order()
+        
+        # Load kinematics guide
+        kinematics_guide = ""
+        
+        try:
+            with open(self.kinematics_guide_path, "r") as f:
+                kinematics_guide = f.read()
+        except Exception as e:
+            self.logger.error(f"Failed to load kinematics guide: {e}")
+            kinematics_guide = "ERROR: Kinematics guide not found."
+        
+        # Generate API summary on-the-fly
+        api_docs = load_api_documentation()
+        if api_docs:
+            api_summary = generate_api_summary(api_docs)
+            self.logger.info("Generated API summary from documentation")
+        else:
+            self.logger.error("Failed to load API documentation")
+            api_summary = "ERROR: API documentation not found."
+        
+        # Build the prompt by concatenating sections in order
+        prompt_parts = []
+        
+        for section_name in section_order:
+            if section_name in sections:
+                prompt_parts.append(sections[section_name])
+        
+        # Insert kinematics guide and API summary at appropriate positions
+        # Add them after the code structure section
+        code_structure_index = section_order.index("code_structure")
+        
+        if code_structure_index >= 0 and code_structure_index < len(prompt_parts):
+            prompt_parts.insert(code_structure_index + 1, f"KINEMATICS GUIDE:\n{kinematics_guide}")
+            prompt_parts.insert(code_structure_index + 2, f"API SUMMARY:\n{api_summary}")
+        
+        # Join all parts with double newlines for better readability
+        return "\n\n".join(prompt_parts) 

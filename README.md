@@ -22,6 +22,9 @@ The LangGraph agent implementation has been significantly improved with the foll
 - ✅ Pollen Vision Integration: Support for Reachy's vision capabilities through pollen-vision library
 - ✅ Recursive Code Correction: Automatic correction of validation errors in generated code (up to 3 attempts)
 - ✅ Gradio Interface for Code Generation: Dedicated web interface with real-time status updates and feedback
+- ✅ Arm Kinematics Understanding: Enhanced spatial awareness through forward and inverse kinematics knowledge, enabling precise 3D positioning and movement planning
+- ✅ Reliable Movement Strategies: Improved guidance for joint angle control and proper Cartesian control with orientation matrices
+- ✅ Enhanced Workspace Safety: Updated workspace guidelines based on empirical testing to prevent unreachable targets
 
 The agent uses real tool definitions from the Reachy 2 SDK but can operate with mock implementations when no physical robot is available.
 
@@ -51,6 +54,7 @@ This repository contains a framework for transparent function calling with the R
 - **Pollen Vision Integration**: Support for Reachy's vision capabilities through pollen-vision library
 - **Recursive Code Correction**: Automatic correction of validation errors in generated code (up to 3 attempts)
 - **Gradio Interface for Code Generation**: Dedicated web interface with real-time status updates and feedback
+- **Arm Kinematics Understanding**: Enhanced spatial awareness through forward and inverse kinematics knowledge, enabling precise 3D positioning and movement planning
 
 ## Dual-Mode Architecture
 
@@ -388,6 +392,34 @@ The API summary generation has been enhanced to provide more detailed informatio
 4. **Units Information**: Extracted from docstrings (e.g., degrees vs. radians)
 
 This enhancement addresses issues with improper function definitions and helps prevent common errors in the generated code.
+
+### Arm Kinematics Documentation
+
+The project now includes comprehensive documentation about Reachy2's arm kinematics, focusing on giving the agent a spatial sense of its body through natural language explanation rather than code examples:
+
+1. **Spatial Awareness**: Detailed explanation of Reachy's coordinate system and how its body exists in 3D space
+2. **Body Representation**: Description of the arm's structure with 7 degrees of freedom, similar to a human arm
+3. **Kinematic Concepts**: Clear explanations of joint space vs. cartesian space, forward and inverse kinematics
+4. **Workspace Understanding**: Information about reachability, singularities, and physical limitations
+5. **Embodied Cognition**: Guidance on thinking like the robot when planning movements
+6. **Movement Guidelines**: Explicit principles for generating kinematically-aware robot movements
+
+The agent is instructed to ALWAYS apply these movement guidelines when generating code:
+- Think spatially about the robot's body and targets in 3D space
+- Check reachability before attempting movements
+- Prefer natural, human-like movement patterns
+- Maintain awareness of both position and orientation
+- Avoid singularities and problematic configurations
+- Consider how starting positions affect movement solutions
+- Allow sufficient time for smooth, safe movements
+
+This conceptual understanding enables the agent to reason more effectively about:
+- How to position the arm to reach specific points in space
+- Natural and efficient ways to move between positions
+- Appropriate hand orientations for different tasks
+- Limitations of the robot's physical capabilities
+
+The kinematics documentation is available in `agent/docs/reachy2_kinematics_guide.md` and is integrated into the agent's system prompt as natural language explanation with minimal code.
 
 ### Implementation Details
 

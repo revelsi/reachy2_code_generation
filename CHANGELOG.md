@@ -4,6 +4,26 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2025-03-13]
+
+### Added
+- Enhanced Cartesian control guidance in prompt configuration with proper orientation matrices
+- Added utility function recommendation for creating pose matrices (`get_pose_matrix()`)
+- Improved documentation on proper orientation matrices for hand-forward positioning
+- Added comprehensive examples for reliable joint angle configurations
+
+### Changed
+- Updated system prompt to emphasize joint angle control over Cartesian control
+- Improved error handling recommendations for unreachable targets
+- Enhanced fallback strategy guidance for Cartesian control failures
+- Updated safe workspace ranges based on empirical testing
+- Simplified workspace validation approach to focus on reliable joint angles
+
+### Fixed
+- Corrected orientation matrix examples in prompt configuration to match official documentation
+- Fixed unreachable target issues by recommending proper orientation matrices
+- Resolved workspace validation complexity by focusing on reliable joint angle configurations
+
 ## [2025-03-10]
 
 ### Added
