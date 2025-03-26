@@ -169,7 +169,7 @@ class CodeGenerationInterface:
         
         return code, explanation
 
-    def process_message(self, message: str, history: List[List[str]]) -> Tuple[List[List[str]], str, Dict[str, Any], str, str]:
+    def process_message(self, message: str, history: List[List[str]]) -> Tuple[List[List[str]], str, Dict[str, Any], str]:
         """
         Process a user message and update the chat history.
         
@@ -178,7 +178,7 @@ class CodeGenerationInterface:
             history: Current chat history.
             
         Returns:
-            Tuple: Updated chat history, generated code, code validation, status message, and correction history.
+            Tuple: Updated chat history, generated code, code validation, and status message.
         """
         try:
             # Add a status message to the chat
@@ -198,7 +198,7 @@ class CodeGenerationInterface:
             # Get the system prompt from the agent
             system_prompt = temp_agent._build_system_prompt()
             
-            # Process the message without recursive correction
+            # Process the message
             response_data = self.generate_code(system_prompt=system_prompt, user_prompt=message)
             
             # Extract the message from the response
@@ -217,47 +217,29 @@ class CodeGenerationInterface:
             generated_code = response_data.get("code", "")
             code_validation = response_data.get("validation", {})
             
-            # Check if code was corrected
-            correction_count = response_data.get("correction_count", 0)
-            correction_info = ""
-            if correction_count > 0:
-                correction_info = f" (Corrected {correction_count}x)"
-            
             # Create a status message
-            status = f"✅ Code generated{correction_info}"
+            status = "✅ Code generated"
             if not generated_code:
                 status = "❌ No code generated. Try a different request."
             elif not code_validation.get("valid", False):
-                status = f"⚠️ Code has validation issues{correction_info}"
+                status = "⚠️ Code has validation issues"
             
-            # Create simplified correction history
-            correction_history = ""
-            corrections = response_data.get("corrections", [])
-            if corrections:
-                correction_history = "### Code Corrections\n\n"
-                for i, correction in enumerate(corrections):
-                    correction_history += f"**Correction {i+1}:**\n"
-                    issues = correction.get('issues', [])
-                    fixed = correction.get('fixed', False)
-                    correction_history += f"- Issues: {', '.join(issues)}\n"
-                    correction_history += f"- {'✅ Fixed' if fixed else '❌ Not fixed'}\n\n"
-            
-            return history, generated_code, code_validation, status, correction_history
+            return history, generated_code, code_validation, status
         except Exception as e:
             logger.error(f"Error processing message: {e}")
             error_message = f"Error: {str(e)}"
             history.append([message, error_message])
-            return history, "", {"valid": False, "errors": [error_message], "warnings": []}, "❌ Error occurred", ""
+            return history, "", {"valid": False, "errors": [error_message], "warnings": []}, "❌ Error occurred"
     
-    def reset_chat(self) -> Tuple[List[List[str]], str, Dict[str, Any], str, str]:
+    def reset_chat(self) -> Tuple[List[List[str]], str, Dict[str, Any], str]:
         """
         Reset the chat history and clear all outputs.
         
         Returns:
-            Tuple: Empty chat history, empty code, empty validation, status message, and empty correction history.
+            Tuple: Empty chat history, empty code, empty validation, and status message.
         """
         self.chat_history = []
-        return [], "", {"valid": False, "errors": [], "warnings": []}, "Chat reset. Ready for new requests.", ""
+        return [], "", {"valid": False, "errors": [], "warnings": []}, "Chat reset. Ready for new requests."
     
     def update_model_config(self, temperature: float, max_tokens: int) -> Dict[str, Any]:
         """
@@ -316,7 +298,8 @@ class CodeGenerationInterface:
                 result = s.connect_ex(('localhost', 50051))  # Default gRPC port for Reachy
                 s.close()
                 reachy_available = (result == 0)
-            except:
+            except Exception as e:
+                logger.error(f"Error checking Reachy availability: {e}")
                 reachy_available = False
             
             if not reachy_available:
@@ -324,36 +307,58 @@ class CodeGenerationInterface:
                     "success": False,
                     "error": "Reachy robot is not available",
                     "output": "Cannot execute code because the Reachy robot or simulator is not running or not accessible.",
-                    "status": "❌ Robot connection failed"
+                    "status": "❌ Robot connection failed",
+                    "feedback": "Please ensure that:\n1. The Reachy robot or simulator is running\n2. The gRPC server is accessible on port 50051\n3. There are no network connectivity issues"
                 }
             
             # Import the agent here to avoid circular imports
             from agent.code_generation_agent import ReachyCodeGenerationAgent
             
-            # Create a temporary agent to execute the code
-            temp_agent = ReachyCodeGenerationAgent(
-                api_key=self.client.api_key,
-                model=self.model
-            )
-            
-            # Execute the code using the agent's execute_code method
-            result = temp_agent.execute_code(code, confirm=False)
-            
-            # Add a status message if not already present
-            if "status" not in result:
-                if result.get("success", False):
-                    result["status"] = "✅ Code executed successfully"
-                else:
-                    result["status"] = "❌ Code execution failed"
-            
-            return result
+            try:
+                # Create a temporary agent to execute the code
+                temp_agent = ReachyCodeGenerationAgent(
+                    api_key=self.client.api_key,
+                    model=self.model
+                )
+                
+                # Execute the code using the agent's execute_code method
+                # Set confirm=False since we're executing directly, and force=True to bypass validation
+                result = temp_agent.execute_code(code, confirm=False, force=True)
+                
+                # Ensure the result has all required fields
+                if not isinstance(result, dict):
+                    raise ValueError("Agent returned invalid result format")
+                
+                # Add a status message if not already present
+                if "status" not in result:
+                    if result.get("success", False):
+                        result["status"] = "✅ Code executed successfully"
+                    else:
+                        error = result.get("error", "Unknown error")
+                        result["status"] = f"❌ Code execution failed: {error}"
+                
+                return result
+                
+            except Exception as agent_error:
+                logger.error(f"Error in agent execution: {agent_error}")
+                logger.error(traceback.format_exc())
+                return {
+                    "success": False,
+                    "error": str(agent_error),
+                    "output": "",
+                    "status": "❌ Agent execution error",
+                    "feedback": f"The code execution agent encountered an error:\n{str(agent_error)}\n\nThis might be due to:\n1. Invalid code syntax\n2. Missing dependencies\n3. System resource issues"
+                }
+                
         except Exception as e:
-            logger.error(f"Error executing code: {e}")
+            logger.error(f"Error in execute_code: {e}")
+            logger.error(traceback.format_exc())
             return {
                 "success": False,
                 "error": str(e),
                 "output": "",
-                "status": "❌ Error during execution"
+                "status": "❌ System error",
+                "feedback": f"A system error occurred:\n{str(e)}\n\nThis is likely a bug in the interface. Please report this issue."
             }
     
     def check_reachy_available(self) -> bool:
@@ -455,9 +460,6 @@ class CodeGenerationInterface:
                         label="Validation Results",
                     )
                     
-                    # Correction history
-                    correction_history_md = gr.Markdown("")
-                    
                     # Execution status
                     execution_status = gr.Markdown("No code executed yet.")
                     
@@ -495,7 +497,7 @@ class CodeGenerationInterface:
             ).then(
                 fn=self.process_message,
                 inputs=[msg, chatbot],
-                outputs=[chatbot, code_editor, validation_json, status_msg, correction_history_md],
+                outputs=[chatbot, code_editor, validation_json, status_msg],
             ).then(
                 fn=lambda: update_process_status("Complete"),
                 outputs=[process_status],
@@ -514,7 +516,7 @@ class CodeGenerationInterface:
             ).then(
                 fn=self.process_message,
                 inputs=[msg, chatbot],
-                outputs=[chatbot, code_editor, validation_json, status_msg, correction_history_md],
+                outputs=[chatbot, code_editor, validation_json, status_msg],
             ).then(
                 fn=lambda: update_process_status("Complete"),
                 outputs=[process_status],
@@ -529,7 +531,7 @@ class CodeGenerationInterface:
                 outputs=[process_status],
             ).then(
                 fn=self.reset_chat,
-                outputs=[chatbot, code_editor, validation_json, status_msg, correction_history_md],
+                outputs=[chatbot, code_editor, validation_json, status_msg],
             ).then(
                 fn=lambda: "",
                 outputs=[execution_status],
@@ -544,6 +546,17 @@ class CodeGenerationInterface:
                 outputs=[process_status],
             )
             
+            # Define a function to extract status from execution result
+            def extract_status(result):
+                # Use the status if provided, otherwise determine from success
+                if "status" in result:
+                    return result["status"]
+                elif result.get("success", False):
+                    return "✅ Code executed successfully"
+                else:
+                    error_msg = result.get("error", "Unknown error")
+                    return f"❌ Code execution failed: {error_msg}"
+            
             # Define a function to extract feedback from execution result
             def extract_feedback(result):
                 feedback = ""
@@ -556,50 +569,45 @@ class CodeGenerationInterface:
                     feedback_msg = result.get("feedback", "")
                     message = result.get("message", "")
                     
-                    # If we have specific feedback, use it first
-                    if feedback_msg:
+                    # Build feedback in order of importance
+                    if feedback_msg:  # Specific feedback from error analysis
                         feedback += f"{feedback_msg}\n\n"
                     
-                    # Add the error message if available
-                    if error:
-                        feedback += f"Error: {error}\n\n"
-                    
-                    # Add the message if available and not already included
-                    if message and "Error" not in message and message not in feedback:
+                    if message and message not in feedback:  # General error message
                         feedback += f"{message}\n\n"
                     
-                    # Add stderr if available
-                    if stderr:
-                        feedback += f"Details: {stderr}\n\n"
+                    if error and error not in feedback:  # Technical error
+                        feedback += f"Error: {error}\n\n"
                     
-                    # Add output if available
-                    if output:
-                        feedback += f"Output: {output}\n\n"
+                    if stderr:  # Stack trace or system errors
+                        feedback += f"Details:\n{stderr}\n\n"
+                    
+                    if output and output not in feedback:  # Program output
+                        feedback += f"Output:\n{output}\n\n"
                     
                     if not feedback:
-                        feedback = "Execution failed. Check the execution result for details."
+                        feedback = "Execution failed. No additional error information available."
                 
-                # If execution succeeded, provide a success message
+                # If execution succeeded, provide output or success message
                 else:
-                    output = result.get("output", "")
+                    output = result.get("output", "").strip()
                     if output:
                         feedback = f"Execution successful!\n\nOutput:\n{output}"
                     else:
-                        feedback = "Execution successful!"
+                        feedback = "Execution successful! (No output)"
                 
-                return feedback
-            
-            # Define a function to extract status from execution result
-            def extract_status(result):
-                return result.get("status", "Code execution completed.")
+                return feedback.strip()  # Remove any trailing whitespace
             
             # Execute code
             execute_btn.click(
                 fn=lambda: update_process_status("Executing..."),
                 outputs=[process_status],
             ).then(
-                fn=lambda: "Running code...",
+                fn=lambda: "Preparing to execute code...",
                 outputs=[execution_status],
+            ).then(
+                fn=lambda: "",  # Clear previous feedback
+                outputs=[execution_feedback],
             ).then(
                 fn=self.execute_code,
                 inputs=[code_editor],

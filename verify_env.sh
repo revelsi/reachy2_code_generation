@@ -43,6 +43,14 @@ fi
 # Check key packages
 echo -e "${YELLOW}Checking key packages:${NC}"
 
+# Check OpenAI
+OPENAI_VERSION=$(pip show openai 2>/dev/null | grep Version | awk '{print $2}')
+if [ -n "$OPENAI_VERSION" ]; then
+    echo -e "${GREEN}✓ openai: $OPENAI_VERSION${NC}"
+else
+    echo -e "${RED}✗ openai not installed${NC}"
+fi
+
 # Check reachy2-sdk
 REACHY_VERSION=$(pip show reachy2-sdk 2>/dev/null | grep Version | awk '{print $2}')
 if [ -n "$REACHY_VERSION" ]; then
@@ -51,28 +59,12 @@ else
     echo -e "${RED}✗ reachy2-sdk not installed${NC}"
 fi
 
-# Check grpcio
-GRPCIO_VERSION=$(pip show grpcio 2>/dev/null | grep Version | awk '{print $2}')
-if [ -n "$GRPCIO_VERSION" ]; then
-    echo -e "${GREEN}✓ grpcio: $GRPCIO_VERSION${NC}"
+# Check gradio
+GRADIO_VERSION=$(pip show gradio 2>/dev/null | grep Version | awk '{print $2}')
+if [ -n "$GRADIO_VERSION" ]; then
+    echo -e "${GREEN}✓ gradio: $GRADIO_VERSION${NC}"
 else
-    echo -e "${RED}✗ grpcio not installed${NC}"
-fi
-
-# Check langchain
-LANGCHAIN_VERSION=$(pip show langchain 2>/dev/null | grep Version | awk '{print $2}')
-if [ -n "$LANGCHAIN_VERSION" ]; then
-    echo -e "${GREEN}✓ langchain: $LANGCHAIN_VERSION${NC}"
-else
-    echo -e "${RED}✗ langchain not installed${NC}"
-fi
-
-# Check langgraph
-LANGGRAPH_VERSION=$(pip show langgraph 2>/dev/null | grep Version | awk '{print $2}')
-if [ -n "$LANGGRAPH_VERSION" ]; then
-    echo -e "${GREEN}✓ langgraph: $LANGGRAPH_VERSION${NC}"
-else
-    echo -e "${RED}✗ langgraph not installed${NC}"
+    echo -e "${RED}✗ gradio not installed${NC}"
 fi
 
 echo -e "${GREEN}Environment verification complete.${NC}" 

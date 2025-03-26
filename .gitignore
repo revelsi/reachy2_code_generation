@@ -50,19 +50,7 @@ logs/
 .coverage
 htmlcov/
 .pytest_cache/
-agent/test_output/
-
-# Frontend
-frontend/node_modules/
-frontend/dist/
-frontend/.env
-frontend/.env.local
-frontend/.env.development.local
-frontend/.env.test.local
-frontend/.env.production.local
-frontend/npm-debug.log*
-frontend/yarn-debug.log*
-frontend/yarn-error.log*
+tests/output/
 
 # Data
 data/raw_docs/*
@@ -73,9 +61,9 @@ data/external_docs/*
 # Generated files
 agent/schemas/*.json
 agent/docs/*.json
-agent/tools/*_tools.py
+
+# Preserve important files
 !agent/tools/__init__.py
-!agent/tools/base_tool.py
 !agent/tools/connection_manager.py
 
 # Temporary files
@@ -83,11 +71,8 @@ agent/tools/*_tools.py
 tmp/
 temp/
 
-# Keep test scripts
-!test_model_config.py
-!test_code_generator_api_tools.py
+# Keep launcher scripts
 !launch_code_gen.py
-
 
 # Gradio cache
 .gradio/

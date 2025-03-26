@@ -7,14 +7,14 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
     requirements = fh.read().splitlines()
 
 setup(
-    name="reachy-function-calling",
+    name="reachy-code-generation",
     version="0.1.0",
     author="",
     author_email="",
-    description="A natural language interface for controlling the Reachy 2 robot",
+    description="A code generation interface for the Reachy 2 robot",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/yourusername/reachy-function-calling",
+    url="https://github.com/yourusername/reachy_function_calling",
     packages=find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
@@ -25,8 +25,7 @@ setup(
     install_requires=requirements,
     entry_points={
         "console_scripts": [
-            "reachy-cli=agent.cli:main",
-            "reachy-web=agent.web_interface:main",
+            "reachy-gradio=launch_code_gen:main",
         ],
     },
 ) 

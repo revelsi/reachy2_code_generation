@@ -35,14 +35,6 @@ except ImportError:
     # Global connection instance as fallback
     _reachy_instance = None
 
-# Import transparent executor if available
-try:
-    from agent.transparent_executor import get_executor, wrap_function
-    TRANSPARENT_EXECUTOR_AVAILABLE = True
-except ImportError:
-    logger.warning("Transparent executor not available. Using direct execution.")
-    TRANSPARENT_EXECUTOR_AVAILABLE = False
-
 
 def get_reachy_instance(host: str = None) -> Any:
     """Get a Reachy instance, connecting if necessary."""
@@ -67,29 +59,8 @@ class BaseTool:
             func: Tool function.
             schema: Tool schema.
         """
-        # Wrap function with transparent executor if available
-        if TRANSPARENT_EXECUTOR_AVAILABLE:
-            # Check if we have a mock version available
-            mock_func = None
-            
-            # Create docstring-based reasoning
-            @wraps(func)
-            def wrapped_func(*args, **kwargs):
-                # Extract reasoning from function docstring
-                doc = func.__doc__ or ""
-                reasoning = doc.strip().split("\n")[0] if doc else f"Executing {name}"
-                
-                # Add reasoning to kwargs
-                kwargs["reasoning"] = kwargs.get("reasoning", reasoning)
-                
-                # Call the function through executor
-                return wrap_function(func, mock_func)(*args, **kwargs)
-            
-            # Register the wrapped function
-            cls.tools[name] = wrapped_func
-        else:
-            # Register the original function
-            cls.tools[name] = func
+        # Register the function
+        cls.tools[name] = func
             
         # Register the schema
         cls.tool_schemas[name] = schema
@@ -126,8 +97,8 @@ class BaseTool:
         Returns:
             Dict[str, Any]: Result of the function execution.
         """
-        # Remove 'reasoning' from kwargs if using direct execution
-        if not TRANSPARENT_EXECUTOR_AVAILABLE and "reasoning" in kwargs:
+        # Remove 'reasoning' from kwargs if present but not accepted by function
+        if "reasoning" in kwargs:
             if "reasoning" in func.__code__.co_varnames:
                 # Only keep reasoning if function explicitly accepts it
                 pass
@@ -156,7 +127,7 @@ class BaseTool:
         required: Optional[List[str]] = None
     ) -> Dict[str, Any]:
         """
-        Create a tool schema for function calling in LangChain/LangGraph format.
+        Create a tool schema for code generation.
         
         Args:
             name: Name of the tool.
@@ -165,19 +136,12 @@ class BaseTool:
             required: List of required parameter names.
             
         Returns:
-            Dict[str, Any]: Tool schema in LangChain/LangGraph format.
+            Dict[str, Any]: Tool schema.
         """
         if required is None:
             required = []
             
-        # Add reasoning parameter if using transparent executor
-        if TRANSPARENT_EXECUTOR_AVAILABLE and "reasoning" not in parameters:
-            parameters["reasoning"] = {
-                "type": "string",
-                "description": "Reasoning behind this function call."
-            }
-            
-        # Create schema in LangChain/LangGraph format
+        # Create schema
         return {
             "type": "function",
             "function": {

@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Setup script for Reachy Function Calling project
+# Setup script for Reachy Code Generation project
 # This script checks Python version, creates a virtual environment, and installs dependencies
 
 # Colors for output
@@ -13,7 +13,24 @@ NC='\033[0m' # No Color
 PYTHON_VERSION="3.10"
 VENV_NAME="venv_py310"
 
-echo -e "${GREEN}Setting up Reachy Function Calling environment...${NC}"
+echo -e "${GREEN}Setting up Reachy Code Generation environment...${NC}"
+
+# Check if venv exists and remove it
+if [ -d "$VENV_NAME" ]; then
+    echo -e "${YELLOW}Removing existing virtual environment: $VENV_NAME${NC}"
+    rm -rf "$VENV_NAME"
+fi
+
+# Clean up package installation artifacts
+echo -e "${YELLOW}Cleaning package installation artifacts...${NC}"
+rm -rf build/ dist/ *.egg-info
+find . -type d -name __pycache__ 2>/dev/null | xargs rm -rf 2>/dev/null
+find . -name "*.pyc" -delete 2>/dev/null
+find . -type d -name ".pytest_cache" 2>/dev/null | xargs rm -rf 2>/dev/null
+find . -name "*.so" -delete 2>/dev/null
+find . -name "*.o" -delete 2>/dev/null
+find . -name ".coverage" -delete 2>/dev/null
+echo -e "${GREEN}Cleanup complete.${NC}"
 
 # Check for Python 3.10 specifically
 echo -e "${YELLOW}Checking for Python ${PYTHON_VERSION}...${NC}"
@@ -43,16 +60,12 @@ echo -e "${GREEN}Python version check passed: $($PYTHON_CMD --version)${NC}"
 
 # Create virtual environment
 echo -e "${YELLOW}Creating virtual environment with Python ${PYTHON_VERSION}...${NC}"
-if [ ! -d "$VENV_NAME" ]; then
-    $PYTHON_CMD -m venv $VENV_NAME
-    if [ $? -ne 0 ]; then
-        echo -e "${RED}Error: Failed to create virtual environment.${NC}"
-        exit 1
-    fi
-    echo -e "${GREEN}Virtual environment created: ${VENV_NAME}${NC}"
-else
-    echo -e "${YELLOW}Virtual environment ${VENV_NAME} already exists.${NC}"
+$PYTHON_CMD -m venv $VENV_NAME
+if [ $? -ne 0 ]; then
+    echo -e "${RED}Error: Failed to create virtual environment.${NC}"
+    exit 1
 fi
+echo -e "${GREEN}Virtual environment created: ${VENV_NAME}${NC}"
 
 # Activate virtual environment and install dependencies
 echo -e "${YELLOW}Installing dependencies...${NC}"
@@ -83,9 +96,8 @@ fi
 
 # Setup complete
 echo -e "${GREEN}Setup complete!${NC}"
-echo -e "${YELLOW}To activate the virtual environment, run:${NC}"
-echo -e "    source ${VENV_NAME}/bin/activate"
-echo -e "${YELLOW}To run the CLI:${NC}"
-echo -e "    python agent/cli.py"
-echo -e "${YELLOW}To run the web interface:${NC}"
-echo -e "    python agent/web_interface.py" 
+echo -e "${YELLOW}Activating the virtual environment...${NC}"
+source ${VENV_NAME}/bin/activate
+echo -e "${GREEN}Virtual environment ${VENV_NAME} is now active.${NC}"
+echo -e "${YELLOW}To run the Gradio interface:${NC}"
+echo -e "    python launch_code_gen.py" 

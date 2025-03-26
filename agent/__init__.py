@@ -1,45 +1,41 @@
 #!/usr/bin/env python
 """
-Reachy Function Calling Agent
+Reachy 2 Code Generation Agent
 
-This package provides a framework for transparent function calling with the Reachy 2 robot.
-It demonstrates how to create a system that:
-
-1. Shows the reasoning behind each function call
-2. Displays the function call with parameters
-3. Requests user permission before execution
-4. Shows execution results
-
-The agent can operate in two modes:
-- Function Calling: Uses OpenAI's function calling to control the robot
-- Code Generation: Generates Python code for more complex interactions
-
-Additional documentation:
-- For arm kinematics (forward/inverse kinematics): see docs/reachy2_kinematics_guide.md
+This package provides a code generation agent for the Reachy 2 robot.
 """
 
-# Import only essential components that don't have complex dependencies
-# Other components will be imported directly when needed
+import os
+import sys
+import logging
+from typing import Dict, Any, Optional
 
-from .agent_router import AgentRouter, AgentMode
-from .transparent_executor import TransparentExecutor
-from .langgraph_agent import ReachyLangGraphAgent
+# Configure logging
+logging.basicConfig(level=logging.INFO,
+                   format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger("agent")
+
+# Ensure the parent directory is in sys.path
+parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+if parent_dir not in sys.path:
+    sys.path.insert(0, parent_dir)
+
+# Export key classes
+from .agent_router import AgentRouter
 from .code_generation_agent import ReachyCodeGenerationAgent
-from .code_generation_interface import CodeGenerationInterface
-from .web_interface import AgentInterface
 
-# Import setup_agent function from cli.py instead of a class
-from .cli import setup_agent
+# Define version
+__version__ = "0.1.0"
 
-__all__ = [
-    'AgentRouter',
-    'AgentMode',
-    'TransparentExecutor',
-    'ReachyLangGraphAgent',
-    'ReachyCodeGenerationAgent',
-    'CodeGenerationInterface',
-    'AgentInterface',
-    'setup_agent',
-]
-
-__version__ = "1.0.0" 
+def create_agent(api_key: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None) -> AgentRouter:
+    """
+    Create a Reachy 2 Code Generation Agent.
+    
+    Args:
+        api_key: OpenAI API key. If None, will use OPENAI_API_KEY from config.
+        model_config: Model configuration. If None, will use the configuration from config.py.
+        
+    Returns:
+        AgentRouter: The agent router.
+    """
+    return AgentRouter(api_key=api_key, model_config=model_config) 

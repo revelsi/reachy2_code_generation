@@ -1,4 +1,56 @@
 {
+  "__init___get_dependencies_from_setup_cfg": {
+    "type": "function",
+    "function": {
+      "name": "__init___get_dependencies_from_setup_cfg",
+      "description": "Get dependencies from setup.cfg file.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.__init__",
+    "source": "reachy2_sdk.__init__.get_dependencies_from_setup_cfg",
+    "return_type": "List[str]"
+  },
+  "__init___check_reachy2_sdk_api_dependency": {
+    "type": "function",
+    "function": {
+      "name": "__init___check_reachy2_sdk_api_dependency",
+      "description": "Check if the installed version of reachy2-sdk-api is compatible with the required one.\n\nAlso check if the used version of reachy2-sdk-api is higher than the minimal required version.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "requirement": {
+            "type": "string",
+            "description": "Parameter requirement"
+          }
+        },
+        "required": [
+          "requirement"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.__init__",
+    "source": "reachy2_sdk.__init__.check_reachy2_sdk_api_dependency",
+    "return_type": "None"
+  },
+  "__init___check_dependencies": {
+    "type": "function",
+    "function": {
+      "name": "__init___check_dependencies",
+      "description": "Check if the installed dependencies are compatible with the required ones.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.__init__",
+    "source": "reachy2_sdk.__init__.check_dependencies",
+    "return_type": "None"
+  },
   "reachy_sdk_ReachySDK___new__": {
     "type": "function",
     "function": {
@@ -217,6 +269,24 @@
     "class": "ReachySDK",
     "source": "reachy2_sdk.reachy_sdk.ReachySDK.mobile_base",
     "return_type": "Optional[MobileBase]",
+    "is_async": false,
+    "is_property": true
+  },
+  "reachy_sdk_ReachySDK_tripod": {
+    "type": "function",
+    "function": {
+      "name": "reachy_sdk_ReachySDK_tripod",
+      "description": "Get Reachy's fixed tripod.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.reachy_sdk",
+    "class": "ReachySDK",
+    "source": "reachy2_sdk.reachy_sdk.ReachySDK.tripod",
+    "return_type": "Optional[Tripod]",
     "is_async": false,
     "is_property": true
   },
@@ -965,10 +1035,10 @@
     "is_async": false,
     "is_property": false
   },
-  "orbita_orbita_Orbita_audit": {
+  "orbita_orbita_Orbita_status": {
     "type": "function",
     "function": {
-      "name": "orbita_orbita_Orbita_audit",
+      "name": "orbita_orbita_Orbita_status",
       "description": "Get the current audit status of the actuator.\n\nReturns:\n    The audit status as a string, representing the latest error or status\n    message, or `None` if there is no error.",
       "parameters": {
         "type": "object",
@@ -978,7 +1048,7 @@
     },
     "module": "reachy2_sdk.orbita.orbita",
     "class": "Orbita",
-    "source": "reachy2_sdk.orbita.orbita.Orbita.audit",
+    "source": "reachy2_sdk.orbita.orbita.Orbita.status",
     "return_type": "Optional[str]",
     "is_async": false,
     "is_property": true
@@ -1863,7 +1933,7 @@
     "module": "reachy2_sdk.sensors.lidar",
     "class": "Lidar",
     "source": "reachy2_sdk.sensors.lidar.Lidar.obstacle_detection_status",
-    "return_type": "LidarObstacleDetectionStatus",
+    "return_type": "str",
     "is_async": false,
     "is_property": true
   },
@@ -2147,7 +2217,7 @@
     "type": "function",
     "function": {
       "name": "utils_utils_get_grpc_interpolation_mode",
-      "description": "Convert a given interpolation mode string to a corresponding GoToInterpolation object.\n\nArgs:\n    interpolation_mode: A string representing the type of interpolation to be used. It can be either\n        \"minimum_jerk\" or \"linear\".\n\nReturns:\n    An instance of the GoToInterpolation class with the interpolation type set based on the input\n    interpolation_mode string.\n\nRaises:\n    ValueError: If the interpolation_mode is not \"minimum_jerk\" or \"linear\".",
+      "description": "Convert a given interpolation mode string to a corresponding GoToInterpolation object.\n\nArgs:\n    interpolation_mode: A string representing the type of interpolation to be used. It can be either\n        \"minimum_jerk\", \"linear\" or \"elliptical\".\n\nReturns:\n    An instance of the GoToInterpolation class with the interpolation type set based on the input\n    interpolation_mode string.\n\nRaises:\n    ValueError: If the interpolation_mode is not \"minimum_jerk\", \"linear\" or \"elliptical\".",
       "parameters": {
         "type": "object",
         "properties": {
@@ -2165,11 +2235,33 @@
     "source": "reachy2_sdk.utils.utils.get_grpc_interpolation_mode",
     "return_type": "GoToInterpolation"
   },
+  "utils_utils_get_grpc_interpolation_space": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_get_grpc_interpolation_space",
+      "description": "Convert a given interpolation space string to a corresponding GoToInterpolationSpace object.\n\nArgs:\n    interpolation_space: A string representing the interpolation space to be used. It can be either\n        \"joint_space\" or \"cartesian_space\".\n\nReturns:\n    An instance of the GoToInterpolationSpace class with the interpolation type set based on the input\n    interpolation_space string.\n\nRaises:\n    ValueError: If the interpolation_space is not \"joint_space\" or \"cartesian_space\".",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "interpolation_space": {
+            "type": "string",
+            "description": "A string representing the interpolation space to be used. It can be either"
+          }
+        },
+        "required": [
+          "interpolation_space"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.utils",
+    "source": "reachy2_sdk.utils.utils.get_grpc_interpolation_space",
+    "return_type": "GoToInterpolationSpace"
+  },
   "utils_utils_get_interpolation_mode": {
     "type": "function",
     "function": {
       "name": "utils_utils_get_interpolation_mode",
-      "description": "Convert an interpolation mode enum to a string representation.\n\nArgs:\n    interpolation_mode: The interpolation mode given as InterpolationMode. The supported interpolation\n        modes are MINIMUM_JERK and LINEAR.\n\nReturns:\n    A string representing the interpolation mode based on the input interpolation_mode. Returns\n    \"minimum_jerk\" if the mode is InterpolationMode.MINIMUM_JERK, and \"linear\" if it is\n    InterpolationMode.LINEAR.\n\nRaises:\n    ValueError: If the interpolation_mode is not InterpolationMode.MINIMUM_JERK or InterpolationMode.LINEAR.",
+      "description": "Convert an interpolation mode enum to a string representation.\n\nArgs:\n    interpolation_mode: The interpolation mode given as InterpolationMode. The supported interpolation\n        modes are MINIMUM_JERK, LINEAR and ELLIPTICAL.\n\nReturns:\n    A string representing the interpolation mode based on the input interpolation_mode. Returns\n    \"minimum_jerk\" if the mode is InterpolationMode.MINIMUM_JERK, \"linear\" if it is\n    InterpolationMode.LINEAR, and \"elliptical\" if it is InterpolationMode.ELLIPTICAL.\n\nRaises:\n    ValueError: If the interpolation_mode is not InterpolationMode.MINIMUM_JERK, InterpolationMode.LINEAR\n    or InterpolationMode.ELLIPTICAL.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -2185,6 +2277,72 @@
     },
     "module": "reachy2_sdk.utils.utils",
     "source": "reachy2_sdk.utils.utils.get_interpolation_mode",
+    "return_type": "str"
+  },
+  "utils_utils_get_interpolation_space": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_get_interpolation_space",
+      "description": "Convert an interpolation space enum to a string representation.\n\nArgs:\n    interpolation_space: The interpolation space given as InterpolationSpace. The supported interpolation\n        modes are JOINT_SPACE and CARTESIAN_SPACE.\n\nReturns:\n    A string representing the interpolation mode based on the input interpolation_space. Returns\n    \"joint_space\" if the mode is InterpolationSpace.JOINT_SPACE, and \"cartesian_space\" if it is\n    InterpolationSpace.CARTESIAN_SPACE.\n\nRaises:\n    ValueError: If the interpolation_space is not InterpolationSpace.JOINT_SPACE or InterpolationSpace.CARTESIAN_SPACE.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "interpolation_space": {
+            "type": "string",
+            "description": "The interpolation space given as InterpolationSpace. The supported interpolation"
+          }
+        },
+        "required": [
+          "interpolation_space"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.utils",
+    "source": "reachy2_sdk.utils.utils.get_interpolation_space",
+    "return_type": "str"
+  },
+  "utils_utils_get_grpc_arc_direction": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_get_grpc_arc_direction",
+      "description": "Convert a given arc direction string to a corresponding ArcDirection object.\n\nArgs:\n    arc_direction: A string representing the direction of the arc. It can be one of the following options:\n        \"above\", \"below\", \"front\", \"back\", \"right\", or \"left\".\n\nReturns:\n    An instance of the ArcDirection class with the direction set based on the input arc_direction string.\n\nRaises:\n    ValueError: If the arc_direction is not one of \"above\", \"below\", \"front\", \"back\", \"right\", or \"left\".",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "arc_direction": {
+            "type": "string",
+            "description": "A string representing the direction of the arc. It can be one of the following options:"
+          }
+        },
+        "required": [
+          "arc_direction"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.utils",
+    "source": "reachy2_sdk.utils.utils.get_grpc_arc_direction",
+    "return_type": "ArcDirection"
+  },
+  "utils_utils_get_arc_direction": {
+    "type": "function",
+    "function": {
+      "name": "utils_utils_get_arc_direction",
+      "description": "Convert an arc direction enum to a string representation.\n\nArgs:\n    arc_direction: The arc direction given as ArcDirection. The supported arc directions are ABOVE, BELOW, FRONT,\n        BACK, RIGHT, and LEFT.\n\nReturns:\n    A string representing the arc direction based on the input arc_direction. Returns \"above\" if the direction is\n    ArcDirection.ABOVE, \"below\" if it is ArcDirection.BELOW, \"front\" if it is ArcDirection.FRONT, \"back\" if it is\n    ArcDirection.BACK, \"right\" if it is ArcDirection.RIGHT, and \"left\" if it is ArcDirection.LEFT.\n\nRaises:\n    ValueError: If the arc_direction is not ArcDirection.ABOVE, ArcDirection.BELOW, ArcDirection.FRONT, ArcDirection.BACK,\n    ArcDirection.RIGHT, or ArcDirection.LEFT.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "arc_direction": {
+            "type": "string",
+            "description": "The arc direction given as ArcDirection. The supported arc directions are ABOVE, BELOW, FRONT,"
+          }
+        },
+        "required": [
+          "arc_direction"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.utils",
+    "source": "reachy2_sdk.utils.utils.get_arc_direction",
     "return_type": "str"
   },
   "utils_utils_decompose_matrix": {
@@ -2468,6 +2626,963 @@
     "is_async": false,
     "is_property": false
   },
+  "utils_goto_based_element_process_goto_request": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_process_goto_request",
+      "description": "Process the response from a goto request and return a SimplifiedRequest object.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "string",
+            "description": "Parameter response"
+          }
+        },
+        "required": [
+          "response"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "source": "reachy2_sdk.utils.goto_based_element.process_goto_request",
+    "return_type": "Optional[SimplifiedRequest]"
+  },
+  "utils_goto_based_element_process_arm_cartesian_goal": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_process_arm_cartesian_goal",
+      "description": "Process the response from a goto request containing an arm cartesian goal.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "string",
+            "description": "Parameter response"
+          }
+        },
+        "required": [
+          "response"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "source": "reachy2_sdk.utils.goto_based_element.process_arm_cartesian_goal",
+    "return_type": "Dict[str, Any]"
+  },
+  "utils_goto_based_element_process_arm_joint_goal": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_process_arm_joint_goal",
+      "description": "Process the response from a goto request containing an arm joint goal.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "string",
+            "description": "Parameter response"
+          }
+        },
+        "required": [
+          "response"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "source": "reachy2_sdk.utils.goto_based_element.process_arm_joint_goal",
+    "return_type": "Dict[str, Any]"
+  },
+  "utils_goto_based_element_process_neck_joint_goal": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_process_neck_joint_goal",
+      "description": "Process the response from a goto request containing a neck joint goal.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "string",
+            "description": "Parameter response"
+          }
+        },
+        "required": [
+          "response"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "source": "reachy2_sdk.utils.goto_based_element.process_neck_joint_goal",
+    "return_type": "Dict[str, Any]"
+  },
+  "utils_goto_based_element_process_antenna_joint_goal": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_process_antenna_joint_goal",
+      "description": "Process the response from a goto request containing an antenna joint goal.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "string",
+            "description": "Parameter response"
+          }
+        },
+        "required": [
+          "response"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "source": "reachy2_sdk.utils.goto_based_element.process_antenna_joint_goal",
+    "return_type": "Dict[str, Any]"
+  },
+  "utils_goto_based_element_process_hand_joint_goal": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_process_hand_joint_goal",
+      "description": "Process the response from a goto request containing a hand joint goal.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "string",
+            "description": "Parameter response"
+          }
+        },
+        "required": [
+          "response"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "source": "reachy2_sdk.utils.goto_based_element.process_hand_joint_goal",
+    "return_type": "Dict[str, Any]"
+  },
+  "utils_goto_based_element_process_odometry_goal": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_process_odometry_goal",
+      "description": "Process the response from a goto request containing an odometry goal.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "response": {
+            "type": "string",
+            "description": "Parameter response"
+          }
+        },
+        "required": [
+          "response"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "source": "reachy2_sdk.utils.goto_based_element.process_odometry_goal",
+    "return_type": "Dict[str, Any]"
+  },
+  "utils_goto_based_element_build_simplified_joints_request": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_build_simplified_joints_request",
+      "description": "Build a SimplifiedRequest object from a dictionary of joints request details.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "request_dict": {
+            "type": "object",
+            "description": "Parameter request_dict"
+          }
+        },
+        "required": [
+          "request_dict"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "source": "reachy2_sdk.utils.goto_based_element.build_simplified_joints_request",
+    "return_type": "SimplifiedRequest"
+  },
+  "utils_goto_based_element_build_simplified_odometry_request": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_build_simplified_odometry_request",
+      "description": "Build a SimplifiedRequest object from a dictionary of odomztry request details.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "request_dict": {
+            "type": "object",
+            "description": "Parameter request_dict"
+          }
+        },
+        "required": [
+          "request_dict"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "source": "reachy2_sdk.utils.goto_based_element.build_simplified_odometry_request",
+    "return_type": "SimplifiedRequest"
+  },
+  "utils_goto_based_element_IGoToBasedElement___init__": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_IGoToBasedElement___init__",
+      "description": "Initialize the IGoToBasedElement interface.\n\nSets up the common attributes needed for handling goto-based movements. This includes\nassociating the component with the interface and setting up the gRPC stub for performing\ngoto commands.\n\nArgs:\n    element_id: The robot component or part that uses this interface.\n    goto_stub: The gRPC stub used to send goto commands to the robot element.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "element_id": {
+            "type": "string",
+            "description": "The robot component or part that uses this interface."
+          },
+          "goto_stub": {
+            "type": "string",
+            "description": "The gRPC stub used to send goto commands to the robot element."
+          }
+        },
+        "required": [
+          "element_id",
+          "goto_stub"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "class": "IGoToBasedElement",
+    "source": "reachy2_sdk.utils.goto_based_element.IGoToBasedElement.__init__",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "utils_goto_based_element_IGoToBasedElement_get_goto_playing": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_IGoToBasedElement_get_goto_playing",
+      "description": "Return the GoToId of the currently playing goto movement on a specific element.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "class": "IGoToBasedElement",
+    "source": "reachy2_sdk.utils.goto_based_element.IGoToBasedElement.get_goto_playing",
+    "return_type": "GoToId",
+    "is_async": false,
+    "is_property": false
+  },
+  "utils_goto_based_element_IGoToBasedElement_get_goto_queue": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_IGoToBasedElement_get_goto_queue",
+      "description": "Return a list of all GoToIds waiting to be played on a specific element.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "class": "IGoToBasedElement",
+    "source": "reachy2_sdk.utils.goto_based_element.IGoToBasedElement.get_goto_queue",
+    "return_type": "List[GoToId]",
+    "is_async": false,
+    "is_property": false
+  },
+  "utils_goto_based_element_IGoToBasedElement_cancel_all_goto": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_IGoToBasedElement_cancel_all_goto",
+      "description": "Request the cancellation of all playing and waiting goto commands for a specific element.\n\nReturns:\n    A GoToAck acknowledging the cancellation of all goto commands.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "class": "IGoToBasedElement",
+    "source": "reachy2_sdk.utils.goto_based_element.IGoToBasedElement.cancel_all_goto",
+    "return_type": "GoToAck",
+    "is_async": false,
+    "is_property": false
+  },
+  "utils_goto_based_element_IGoToBasedElement_goto_posture": {
+    "type": "function",
+    "function": {
+      "name": "utils_goto_based_element_IGoToBasedElement_goto_posture",
+      "description": "Send all joints to standard positions with optional parameters for duration, waiting, and interpolation mode.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "common_posture": {
+            "type": "string",
+            "description": "Parameter common_posture"
+          },
+          "duration": {
+            "type": "number",
+            "description": "Parameter duration"
+          },
+          "wait": {
+            "type": "boolean",
+            "description": "Parameter wait"
+          },
+          "wait_for_goto_end": {
+            "type": "boolean",
+            "description": "Parameter wait_for_goto_end"
+          },
+          "interpolation_mode": {
+            "type": "string",
+            "description": "Parameter interpolation_mode"
+          }
+        },
+        "required": [
+          "common_posture",
+          "duration",
+          "wait",
+          "wait_for_goto_end",
+          "interpolation_mode"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.utils.goto_based_element",
+    "class": "IGoToBasedElement",
+    "source": "reachy2_sdk.utils.goto_based_element.IGoToBasedElement.goto_posture",
+    "return_type": "GoToId",
+    "is_async": false,
+    "is_property": false
+  },
+  "dynamixel_dynamixel_motor_DynamixelMotor___init__": {
+    "type": "function",
+    "function": {
+      "name": "dynamixel_dynamixel_motor_DynamixelMotor___init__",
+      "description": "Initialize the DynamixelMotor with its initial state and configuration.\n\nThis sets up the motor by assigning its state based on the provided initial values.\n\nArgs:\n    uid: The unique identifier of the component.\n    name: The name of the component.\n    initial_state: A dictionary containing the initial state of the joint, with\n        each entry representing a specific parameter of the joint (e.g., present position).\n    grpc_channel: The gRPC channel used to communicate with the DynamixelMotor service.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "integer",
+            "description": "The unique identifier of the component."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the component."
+          },
+          "initial_state": {
+            "type": "string",
+            "description": "A dictionary containing the initial state of the joint, with"
+          },
+          "grpc_channel": {
+            "type": "string",
+            "description": "The gRPC channel used to communicate with the DynamixelMotor service."
+          }
+        },
+        "required": [
+          "uid",
+          "name",
+          "initial_state",
+          "grpc_channel"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.dynamixel.dynamixel_motor",
+    "class": "DynamixelMotor",
+    "source": "reachy2_sdk.dynamixel.dynamixel_motor.DynamixelMotor.__init__",
+    "return_type": null,
+    "is_async": false,
+    "is_property": false
+  },
+  "dynamixel_dynamixel_motor_DynamixelMotor___repr__": {
+    "type": "function",
+    "function": {
+      "name": "dynamixel_dynamixel_motor_DynamixelMotor___repr__",
+      "description": "Clean representation of the DynamixelMotor.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.dynamixel.dynamixel_motor",
+    "class": "DynamixelMotor",
+    "source": "reachy2_sdk.dynamixel.dynamixel_motor.DynamixelMotor.__repr__",
+    "return_type": "str",
+    "is_async": false,
+    "is_property": false
+  },
+  "dynamixel_dynamixel_motor_DynamixelMotor_turn_on": {
+    "type": "function",
+    "function": {
+      "name": "dynamixel_dynamixel_motor_DynamixelMotor_turn_on",
+      "description": "Turn on the motor.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.dynamixel.dynamixel_motor",
+    "class": "DynamixelMotor",
+    "source": "reachy2_sdk.dynamixel.dynamixel_motor.DynamixelMotor.turn_on",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "dynamixel_dynamixel_motor_DynamixelMotor_turn_off": {
+    "type": "function",
+    "function": {
+      "name": "dynamixel_dynamixel_motor_DynamixelMotor_turn_off",
+      "description": "Turn off the motor.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.dynamixel.dynamixel_motor",
+    "class": "DynamixelMotor",
+    "source": "reachy2_sdk.dynamixel.dynamixel_motor.DynamixelMotor.turn_off",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "dynamixel_dynamixel_motor_DynamixelMotor_is_on": {
+    "type": "function",
+    "function": {
+      "name": "dynamixel_dynamixel_motor_DynamixelMotor_is_on",
+      "description": "Check if the dynamixel motor is currently stiff.\n\nReturns:\n    `True` if the motor is stiff (not compliant), `False` otherwise.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.dynamixel.dynamixel_motor",
+    "class": "DynamixelMotor",
+    "source": "reachy2_sdk.dynamixel.dynamixel_motor.DynamixelMotor.is_on",
+    "return_type": "bool",
+    "is_async": false,
+    "is_property": false
+  },
+  "dynamixel_dynamixel_motor_DynamixelMotor_present_position": {
+    "type": "function",
+    "function": {
+      "name": "dynamixel_dynamixel_motor_DynamixelMotor_present_position",
+      "description": "Get the present position of the joint in degrees.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.dynamixel.dynamixel_motor",
+    "class": "DynamixelMotor",
+    "source": "reachy2_sdk.dynamixel.dynamixel_motor.DynamixelMotor.present_position",
+    "return_type": "float",
+    "is_async": false,
+    "is_property": true
+  },
+  "dynamixel_dynamixel_motor_DynamixelMotor_goal_position": {
+    "type": "function",
+    "function": {
+      "name": "dynamixel_dynamixel_motor_DynamixelMotor_goal_position",
+      "description": "Set the goal position of the joint in degrees.\n\nThe goal position is not send to the joint immediately, it is stored locally until the `send_goal_positions` method\nis called.\n\nArgs:\n    value: The goal position to set, specified as a float or int.\n\nRaises:\n    TypeError: If the provided value is not a float or int.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "The goal position to set, specified as a float or int."
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.dynamixel.dynamixel_motor",
+    "class": "DynamixelMotor",
+    "source": "reachy2_sdk.dynamixel.dynamixel_motor.DynamixelMotor.goal_position",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "dynamixel_dynamixel_motor_DynamixelMotor_send_goal_positions": {
+    "type": "function",
+    "function": {
+      "name": "dynamixel_dynamixel_motor_DynamixelMotor_send_goal_positions",
+      "description": "Send goal positions to the motor.\n\nIf goal positions have been specified, sends them to the motor.\nArgs :\n    check_positions: A boolean indicating whether to check the positions after sending the command.\n        Defaults to True.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "check_positions": {
+            "type": "boolean",
+            "description": "A boolean indicating whether to check the positions after sending the command."
+          }
+        },
+        "required": [
+          "check_positions"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.dynamixel.dynamixel_motor",
+    "class": "DynamixelMotor",
+    "source": "reachy2_sdk.dynamixel.dynamixel_motor.DynamixelMotor.send_goal_positions",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "dynamixel_dynamixel_motor_DynamixelMotor_set_speed_limits": {
+    "type": "function",
+    "function": {
+      "name": "dynamixel_dynamixel_motor_DynamixelMotor_set_speed_limits",
+      "description": "Set the speed limit as a percentage of the maximum speed the motor.\n\nArgs:\n    speed_limit: The desired speed limit as a percentage (0-100) of the maximum speed. Can be\n        specified as a float or int.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "speed_limit": {
+            "type": "string",
+            "description": "The desired speed limit as a percentage (0-100) of the maximum speed. Can be"
+          }
+        },
+        "required": [
+          "speed_limit"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.dynamixel.dynamixel_motor",
+    "class": "DynamixelMotor",
+    "source": "reachy2_sdk.dynamixel.dynamixel_motor.DynamixelMotor.set_speed_limits",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna___init__": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna___init__",
+      "description": "Initialize the Antenna with its initial state and configuration.\n\nArgs:\n    uid: The unique identifier of the component.\n    name: The name of the joint.\n    initial_state: A dictionary containing the initial state of the joint, with\n        each entry representing a specific parameter of the joint (e.g., present position).\n    grpc_channel: The gRPC channel used to communicate with the DynamixelMotor service.\n    goto_stub: The gRPC stub for controlling goto movements.\n    part: The part to which this joint belongs.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "uid": {
+            "type": "integer",
+            "description": "The unique identifier of the component."
+          },
+          "name": {
+            "type": "string",
+            "description": "The name of the joint."
+          },
+          "initial_state": {
+            "type": "string",
+            "description": "A dictionary containing the initial state of the joint, with"
+          },
+          "grpc_channel": {
+            "type": "string",
+            "description": "The gRPC channel used to communicate with the DynamixelMotor service."
+          },
+          "goto_stub": {
+            "type": "string",
+            "description": "The gRPC stub for controlling goto movements."
+          },
+          "part": {
+            "type": "string",
+            "description": "The part to which this joint belongs."
+          }
+        },
+        "required": [
+          "uid",
+          "name",
+          "initial_state",
+          "grpc_channel",
+          "goto_stub",
+          "part"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.__init__",
+    "return_type": null,
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna_goto_posture": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna_goto_posture",
+      "description": "Send the antenna to standard positions within the specified duration.\n\nThe default posture sets the antenna is 0.0.\n\nArgs:\n    common_posture: The standard positions to which all joints will be sent.\n        It can be 'default' or 'elbow_90'. Defaults to 'default'.\n    duration: The time duration in seconds for the robot to move to the specified posture.\n        Defaults to 2.\n    wait: Determines whether the program should wait for the movement to finish before\n        returning. If set to `True`, the program waits for the movement to complete before continuing\n        execution. Defaults to `False`.\n    wait_for_goto_end: Specifies whether commands will be sent to a part immediately or\n        only after all previous commands in the queue have been executed. If set to `False`, the program\n        will cancel all executing moves and queues. Defaults to `True`.\n    interpolation_mode: The type of interpolation used when moving the arm's joints.\n        Can be 'minimum_jerk' or 'linear'. Defaults to 'minimum_jerk'.\n\nReturns:\n    The unique GoToId associated with the movement command.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "common_posture": {
+            "type": "string",
+            "description": "The standard positions to which all joints will be sent."
+          },
+          "duration": {
+            "type": "number",
+            "description": "The time duration in seconds for the robot to move to the specified posture."
+          },
+          "wait": {
+            "type": "boolean",
+            "description": "Determines whether the program should wait for the movement to finish before"
+          },
+          "wait_for_goto_end": {
+            "type": "boolean",
+            "description": "Specifies whether commands will be sent to a part immediately or"
+          },
+          "interpolation_mode": {
+            "type": "string",
+            "description": "The type of interpolation used when moving the arm's joints."
+          }
+        },
+        "required": [
+          "common_posture",
+          "duration",
+          "wait",
+          "wait_for_goto_end",
+          "interpolation_mode"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.goto_posture",
+    "return_type": "GoToId",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna_goto": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna_goto",
+      "description": "Send the antenna to a specified goal position.\n\nArgs:\n    target: The desired goal position for the antenna.\n    duration: The time in seconds for the movement to be completed. Defaults to 2.\n    wait: If True, the function waits until the movement is completed before returning.\n            Defaults to False.\n    interpolation_mode: The interpolation method to be used. It can be either \"minimum_jerk\"\n            or \"linear\". Defaults to \"minimum_jerk\".\n    degrees: If True, the joint value in the `target` argument is treated as degrees.\n            Defaults to True.\n\nRaises:\n    TypeError : If the input type for `target` is invalid\n    ValueError: If the `duration` is set to 0.\n\nReturns:\n    GoToId: The unique identifier for the movement command.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "number",
+            "description": "The desired goal position for the antenna."
+          },
+          "duration": {
+            "type": "number",
+            "description": "The time in seconds for the movement to be completed. Defaults to 2."
+          },
+          "wait": {
+            "type": "boolean",
+            "description": "If True, the function waits until the movement is completed before returning."
+          },
+          "interpolation_mode": {
+            "type": "string",
+            "description": "The interpolation method to be used. It can be either \"minimum_jerk\""
+          },
+          "degrees": {
+            "type": "boolean",
+            "description": "If True, the joint value in the `target` argument is treated as degrees."
+          }
+        },
+        "required": [
+          "target",
+          "duration",
+          "wait",
+          "interpolation_mode",
+          "degrees"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.goto",
+    "return_type": "GoToId",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna___repr__": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna___repr__",
+      "description": "Clean representation of the Antenna only joint (DynamixelMotor).",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.__repr__",
+    "return_type": "str",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna_turn_on": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna_turn_on",
+      "description": "Turn on the antenna's motor.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.turn_on",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna_turn_off": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna_turn_off",
+      "description": "Turn off the antenna's motor.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.turn_off",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna_is_on": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna_is_on",
+      "description": "Check if the antenna is currently stiff.\n\nReturns:\n    `True` if the antenna's motor is stiff (not compliant), `False` otherwise.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.is_on",
+    "return_type": "bool",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna_is_off": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna_is_off",
+      "description": "Check if the antenna is currently stiff.\n\nReturns:\n    `True` if the antenna's motor is stiff (not compliant), `False` otherwise.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.is_off",
+    "return_type": "bool",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna_present_position": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna_present_position",
+      "description": "Get the present position of the joint in degrees.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.present_position",
+    "return_type": "float",
+    "is_async": false,
+    "is_property": true
+  },
+  "components_antenna_Antenna_goal_position": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna_goal_position",
+      "description": "Set the goal position of the joint in degrees.\n\nThe goal position is not send to the joint immediately, it is stored locally until the `send_goal_positions` method\nis called.\n\nArgs:\n    value: The goal position to set, specified as a float or int.\n\nRaises:\n    TypeError: If the provided value is not a float or int.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "The goal position to set, specified as a float or int."
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.goal_position",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna_send_goal_positions": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna_send_goal_positions",
+      "description": "Send goal positions to the motor.\n\nIf goal positions have been specified, sends them to the motor.\nArgs :\n    check_positions: A boolean indicating whether to check the positions after sending the command.\n        Defaults to True.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "check_positions": {
+            "type": "boolean",
+            "description": "A boolean indicating whether to check the positions after sending the command."
+          }
+        },
+        "required": [
+          "check_positions"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.send_goal_positions",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna_set_speed_limits": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna_set_speed_limits",
+      "description": "Set the speed limit as a percentage of the maximum speed the motor.\n\nArgs:\n    speed_limit: The desired speed limit as a percentage (0-100) of the maximum speed. Can be\n        specified as a float or int.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "speed_limit": {
+            "type": "string",
+            "description": "The desired speed limit as a percentage (0-100) of the maximum speed. Can be"
+          }
+        },
+        "required": [
+          "speed_limit"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.set_speed_limits",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_antenna_Antenna_status": {
+    "type": "function",
+    "function": {
+      "name": "components_antenna_Antenna_status",
+      "description": "Get the current audit status of the actuator.\n\nReturns:\n    The audit status as a string, representing the latest error or status\n    message, or `None` if there is no error.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.components.antenna",
+    "class": "Antenna",
+    "source": "reachy2_sdk.components.antenna.Antenna.status",
+    "return_type": "Optional[str]",
+    "is_async": false,
+    "is_property": true
+  },
+  "components_goto_based_component_IGoToBasedComponent___init__": {
+    "type": "function",
+    "function": {
+      "name": "components_goto_based_component_IGoToBasedComponent___init__",
+      "description": "Initialize the IGoToBasedComponent interface.\n\nSets up the common attributes needed for handling goto-based movements. This includes\nassociating the component with the interface and setting up the gRPC stub for performing\ngoto commands.\n\nArgs:\n    component_id: The robot component that uses this interface.\n    goto_stub: The gRPC stub used to send goto commands to the robot component.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "component_id": {
+            "type": "string",
+            "description": "The robot component that uses this interface."
+          },
+          "goto_stub": {
+            "type": "string",
+            "description": "The gRPC stub used to send goto commands to the robot component."
+          }
+        },
+        "required": [
+          "component_id",
+          "goto_stub"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.components.goto_based_component",
+    "class": "IGoToBasedComponent",
+    "source": "reachy2_sdk.components.goto_based_component.IGoToBasedComponent.__init__",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_goto_based_component_IGoToBasedComponent_get_goto_playing": {
+    "type": "function",
+    "function": {
+      "name": "components_goto_based_component_IGoToBasedComponent_get_goto_playing",
+      "description": "Return the GoToId of the currently playing goto movement on a specific component.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.components.goto_based_component",
+    "class": "IGoToBasedComponent",
+    "source": "reachy2_sdk.components.goto_based_component.IGoToBasedComponent.get_goto_playing",
+    "return_type": "GoToId",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_goto_based_component_IGoToBasedComponent_get_goto_queue": {
+    "type": "function",
+    "function": {
+      "name": "components_goto_based_component_IGoToBasedComponent_get_goto_queue",
+      "description": "Return a list of all GoToIds waiting to be played on a specific component.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.components.goto_based_component",
+    "class": "IGoToBasedComponent",
+    "source": "reachy2_sdk.components.goto_based_component.IGoToBasedComponent.get_goto_queue",
+    "return_type": "List[GoToId]",
+    "is_async": false,
+    "is_property": false
+  },
+  "components_goto_based_component_IGoToBasedComponent_cancel_all_goto": {
+    "type": "function",
+    "function": {
+      "name": "components_goto_based_component_IGoToBasedComponent_cancel_all_goto",
+      "description": "Request the cancellation of all playing and waiting goto commands for a specific component.\n\nReturns:\n    A GoToAck acknowledging the cancellation of all goto commands.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.components.goto_based_component",
+    "class": "IGoToBasedComponent",
+    "source": "reachy2_sdk.components.goto_based_component.IGoToBasedComponent.cancel_all_goto",
+    "return_type": "GoToAck",
+    "is_async": false,
+    "is_property": false
+  },
   "parts_goto_based_part_IGoToBasedPart___init__": {
     "type": "function",
     "function": {
@@ -2549,51 +3664,6 @@
     "class": "IGoToBasedPart",
     "source": "reachy2_sdk.parts.goto_based_part.IGoToBasedPart.cancel_all_goto",
     "return_type": "GoToAck",
-    "is_async": false,
-    "is_property": false
-  },
-  "parts_goto_based_part_IGoToBasedPart_goto_posture": {
-    "type": "function",
-    "function": {
-      "name": "parts_goto_based_part_IGoToBasedPart_goto_posture",
-      "description": "Send all joints to standard positions with optional parameters for duration, waiting, and interpolation mode.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "common_posture": {
-            "type": "string",
-            "description": "Parameter common_posture"
-          },
-          "duration": {
-            "type": "number",
-            "description": "Parameter duration"
-          },
-          "wait": {
-            "type": "boolean",
-            "description": "Parameter wait"
-          },
-          "wait_for_goto_end": {
-            "type": "boolean",
-            "description": "Parameter wait_for_goto_end"
-          },
-          "interpolation_mode": {
-            "type": "string",
-            "description": "Parameter interpolation_mode"
-          }
-        },
-        "required": [
-          "common_posture",
-          "duration",
-          "wait",
-          "wait_for_goto_end",
-          "interpolation_mode"
-        ]
-      }
-    },
-    "module": "reachy2_sdk.parts.goto_based_part",
-    "class": "IGoToBasedPart",
-    "source": "reachy2_sdk.parts.goto_based_part.IGoToBasedPart.goto_posture",
-    "return_type": "GoToId",
     "is_async": false,
     "is_property": false
   },
@@ -3398,8 +4468,15 @@
       "description": "Check if all actuators of the arm are stiff.\n\nReturns:\n    `True` if all actuators of the arm are stiff, `False` otherwise.",
       "parameters": {
         "type": "object",
-        "properties": {},
-        "required": []
+        "properties": {
+          "check_gripper": {
+            "type": "boolean",
+            "description": "Parameter check_gripper"
+          }
+        },
+        "required": [
+          "check_gripper"
+        ]
       }
     },
     "module": "reachy2_sdk.parts.arm",
@@ -3416,8 +4493,15 @@
       "description": "Check if all actuators of the arm are compliant.\n\nReturns:\n    `True` if all actuators of the arm are compliant, `False` otherwise.",
       "parameters": {
         "type": "object",
-        "properties": {},
-        "required": []
+        "properties": {
+          "check_gripper": {
+            "type": "boolean",
+            "description": "Parameter check_gripper"
+          }
+        },
+        "required": [
+          "check_gripper"
+        ]
       }
     },
     "module": "reachy2_sdk.parts.arm",
@@ -3521,7 +4605,7 @@
     "type": "function",
     "function": {
       "name": "parts_arm_Arm_goto",
-      "description": "Move the arm to a specified target position, either in joint space or Cartesian space.\n\nThis function allows the arm to move to a specified target using either:\n- A list of 7 joint positions, or\n- A 4x4 pose matrix representing the desired end-effector position.\n\nThe function also supports an optional initial configuration `q0` for\ncomputing the inverse kinematics solution when the target is in Cartesian space.\n\nArgs:\n    target: The target position. It can either be a list of 7 joint values (for joint space)\n            or a 4x4 NumPy array (for Cartesian space).\n    duration: The time in seconds for the movement to be completed. Defaults to 2.\n    wait: If True, the function waits until the movement is completed before returning.\n            Defaults to False.\n    interpolation_mode: The interpolation method to be used. It can be either \"minimum_jerk\"\n            or \"linear\". Defaults to \"minimum_jerk\".\n    degrees: If True, the joint values in the `target` argument are treated as degrees.\n            Defaults to True.\n    q0: An optional list of 7 joint values representing the initial configuration\n            for inverse kinematics. Defaults to None.\n\nReturns:\n    GoToId: The unique GoToId identifier for the movement command.\n\nRaises:\n    TypeError: If the `target` is neither a list nor a pose matrix.\n    TypeError: If the `q0` is not a list.\n    ValueError: If the `target` list has a length other than 7, or the pose matrix is not\n        of shape (4, 4).\n    ValueError: If the `q0` list has a length other than 7.\n    ValueError: If the `duration` is set to 0.",
+      "description": "Move the arm to a specified target position, either in joint space or Cartesian space.\n\nThis function allows the arm to move to a specified target using either:\n- A list of 7 joint positions, or\n- A 4x4 pose matrix representing the desired end-effector position.\n\nThe function also supports an optional initial configuration `q0` for\ncomputing the inverse kinematics solution when the target is in Cartesian space.\n\nArgs:\n    target: The target position. It can either be a list of 7 joint values (for joint space)\n            or a 4x4 NumPy array (for Cartesian space).\n    duration: The time in seconds for the movement to be completed. Defaults to 2.\n    wait: If True, the function waits until the movement is completed before returning.\n            Defaults to False.\n    interpolation_space: The space in which the interpolation should be performed. It can\n            be either \"joint_space\" or \"cartesian_space\". Defaults to \"joint_space\".\n    interpolation_mode: The interpolation method to be used. It can be either \"minimum_jerk\",\n            \"linear\" or \"elliptical\". Defaults to \"minimum_jerk\".\n    degrees: If True, the joint values in the `target` argument are treated as degrees.\n            Defaults to True.\n    q0: An optional list of 7 joint values representing the initial configuration\n            for inverse kinematics. Defaults to None.\n    arc_direction: The direction of the arc to be followed during elliptical interpolation.\n            Can be \"above\", \"below\", \"front\", \"back\", \"left\" or \"right\" . Defaults to \"above\".\n    secondary_radius: The secondary radius of the ellipse for elliptical interpolation, in meters.\n\nReturns:\n    GoToId: The unique GoToId identifier for the movement command.\n\nRaises:\n    TypeError: If the `target` is neither a list nor a pose matrix.\n    TypeError: If the `q0` is not a list.\n    ValueError: If the `target` list has a length other than 7, or the pose matrix is not\n        of shape (4, 4).\n    ValueError: If the `q0` list has a length other than 7.\n    ValueError: If the `duration` is set to 0.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -3537,9 +4621,13 @@
             "type": "boolean",
             "description": "If True, the function waits until the movement is completed before returning."
           },
+          "interpolation_space": {
+            "type": "string",
+            "description": "The space in which the interpolation should be performed. It can"
+          },
           "interpolation_mode": {
             "type": "string",
-            "description": "The interpolation method to be used. It can be either \"minimum_jerk\""
+            "description": "The interpolation method to be used. It can be either \"minimum_jerk\","
           },
           "degrees": {
             "type": "boolean",
@@ -3548,15 +4636,26 @@
           "q0": {
             "type": "array",
             "description": "An optional list of 7 joint values representing the initial configuration"
+          },
+          "arc_direction": {
+            "type": "string",
+            "description": "The direction of the arc to be followed during elliptical interpolation."
+          },
+          "secondary_radius": {
+            "type": "number",
+            "description": "The secondary radius of the ellipse for elliptical interpolation, in meters."
           }
         },
         "required": [
           "target",
           "duration",
           "wait",
+          "interpolation_space",
           "interpolation_mode",
           "degrees",
-          "q0"
+          "q0",
+          "arc_direction",
+          "secondary_radius"
         ]
       }
     },
@@ -3744,9 +4843,21 @@
             "type": "string",
             "description": "The coordinate system in which the translation should be performed."
           },
+          "interpolation_space": {
+            "type": "string",
+            "description": "Parameter interpolation_space"
+          },
           "interpolation_mode": {
             "type": "string",
             "description": "The type of interpolation to be used when moving the arm's"
+          },
+          "arc_direction": {
+            "type": "string",
+            "description": "Parameter arc_direction"
+          },
+          "secondary_radius": {
+            "type": "number",
+            "description": "Parameter secondary_radius"
           }
         },
         "required": [
@@ -3756,7 +4867,10 @@
           "duration",
           "wait",
           "frame",
-          "interpolation_mode"
+          "interpolation_space",
+          "interpolation_mode",
+          "arc_direction",
+          "secondary_radius"
         ]
       }
     },
@@ -3877,61 +4991,11 @@
     "is_async": false,
     "is_property": false
   },
-  "parts_arm_Arm_send_cartesian_interpolation": {
-    "type": "function",
-    "function": {
-      "name": "parts_arm_Arm_send_cartesian_interpolation",
-      "description": "Perform Cartesian interpolation and move the arm towards a target pose.\n\nThe function uses linear or elliptical interpolation for translation to reach or get close\nto the specified target pose.\n\nArgs:\n    target: A 4x4 homogeneous pose matrix representing the desired\n        position and orientation in the Reachy coordinate system, provided as a NumPy array.\n    duration: The expected time in seconds for the arm to reach the target position\n        from its current position. Defaults to 2.\n    arc_direction: The direction for elliptic interpolation when moving\n        the arm towards the target pose. Can be 'above', 'below', 'right', 'left', 'front',\n        or 'back'. If not specified, a linear interpolation is computed.\n    elliptic_radius: The second radius of the computed ellipse for elliptical\n        interpolation. The first radius is the distance between the current pose and the\n        target pose. If not specified, a circular interpolation is used.\n    interpolation_frequency: The number of intermediate points used to interpolate\n        the movement in Cartesian space between the initial and target poses. Defaults to 120.\n    precision_distance_xyz: The maximum allowed distance in meters in the XYZ space between\n        the current end-effector position and the target position. If the end-effector is\n        further than this distance from the target after the movement, the movement is repeated\n        until the precision is met. Defaults to 0.003.\n\nRaises:\n    TypeError: If the target is not a NumPy matrix.\n    ValueError: If the target shape is not (4, 4).\n    ValueError: If the duration is set to 0.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "target": {
-            "type": "string",
-            "description": "A 4x4 homogeneous pose matrix representing the desired"
-          },
-          "duration": {
-            "type": "number",
-            "description": "The expected time in seconds for the arm to reach the target position"
-          },
-          "arc_direction": {
-            "type": "string",
-            "description": "The direction for elliptic interpolation when moving"
-          },
-          "elliptic_radius": {
-            "type": "number",
-            "description": "The second radius of the computed ellipse for elliptical"
-          },
-          "interpolation_frequency": {
-            "type": "number",
-            "description": "The number of intermediate points used to interpolate"
-          },
-          "precision_distance_xyz": {
-            "type": "number",
-            "description": "The maximum allowed distance in meters in the XYZ space between"
-          }
-        },
-        "required": [
-          "target",
-          "duration",
-          "arc_direction",
-          "elliptic_radius",
-          "interpolation_frequency",
-          "precision_distance_xyz"
-        ]
-      }
-    },
-    "module": "reachy2_sdk.parts.arm",
-    "class": "Arm",
-    "source": "reachy2_sdk.parts.arm.Arm.send_cartesian_interpolation",
-    "return_type": "None",
-    "is_async": false,
-    "is_property": false
-  },
   "parts_arm_Arm_send_goal_positions": {
     "type": "function",
     "function": {
       "name": "parts_arm_Arm_send_goal_positions",
-      "description": "Send goal positions to the gripper and actuators if the parts are on.\n\nThe function checks if the gripper and actuators are active before sending the goal positions.\n\nArgs :\n    check_positions: A boolean indicating whether to check the positions after sending the command.\n        Defaults to True.",
+      "description": "Send goal positions to the arm's joints, including the gripper.\n\nIf goal positions have been specified for any joint of the part, sends them to the robot.\n\nArgs :\n    check_positions: A boolean indicating whether to check the positions after sending the command.\n        Defaults to True.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -4024,7 +5088,43 @@
     "module": "reachy2_sdk.parts.head",
     "class": "Head",
     "source": "reachy2_sdk.parts.head.Head.neck",
-    "return_type": "Orbita3d",
+    "return_type": "Optional[Orbita3d]",
+    "is_async": false,
+    "is_property": true
+  },
+  "parts_head_Head_l_antenna": {
+    "type": "function",
+    "function": {
+      "name": "parts_head_Head_l_antenna",
+      "description": "Get the left antenna actuator of the head.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.parts.head",
+    "class": "Head",
+    "source": "reachy2_sdk.parts.head.Head.l_antenna",
+    "return_type": "Optional[Antenna]",
+    "is_async": false,
+    "is_property": true
+  },
+  "parts_head_Head_r_antenna": {
+    "type": "function",
+    "function": {
+      "name": "parts_head_Head_r_antenna",
+      "description": "Get the right antenna actuator of the head.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.parts.head",
+    "class": "Head",
+    "source": "reachy2_sdk.parts.head.Head.r_antenna",
+    "return_type": "Optional[Antenna]",
     "is_async": false,
     "is_property": true
   },
@@ -4075,29 +5175,29 @@
     "type": "function",
     "function": {
       "name": "parts_head_Head_goto",
-      "description": "Send the neck to a specified orientation.\n\nThis method moves the neck either to a given roll-pitch-yaw (RPY) position or to a quaternion orientation.\n\nArgs:\n    target (Any): The desired orientation for the neck. Can either be:\n        - A list of three floats [roll, pitch, yaw] representing the RPY orientation (in degrees if `degrees=True`).\n        - A pyQuat object representing a quaternion.\n    duration (float, optional): Time in seconds for the movement. Defaults to 2.0.\n    wait (bool, optional): Whether to wait for the movement to complete before returning. Defaults to False.\n    interpolation_mode (str, optional): The type of interpolation to be used for the movement.\n                                        Can be \"minimum_jerk\" or other modes. Defaults to \"minimum_jerk\".\n    degrees (bool, optional): Specifies if the RPY values in `target` are in degrees. Defaults to True.\n\nRaises:\n    TypeError : If the input type for `target` is invalid\n    ValueError: If the `duration` is set to 0.\n\nReturns:\n    GoToId: The unique identifier for the movement command.",
+      "description": "Send the neck to a specified orientation.\n\nThis method moves the neck either to a given roll-pitch-yaw (RPY) position or to a quaternion orientation.\n\nArgs:\n    target: The desired orientation for the neck. Can either be:\n        - A list of three floats [roll, pitch, yaw] representing the RPY orientation (in degrees if `degrees=True`).\n        - A pyQuat object representing a quaternion.\n    duration: The time in seconds for the movement to be completed. Defaults to 2.\n    wait: If True, the function waits until the movement is completed before returning.\n            Defaults to False.\n    interpolation_mode: The interpolation method to be used. It can be either \"minimum_jerk\"\n            or \"linear\". Defaults to \"minimum_jerk\".\n    degrees: If True, the RPY values in the `target` argument are treated as degrees.\n            Defaults to True.\n\nRaises:\n    TypeError : If the input type for `target` is invalid\n    ValueError: If the `duration` is set to 0.\n\nReturns:\n    GoToId: The unique identifier for the movement command.",
       "parameters": {
         "type": "object",
         "properties": {
           "target": {
             "type": "string",
-            "description": "Parameter target"
+            "description": "The desired orientation for the neck. Can either be:"
           },
           "duration": {
             "type": "number",
-            "description": "Parameter duration"
+            "description": "The time in seconds for the movement to be completed. Defaults to 2."
           },
           "wait": {
             "type": "boolean",
-            "description": "Parameter wait"
+            "description": "If True, the function waits until the movement is completed before returning."
           },
           "interpolation_mode": {
             "type": "string",
-            "description": "Parameter interpolation_mode"
+            "description": "The interpolation method to be used. It can be either \"minimum_jerk\""
           },
           "degrees": {
             "type": "boolean",
-            "description": "Parameter degrees"
+            "description": "If True, the RPY values in the `target` argument are treated as degrees."
           }
         },
         "required": [
@@ -4230,7 +5330,7 @@
     "type": "function",
     "function": {
       "name": "parts_head_Head_goto_posture",
-      "description": "Send all neck joints to standard positions within the specified duration.\n\nThe default posture sets the neck joints to [0, -10, 0] (roll, pitch, yaw).\n\nArgs:\n    common_posture: The standard positions to which all joints will be sent.\n        It can be 'default' or 'elbow_90'. Defaults to 'default'.\n    duration: The time in seconds for the neck to reach the target posture. Defaults to 2.\n    wait: Whether to wait for the movement to complete before returning. Defaults to False.\n    wait_for_goto_end: Whether to wait for all previous goto commands to finish before executing\n        the current command. If False, it cancels all ongoing commands. Defaults to True.\n    interpolation_mode: The interpolation mode for the movement, either \"minimum_jerk\" or \"linear\".\n        Defaults to \"minimum_jerk\".\n\nReturns:\n    The unique GoToId associated with the movement command.\n\nRaises:\n    ValueError: If the neck is off and the command cannot be sent.",
+      "description": "Send all neck joints to standard positions within the specified duration.\n\nThe default posture sets the neck joints to [0, -10, 0] (roll, pitch, yaw).\n\nArgs:\n    common_posture: The standard positions to which all joints will be sent.\n        It can be 'default' or 'elbow_90'. Defaults to 'default'.\n    duration: The time in seconds for the neck to reach the target posture. Defaults to 2.\n    wait: Whether to wait for the movement to complete before returning. Defaults to False.\n    wait_for_goto_end: Whether to wait for all previous goto commands to finish before executing\n        the current command. If False, it cancels all ongoing commands. Defaults to True.\n    interpolation_mode: The interpolation mode for the movement, either \"minimum_jerk\" or \"linear\".\n        Defaults to \"minimum_jerk\".\n\nReturns:\n    The unique GoToId associated with the movement command.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -4271,36 +5371,11 @@
     "is_async": false,
     "is_property": false
   },
-  "parts_head_Head_send_goal_positions": {
-    "type": "function",
-    "function": {
-      "name": "parts_head_Head_send_goal_positions",
-      "description": "Send goal positions to the head's joints.\n\nIf goal positions have been specified for any joint of the head, sends them to the robot.\n\nArgs :\n    check_positions: A boolean indicating whether to check the positions after sending the command.\n        Defaults to True.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "check_positions": {
-            "type": "boolean",
-            "description": "A boolean indicating whether to check the positions after sending the command."
-          }
-        },
-        "required": [
-          "check_positions"
-        ]
-      }
-    },
-    "module": "reachy2_sdk.parts.head",
-    "class": "Head",
-    "source": "reachy2_sdk.parts.head.Head.send_goal_positions",
-    "return_type": "None",
-    "is_async": false,
-    "is_property": false
-  },
   "parts_hand_Hand___init__": {
     "type": "function",
     "function": {
       "name": "parts_hand_Hand___init__",
-      "description": "Initialize the Hand component.\n\nSets up the necessary attributes and configuration for the hand, including the gRPC\nstub and initial state.\n\nArgs:\n    hand_msg: The Hand_proto object containing the configuration details for the hand.\n    initial_state: The initial state of the hand, represented as a HandState object.\n    grpc_channel: The gRPC channel used to communicate with the hand's gRPC service.",
+      "description": "Initialize the Hand component.\n\nSets up the necessary attributes and configuration for the hand, including the gRPC\nstub and initial state.\n\nArgs:\n    hand_msg: The Hand_proto object containing the configuration details for the hand.\n    grpc_channel: The gRPC channel used to communicate with the hand's gRPC service.\n    goto_stub: The gRPC stub for controlling goto movements.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -4308,104 +5383,25 @@
             "type": "string",
             "description": "The Hand_proto object containing the configuration details for the hand."
           },
-          "initial_state": {
-            "type": "string",
-            "description": "The initial state of the hand, represented as a HandState object."
-          },
           "grpc_channel": {
             "type": "string",
             "description": "The gRPC channel used to communicate with the hand's gRPC service."
+          },
+          "goto_stub": {
+            "type": "string",
+            "description": "The gRPC stub for controlling goto movements."
           }
         },
         "required": [
           "hand_msg",
-          "initial_state",
-          "grpc_channel"
+          "grpc_channel",
+          "goto_stub"
         ]
       }
     },
     "module": "reachy2_sdk.parts.hand",
     "class": "Hand",
     "source": "reachy2_sdk.parts.hand.Hand.__init__",
-    "return_type": "None",
-    "is_async": false,
-    "is_property": false
-  },
-  "parts_hand_Hand___repr__": {
-    "type": "function",
-    "function": {
-      "name": "parts_hand_Hand___repr__",
-      "description": "Clean representation of a Hand.",
-      "parameters": {
-        "type": "object",
-        "properties": {},
-        "required": []
-      }
-    },
-    "module": "reachy2_sdk.parts.hand",
-    "class": "Hand",
-    "source": "reachy2_sdk.parts.hand.Hand.__repr__",
-    "return_type": "str",
-    "is_async": false,
-    "is_property": false
-  },
-  "parts_hand_Hand_opening": {
-    "type": "function",
-    "function": {
-      "name": "parts_hand_Hand_opening",
-      "description": "Get the opening of the hand as a percentage.\n\nReturns:\n    The hand opening as a percentage (0-100), rounded to two decimal places.",
-      "parameters": {
-        "type": "object",
-        "properties": {},
-        "required": []
-      }
-    },
-    "module": "reachy2_sdk.parts.hand",
-    "class": "Hand",
-    "source": "reachy2_sdk.parts.hand.Hand.opening",
-    "return_type": "float",
-    "is_async": false,
-    "is_property": true
-  },
-  "parts_hand_Hand_present_position": {
-    "type": "function",
-    "function": {
-      "name": "parts_hand_Hand_present_position",
-      "description": "Get the current position of the hand.\n\nReturns:\n    The present position of the hand in degrees.",
-      "parameters": {
-        "type": "object",
-        "properties": {},
-        "required": []
-      }
-    },
-    "module": "reachy2_sdk.parts.hand",
-    "class": "Hand",
-    "source": "reachy2_sdk.parts.hand.Hand.present_position",
-    "return_type": "float",
-    "is_async": false,
-    "is_property": true
-  },
-  "parts_hand_Hand_goal_position": {
-    "type": "function",
-    "function": {
-      "name": "parts_hand_Hand_goal_position",
-      "description": "Set the goal position for the hand.\n\nArgs:\n    value: The goal position to set, specified as a float or int.\n\nRaises:\n    TypeError: If the provided value is not a float or int.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "value": {
-            "type": "string",
-            "description": "The goal position to set, specified as a float or int."
-          }
-        },
-        "required": [
-          "value"
-        ]
-      }
-    },
-    "module": "reachy2_sdk.parts.hand",
-    "class": "Hand",
-    "source": "reachy2_sdk.parts.hand.Hand.goal_position",
     "return_type": "None",
     "is_async": false,
     "is_property": false
@@ -4450,7 +5446,7 @@
     "type": "function",
     "function": {
       "name": "parts_hand_Hand_is_moving",
-      "description": "Check if the hand is currently moving.\n\nReturns:\n    `True` if the gripper is moving, `False` otherwise.",
+      "description": "Check if the hand is currently moving.\n\nReturns:\n    `True` if any joint of the hand is moving, `False` otherwise.",
       "parameters": {
         "type": "object",
         "properties": {},
@@ -4461,24 +5457,6 @@
     "class": "Hand",
     "source": "reachy2_sdk.parts.hand.Hand.is_moving",
     "return_type": "bool",
-    "is_async": false,
-    "is_property": false
-  },
-  "parts_hand_Hand_get_current_opening": {
-    "type": "function",
-    "function": {
-      "name": "parts_hand_Hand_get_current_opening",
-      "description": "Get the current opening of the hand.\n\nReturns:\n    The current opening of the hand as a percentage (0-100).",
-      "parameters": {
-        "type": "object",
-        "properties": {},
-        "required": []
-      }
-    },
-    "module": "reachy2_sdk.parts.hand",
-    "class": "Hand",
-    "source": "reachy2_sdk.parts.hand.Hand.get_current_opening",
-    "return_type": "float",
     "is_async": false,
     "is_property": false
   },
@@ -4518,36 +5496,11 @@
     "is_async": false,
     "is_property": false
   },
-  "parts_hand_Hand_set_opening": {
-    "type": "function",
-    "function": {
-      "name": "parts_hand_Hand_set_opening",
-      "description": "Set the opening value for the hand.\n\nArgs:\n    percentage: The desired opening percentage of the hand, ranging from 0 to 100.\n\nRaises:\n    ValueError: If the percentage is not between 0 and 100.\n    RuntimeError: If the gripper is off and the opening value cannot be set.",
-      "parameters": {
-        "type": "object",
-        "properties": {
-          "percentage": {
-            "type": "number",
-            "description": "The desired opening percentage of the hand, ranging from 0 to 100."
-          }
-        },
-        "required": [
-          "percentage"
-        ]
-      }
-    },
-    "module": "reachy2_sdk.parts.hand",
-    "class": "Hand",
-    "source": "reachy2_sdk.parts.hand.Hand.set_opening",
-    "return_type": "None",
-    "is_async": false,
-    "is_property": false
-  },
   "parts_hand_Hand_send_goal_positions": {
     "type": "function",
     "function": {
       "name": "parts_hand_Hand_send_goal_positions",
-      "description": "Send the goal position to the hand actuator.\n\nIf any goal position has been specified to the gripper, sends them to the robot.\nIf the hand is off, the command is not sent.\n\nArgs :\n    check_positions: A boolean indicating whether to check the positions after sending the command.\n        Defaults to True.",
+      "description": "Send the goal positions to the hand's joints.\n\nIf any goal position has been specified for any of the gripper's joints, sends them to the robot.\nIf the hand is off, the command is not sent.\n\nArgs :\n    check_positions: A boolean indicating whether to check the positions after sending the command.\n        Defaults to True.",
       "parameters": {
         "type": "object",
         "properties": {
@@ -4690,6 +5643,571 @@
     "class": "Part",
     "source": "reachy2_sdk.parts.part.Part.audit",
     "return_type": "Dict[str, str]",
+    "is_async": false,
+    "is_property": true
+  },
+  "parts_tripod_Tripod___init__": {
+    "type": "function",
+    "function": {
+      "name": "parts_tripod_Tripod___init__",
+      "description": "Initialize the Tripod with its initial state and configuration.\n\nThis sets up the tripod by assigning its state based on the provided initial values.\n\nArgs:\n    proto_msg: The protobuf message containing configuration details for the part.\n    initial_state: The initial state of the tripod's joints.\n    grpc_channel: The gRPC channel used to communicate with the DynamixelMotor service.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "proto_msg": {
+            "type": "string",
+            "description": "The protobuf message containing configuration details for the part."
+          },
+          "initial_state": {
+            "type": "string",
+            "description": "The initial state of the tripod's joints."
+          },
+          "grpc_channel": {
+            "type": "string",
+            "description": "The gRPC channel used to communicate with the DynamixelMotor service."
+          }
+        },
+        "required": [
+          "proto_msg",
+          "initial_state",
+          "grpc_channel"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.parts.tripod",
+    "class": "Tripod",
+    "source": "reachy2_sdk.parts.tripod.Tripod.__init__",
+    "return_type": null,
+    "is_async": false,
+    "is_property": false
+  },
+  "parts_tripod_Tripod___repr__": {
+    "type": "function",
+    "function": {
+      "name": "parts_tripod_Tripod___repr__",
+      "description": "Clean representation of the Tripod.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.parts.tripod",
+    "class": "Tripod",
+    "source": "reachy2_sdk.parts.tripod.Tripod.__repr__",
+    "return_type": "str",
+    "is_async": false,
+    "is_property": false
+  },
+  "parts_tripod_Tripod_height": {
+    "type": "function",
+    "function": {
+      "name": "parts_tripod_Tripod_height",
+      "description": "Get the current height of the robot torso in meters.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.parts.tripod",
+    "class": "Tripod",
+    "source": "reachy2_sdk.parts.tripod.Tripod.height",
+    "return_type": "float",
+    "is_async": false,
+    "is_property": true
+  },
+  "parts_tripod_Tripod_set_height": {
+    "type": "function",
+    "function": {
+      "name": "parts_tripod_Tripod_set_height",
+      "description": "Set the height of the tripod.\n\nArgs:\n    height: The height of the tripod in meters.\n\nRaises:\n    TypeError: If the height is not a float or int.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "height": {
+            "type": "number",
+            "description": "The height of the tripod in meters."
+          }
+        },
+        "required": [
+          "height"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.parts.tripod",
+    "class": "Tripod",
+    "source": "reachy2_sdk.parts.tripod.Tripod.set_height",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "parts_tripod_Tripod_reset_height": {
+    "type": "function",
+    "function": {
+      "name": "parts_tripod_Tripod_reset_height",
+      "description": "Reset the height of the tripod to its default position.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.parts.tripod",
+    "class": "Tripod",
+    "source": "reachy2_sdk.parts.tripod.Tripod.reset_height",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "parts_tripod_Tripod_get_limits": {
+    "type": "function",
+    "function": {
+      "name": "parts_tripod_Tripod_get_limits",
+      "description": "Get the limits of the tripod's height.\n\nReturns:\n    A tuple containing the minimum and maximum height values.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.parts.tripod",
+    "class": "Tripod",
+    "source": "reachy2_sdk.parts.tripod.Tripod.get_limits",
+    "return_type": "Tuple[float, float]",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_gripper_joint_GripperJoint___init__": {
+    "type": "function",
+    "function": {
+      "name": "grippers_gripper_joint_GripperJoint___init__",
+      "description": "Initialize the GripperJoint with its initial state.\n\nThis sets up the joint by assigning its state based on the provided initial values.\n\nArgs:\n    initial_state: A HandState containing the initial state of the joint.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "initial_state": {
+            "type": "string",
+            "description": "A HandState containing the initial state of the joint."
+          }
+        },
+        "required": [
+          "initial_state"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.grippers.gripper_joint",
+    "class": "GripperJoint",
+    "source": "reachy2_sdk.grippers.gripper_joint.GripperJoint.__init__",
+    "return_type": null,
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_gripper_joint_GripperJoint___repr__": {
+    "type": "function",
+    "function": {
+      "name": "grippers_gripper_joint_GripperJoint___repr__",
+      "description": "Clean representation of a GripperJoint.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.grippers.gripper_joint",
+    "class": "GripperJoint",
+    "source": "reachy2_sdk.grippers.gripper_joint.GripperJoint.__repr__",
+    "return_type": "str",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_gripper_joint_GripperJoint_opening": {
+    "type": "function",
+    "function": {
+      "name": "grippers_gripper_joint_GripperJoint_opening",
+      "description": "Get the opening of the joint as a percentage.\n\nReturns:\n    The joint opening as a percentage (0-100), rounded to two decimal places.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.grippers.gripper_joint",
+    "class": "GripperJoint",
+    "source": "reachy2_sdk.grippers.gripper_joint.GripperJoint.opening",
+    "return_type": "float",
+    "is_async": false,
+    "is_property": true
+  },
+  "grippers_gripper_joint_GripperJoint_present_position": {
+    "type": "function",
+    "function": {
+      "name": "grippers_gripper_joint_GripperJoint_present_position",
+      "description": "Get the current position of the joint.\n\nReturns:\n    The present position of the joint in degrees.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.grippers.gripper_joint",
+    "class": "GripperJoint",
+    "source": "reachy2_sdk.grippers.gripper_joint.GripperJoint.present_position",
+    "return_type": "float",
+    "is_async": false,
+    "is_property": true
+  },
+  "grippers_gripper_joint_GripperJoint_goal_position": {
+    "type": "function",
+    "function": {
+      "name": "grippers_gripper_joint_GripperJoint_goal_position",
+      "description": "Set the goal position for the joint.\n\nArgs:\n    value: The goal position to set, specified as a float or int.\n\nRaises:\n    TypeError: If the provided value is not a float or int.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "The goal position to set, specified as a float or int."
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.grippers.gripper_joint",
+    "class": "GripperJoint",
+    "source": "reachy2_sdk.grippers.gripper_joint.GripperJoint.goal_position",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_gripper_joint_GripperJoint_is_on": {
+    "type": "function",
+    "function": {
+      "name": "grippers_gripper_joint_GripperJoint_is_on",
+      "description": "Check if the joint is stiff.\n\nReturns:\n    `True` if the joint is on (not compliant), `False` otherwise.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.grippers.gripper_joint",
+    "class": "GripperJoint",
+    "source": "reachy2_sdk.grippers.gripper_joint.GripperJoint.is_on",
+    "return_type": "bool",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_gripper_joint_GripperJoint_is_off": {
+    "type": "function",
+    "function": {
+      "name": "grippers_gripper_joint_GripperJoint_is_off",
+      "description": "Check if the joint is compliant.\n\nReturns:\n    `True` if the joint is off (compliant), `False` otherwise.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.grippers.gripper_joint",
+    "class": "GripperJoint",
+    "source": "reachy2_sdk.grippers.gripper_joint.GripperJoint.is_off",
+    "return_type": "bool",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_gripper_joint_GripperJoint_is_moving": {
+    "type": "function",
+    "function": {
+      "name": "grippers_gripper_joint_GripperJoint_is_moving",
+      "description": "Check if the joint is currently moving.\n\nReturns:\n    `True` if the joint is moving, `False` otherwise.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.grippers.gripper_joint",
+    "class": "GripperJoint",
+    "source": "reachy2_sdk.grippers.gripper_joint.GripperJoint.is_moving",
+    "return_type": "bool",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_parallel_gripper_ParallelGripper___init__": {
+    "type": "function",
+    "function": {
+      "name": "grippers_parallel_gripper_ParallelGripper___init__",
+      "description": "Initialize the ParallelGripper component.\n\nSets up the necessary attributes and configuration for the hand, including the gRPC\nstub and initial state.\n\nArgs:\n    hand_msg: The Hand_proto object containing the configuration details for the hand.\n    initial_state: The initial state of the hand, represented as a HandState object.\n    grpc_channel: The gRPC channel used to communicate with the hand's gRPC service.\n    goto_stub: The gRPC stub for controlling goto movements.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "hand_msg": {
+            "type": "string",
+            "description": "The Hand_proto object containing the configuration details for the hand."
+          },
+          "initial_state": {
+            "type": "string",
+            "description": "The initial state of the hand, represented as a HandState object."
+          },
+          "grpc_channel": {
+            "type": "string",
+            "description": "The gRPC channel used to communicate with the hand's gRPC service."
+          },
+          "goto_stub": {
+            "type": "string",
+            "description": "The gRPC stub for controlling goto movements."
+          }
+        },
+        "required": [
+          "hand_msg",
+          "initial_state",
+          "grpc_channel",
+          "goto_stub"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.grippers.parallel_gripper",
+    "class": "ParallelGripper",
+    "source": "reachy2_sdk.grippers.parallel_gripper.ParallelGripper.__init__",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_parallel_gripper_ParallelGripper___repr__": {
+    "type": "function",
+    "function": {
+      "name": "grippers_parallel_gripper_ParallelGripper___repr__",
+      "description": "Clean representation of a ParallelGripper.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.grippers.parallel_gripper",
+    "class": "ParallelGripper",
+    "source": "reachy2_sdk.grippers.parallel_gripper.ParallelGripper.__repr__",
+    "return_type": "str",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_parallel_gripper_ParallelGripper_opening": {
+    "type": "function",
+    "function": {
+      "name": "grippers_parallel_gripper_ParallelGripper_opening",
+      "description": "Get the opening of the parallel gripper only joint as a percentage.\n\nReturns:\n    The hand opening as a percentage (0-100), rounded to two decimal places.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.grippers.parallel_gripper",
+    "class": "ParallelGripper",
+    "source": "reachy2_sdk.grippers.parallel_gripper.ParallelGripper.opening",
+    "return_type": "float",
+    "is_async": false,
+    "is_property": true
+  },
+  "grippers_parallel_gripper_ParallelGripper_present_position": {
+    "type": "function",
+    "function": {
+      "name": "grippers_parallel_gripper_ParallelGripper_present_position",
+      "description": "Get the current position of the parallel gripper only joint.\n\nReturns:\n    The present position of the hand in degrees.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.grippers.parallel_gripper",
+    "class": "ParallelGripper",
+    "source": "reachy2_sdk.grippers.parallel_gripper.ParallelGripper.present_position",
+    "return_type": "float",
+    "is_async": false,
+    "is_property": true
+  },
+  "grippers_parallel_gripper_ParallelGripper_goal_position": {
+    "type": "function",
+    "function": {
+      "name": "grippers_parallel_gripper_ParallelGripper_goal_position",
+      "description": "Set the goal position for the parallel gripper only joint.\n\nArgs:\n    value: The goal position to set, specified as a float or int.\n\nRaises:\n    TypeError: If the provided value is not a float or int.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "value": {
+            "type": "string",
+            "description": "The goal position to set, specified as a float or int."
+          }
+        },
+        "required": [
+          "value"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.grippers.parallel_gripper",
+    "class": "ParallelGripper",
+    "source": "reachy2_sdk.grippers.parallel_gripper.ParallelGripper.goal_position",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_parallel_gripper_ParallelGripper_get_current_opening": {
+    "type": "function",
+    "function": {
+      "name": "grippers_parallel_gripper_ParallelGripper_get_current_opening",
+      "description": "Get the current opening of the parallel gripper only joint.\n\nReturns:\n    The current opening of the hand as a percentage (0-100).",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.grippers.parallel_gripper",
+    "class": "ParallelGripper",
+    "source": "reachy2_sdk.grippers.parallel_gripper.ParallelGripper.get_current_opening",
+    "return_type": "float",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_parallel_gripper_ParallelGripper_set_opening": {
+    "type": "function",
+    "function": {
+      "name": "grippers_parallel_gripper_ParallelGripper_set_opening",
+      "description": "Set the opening value for the parallel gripper only joint.\n\nArgs:\n    percentage: The desired opening percentage of the hand, ranging from 0 to 100.\n\nRaises:\n    ValueError: If the percentage is not between 0 and 100.\n    RuntimeError: If the gripper is off and the opening value cannot be set.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "percentage": {
+            "type": "number",
+            "description": "The desired opening percentage of the hand, ranging from 0 to 100."
+          }
+        },
+        "required": [
+          "percentage"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.grippers.parallel_gripper",
+    "class": "ParallelGripper",
+    "source": "reachy2_sdk.grippers.parallel_gripper.ParallelGripper.set_opening",
+    "return_type": "None",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_parallel_gripper_ParallelGripper_goto_posture": {
+    "type": "function",
+    "function": {
+      "name": "grippers_parallel_gripper_ParallelGripper_goto_posture",
+      "description": "Send the gripper to default open posture with optional parameters for duration, waiting, and interpolation mode.\n\nArgs:\n    common_posture: The standard posture. It can be 'default' or 'elbow_90'. Defaults to 'default'.\n        Modifying the posture has no effect on the hand.\n    duration: The time duration in seconds for the robot to move to the specified posture.\n        Defaults to 2.\n    wait: Determines whether the program should wait for the movement to finish before\n        returning. If set to `True`, the program waits for the movement to complete before continuing\n        execution. Defaults to `False`.\n    wait_for_goto_end: Specifies whether commands will be sent to a part immediately or\n        only after all previous commands in the queue have been executed. If set to `False`, the program\n        will cancel all executing moves and queues. Defaults to `True`.\n    interpolation_mode: The type of interpolation used when moving the gripper.\n        Can be 'minimum_jerk' or 'linear'. Defaults to 'minimum_jerk'.\n\nReturns:\n    A unique GoToId identifier for this specific movement.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "common_posture": {
+            "type": "string",
+            "description": "The standard posture. It can be 'default' or 'elbow_90'. Defaults to 'default'."
+          },
+          "duration": {
+            "type": "number",
+            "description": "The time duration in seconds for the robot to move to the specified posture."
+          },
+          "wait": {
+            "type": "boolean",
+            "description": "Determines whether the program should wait for the movement to finish before"
+          },
+          "wait_for_goto_end": {
+            "type": "boolean",
+            "description": "Specifies whether commands will be sent to a part immediately or"
+          },
+          "interpolation_mode": {
+            "type": "string",
+            "description": "The type of interpolation used when moving the gripper."
+          }
+        },
+        "required": [
+          "common_posture",
+          "duration",
+          "wait",
+          "wait_for_goto_end",
+          "interpolation_mode"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.grippers.parallel_gripper",
+    "class": "ParallelGripper",
+    "source": "reachy2_sdk.grippers.parallel_gripper.ParallelGripper.goto_posture",
+    "return_type": "GoToId",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_parallel_gripper_ParallelGripper_goto": {
+    "type": "function",
+    "function": {
+      "name": "grippers_parallel_gripper_ParallelGripper_goto",
+      "description": "Move the hand to a specified goal position.\n\nArgs:\n    target: The target position. It can either be a float or int.\n    duration: The time in seconds for the movement to be completed. Defaults to 2.\n    wait: If True, the function waits until the movement is completed before returning.\n            Defaults to False.\n    interpolation_mode: The interpolation method to be used. It can be either \"minimum_jerk\"\n            or \"linear\". Defaults to \"minimum_jerk\".\n    degrees: If True, the joint values in the `target` argument are treated as degrees.\n            Defaults to True.\n    percentage: If True, the target value is treated as a percentage of opening. Defaults to False.\n\nReturns:\n    GoToId: The unique GoToId identifier for the movement command.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "target": {
+            "type": "string",
+            "description": "The target position. It can either be a float or int."
+          },
+          "duration": {
+            "type": "number",
+            "description": "The time in seconds for the movement to be completed. Defaults to 2."
+          },
+          "wait": {
+            "type": "boolean",
+            "description": "If True, the function waits until the movement is completed before returning."
+          },
+          "interpolation_mode": {
+            "type": "string",
+            "description": "The interpolation method to be used. It can be either \"minimum_jerk\""
+          },
+          "degrees": {
+            "type": "boolean",
+            "description": "If True, the joint values in the `target` argument are treated as degrees."
+          },
+          "percentage": {
+            "type": "number",
+            "description": "If True, the target value is treated as a percentage of opening. Defaults to False."
+          }
+        },
+        "required": [
+          "target",
+          "duration",
+          "wait",
+          "interpolation_mode",
+          "degrees",
+          "percentage"
+        ]
+      }
+    },
+    "module": "reachy2_sdk.grippers.parallel_gripper",
+    "class": "ParallelGripper",
+    "source": "reachy2_sdk.grippers.parallel_gripper.ParallelGripper.goto",
+    "return_type": "GoToId",
+    "is_async": false,
+    "is_property": false
+  },
+  "grippers_parallel_gripper_ParallelGripper_status": {
+    "type": "function",
+    "function": {
+      "name": "grippers_parallel_gripper_ParallelGripper_status",
+      "description": "Get the current audit status of the actuator.\n\nReturns:\n    The audit status as a string, representing the latest error or status\n    message, or `None` if there is no error.",
+      "parameters": {
+        "type": "object",
+        "properties": {},
+        "required": []
+      }
+    },
+    "module": "reachy2_sdk.grippers.parallel_gripper",
+    "class": "ParallelGripper",
+    "source": "reachy2_sdk.grippers.parallel_gripper.ParallelGripper.status",
+    "return_type": "Optional[str]",
     "is_async": false,
     "is_property": true
   },

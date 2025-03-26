@@ -3,8 +3,6 @@
 - **Natural Language to Code**: Convert natural language descriptions into executable Python code for the Reachy 2 robot
 - **Real-time Status Updates**: See the current status of the code generation process
 - **Automatic Code Validation**: Validate generated code before execution
-- **Recursive Code Correction**: Automatically fix common issues in the generated code (up to 3 attempts)
-- **Correction History**: View a history of what issues were fixed during code generation
 - **Code Execution**: Execute the generated code directly from the interface
 - **Detailed Feedback**: Get detailed feedback about code execution results
 - **Robot Connection Status**: See if the Reachy robot or simulator is available
@@ -21,12 +19,23 @@ When code is generated, it goes through these validation steps:
 1. **Syntax Check**: Ensures the code has valid Python syntax
 2. **Import Validation**: Verifies all imports are available
 3. **API Usage Check**: Confirms correct usage of the Reachy API
+   - Validates proper gripper access through arm properties (e.g., `arm.gripper`)
+   - Checks for incorrect patterns like `r_gripper`, `l_gripper`, or `gripper()`
 4. **Safety Check**: Looks for potentially harmful operations
 
-When issues are found, the model will attempt to fix them automatically (up to 3 correction attempts). The interface provides transparency about this process, showing:
-- What issues were found
-- Whether they were successfully fixed
-- A detailed correction history
+The interface provides transparency about this process, showing what issues were found in the validation results.
+
+### Common API Usage Examples
+
+```python
+# Correct gripper access
+reachy.r_arm.gripper.open()           # ✅ Correct: Access gripper as a property
+reachy.l_arm.gripper.set_opening(0.5) # ✅ Correct: Access gripper as a property
+
+# Incorrect gripper access
+reachy.r_gripper.open()               # ❌ Wrong: Direct gripper access
+reachy.l_arm.gripper().close()        # ❌ Wrong: Calling gripper as a method
+```
 
 ### Command-line Arguments
 

@@ -32,8 +32,19 @@ if parent_dir not in sys.path:
 # Import configuration
 from config import OPENAI_API_KEY, MODEL
 
-# Import WebSocket server for notifications
-from api.websocket import get_websocket_server
+# Replace with a stub implementation for now
+def get_websocket_server():
+    """
+    Stub implementation for the websocket server.
+    
+    Returns:
+        object: A stub websocket server.
+    """
+    class StubWebSocketServer:
+        def send_notification(self, *args, **kwargs):
+            pass
+    
+    return StubWebSocketServer()
 
 # Configure OpenAI client with custom settings
 client = OpenAI(
@@ -255,74 +266,27 @@ def generate_api_summary(api_docs):
         "pollen_vision"
     ]
     
-    # Define the most commonly used classes
-    common_classes = [
-        "ReachySDK",  # Main SDK class
-        "Arm",        # Arm control
-        "Head",       # Head control
-        "MobileBase", # Mobile base control
-        "Hand",       # Hand/gripper control
-        "OrbitaJoint" # Joint control
-    ]
-    
-    # Extract classes and their methods with enhanced details
+    # Extract classes and their methods from the documentation
     classes = {}
     official_classes = set()
     
+    # First pass: Collect all classes and their methods
     for item in api_docs:
-        # Process classes (only if they're from official modules and in common_classes)
         if item.get("type") == "class":
             class_name = item.get("name")
             module_name = item.get("module", "")
             
-            # Only include classes from official modules and in common_classes
-            if (module_name and any(module_name.startswith(prefix) for prefix in official_api_modules) 
-                and class_name in common_classes):
-                # Add to official classes
+            # Only include classes from official modules
+            if module_name and any(module_name.startswith(prefix) for prefix in official_api_modules):
                 if class_name:
                     official_classes.add(class_name)
-                
-                methods = []
-                
-                # Define commonly used methods for each class
-                common_methods = {
-                    "ReachySDK": ["__init__", "connect", "disconnect", "turn_on", "turn_off_smoothly", 
-                                 "goto_posture", "r_arm", "l_arm", "head", "mobile_base"],
-                    "Arm": ["goto", "inverse_kinematics", "get_current_positions", "goto_posture"],
-                    "Head": ["look_at", "goto", "rotate_by", "get_current_positions"],
-                    "MobileBase": ["goto", "rotate_by", "translate_by", "set_goal_speed"],
-                    "Hand": ["open", "close", "set_opening"],
-                    "OrbitaJoint": ["goal_position", "present_position", "goto"]
-                }
-                
-                # Get methods for this class
-                for method in item.get("methods", []):
-                    method_name = method.get("name")
-                    signature = method.get("signature", "")
-                    docstring = method.get("docstring", "")
                     
-                    # Only include common methods for this class
-                    if (method_name and not method_name.startswith("_") and  # Skip private methods
-                        (method_name in common_methods.get(class_name, []) or method_name == "__init__")):  # Always include constructor
-                        
-                        # Extract parameter details
-                        param_details = extract_parameter_details(signature, docstring)
-                        
-                        # Add special constraints for known problematic functions
-                        param_details = add_special_constraints(class_name, method_name, param_details)
-                        
-                        # Format the method information
-                        method_info = {
-                            "name": method_name,
-                            "signature": signature,
-                            "docstring": docstring.split("\n")[0] if docstring else "",  # First line of docstring
-                            "parameters": param_details
-                        }
-                        
-                        methods.append(method_info)
-                
-                if methods:
-                    classes[class_name] = methods
+                    # Store class info
+                    classes[class_name] = {
+                        "module": module_name,
+                        "docstring": item.get("docstring", ""),
+                        "methods": item.get("methods", [])
+                    }
     
     # Format the enhanced summary
     summary = []
@@ -333,48 +297,59 @@ def generate_api_summary(api_docs):
     summary.append("")
     
     # Add class methods with enhanced details
-    for class_name, methods in sorted(classes.items()):
+    for class_name, class_info in sorted(classes.items()):
         summary.append(f"## {class_name}")
+        summary.append(f"Module: {class_info['module']}")
+        if class_info["docstring"]:
+            summary.append(class_info["docstring"])
+        summary.append("")
         
-        for method in sorted(methods, key=lambda x: x["name"]):
-            method_name = method["name"]
+        # Process methods
+        for method in class_info["methods"]:
+            method_name = method.get("name")
             
-            # Simplify signature display - only show if it's not a standard method
-            if method_name in ["__init__", "goto", "inverse_kinematics"]:
-                signature = method["signature"]
-                # Simplify signature by removing return type annotations for clarity
-                if " -> " in signature:
-                    signature = signature.split(" -> ")[0] + ")"
-            else:
-                # For other methods, don't show the full signature
-                signature = "()"
-                
-            docstring = method["docstring"]
+            # Skip private methods (but allow special methods like __init__)
+            if method_name.startswith("_") and not method_name.startswith("__"):
+                continue
+            
+            signature = method.get("signature", "")
+            docstring = method.get("docstring", "")
+            
+            # Extract parameter details
+            param_details = extract_parameter_details(signature, docstring)
+            
+            # Add special constraints for known problematic functions
+            param_details = add_special_constraints(class_name, method_name, param_details)
             
             # Add method name and simplified signature
-            summary.append(f"### {method_name}{signature}")
+            if method_name in ["__init__", "goto", "inverse_kinematics"]:
+                # Show full signature for important methods
+                if " -> " in signature:
+                    signature = signature.split(" -> ")[0] + ")"
+                summary.append(f"### {method_name}{signature}")
+            else:
+                # For other methods, show simplified signature
+                summary.append(f"### {method_name}()")
             
             # Add first line of docstring if it exists and is meaningful
-            if docstring and len(docstring) > 5:  # Only add if docstring has substance
-                summary.append(f"{docstring}")
+            if docstring and len(docstring) > 5:
+                summary.append(docstring.split("\n")[0])
             
-            # Add parameter details - but only for parameters with constraints or important info
-            if method["parameters"]:
+            # Add parameter details if they exist
+            if param_details:
                 has_important_params = False
                 param_lines = []
                 
-                for param_name, param_info in method["parameters"].items():
-                    # Skip parameters without descriptions or constraints
+                for param_name, param_info in param_details.items():
                     if not param_info.get("description") and not param_info.get("constraints"):
                         continue
-                        
+                    
                     has_important_params = True
                     param_type = param_info.get("type", "")
                     param_desc = param_info.get("description", "")
                     
                     # Simplify parameter type display
                     if param_type and len(param_type) > 20:
-                        # For complex types, simplify
                         if "List" in param_type:
                             param_type = "List"
                         elif "Optional" in param_type:
@@ -395,20 +370,37 @@ def generate_api_summary(api_docs):
                     
                     param_lines.append(param_line)
                     
-                    # Add constraints if any - these are critical for safety
+                    # Add constraints
                     constraints = param_info.get("constraints", [])
                     if constraints:
                         for constraint in constraints:
                             param_lines.append(f"  * {constraint}")
                     
-                    # Add units if specified - important for correct usage
+                    # Add units
                     if "units" in param_info:
                         param_lines.append(f"  * Units: {param_info['units']}")
                 
-                # Only add Parameters section if there are important parameters
                 if has_important_params:
                     summary.append("Parameters:")
                     summary.extend(param_lines)
+            
+            # Add special notes for Arm class about grippers
+            if class_name == "Arm":
+                summary.append("\nGripper Control:")
+                summary.append("- Access the gripper through the arm.gripper property")
+                summary.append("- Available methods:")
+                summary.append("  * open(): Open the gripper fully")
+                summary.append("  * close(): Close the gripper fully")
+                summary.append("  * set_opening(value): Set gripper opening (0.0 to 1.0)")
+                summary.append("\nExample:")
+                summary.append("```python")
+                summary.append("# Right arm gripper")
+                summary.append("reachy.r_arm.gripper.open()")
+                summary.append("reachy.r_arm.gripper.set_opening(0.5)  # Half open")
+                summary.append("")
+                summary.append("# Left arm gripper")
+                summary.append("reachy.l_arm.gripper.close()")
+                summary.append("```")
             
             summary.append("")
         
@@ -687,11 +679,17 @@ class ReachyCodeGenerationAgent:
         # Check for incorrect property usage (calling properties as methods)
         property_patterns = [
             "r_arm()", "l_arm()", "head()", "cameras()", 
-            "gripper()", "r_gripper()", "l_gripper()"
+            "gripper()", "r_gripper", "l_gripper",  # Updated to catch incorrect gripper access
+            ".gripper()"  # Added to catch cases where gripper is called as a method
         ]
         for pattern in property_patterns:
             if pattern in code:
-                errors.append(f"Incorrect property usage: '{pattern}' is a property, not a method. Use without parentheses.")
+                if pattern in ["r_gripper", "l_gripper"]:
+                    errors.append(f"Incorrect gripper access: Use 'arm.gripper' instead of '{pattern}' (e.g., reachy.r_arm.gripper)")
+                elif pattern == "gripper()" or pattern == ".gripper()":
+                    errors.append(f"Incorrect gripper usage: 'gripper' is a property, not a method. Use without parentheses (e.g., reachy.r_arm.gripper)")
+                else:
+                    errors.append(f"Incorrect property usage: '{pattern}' is a property, not a method. Use without parentheses.")
         
         # Check for incorrect arm goto usage
         if "goto" in code:

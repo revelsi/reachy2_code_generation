@@ -4,6 +4,32 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [2025-03-27]
+
+### Major Refactoring
+- Simplified repository to focus exclusively on code generation functionality
+- Removed the frontend, API, and openAPI components in favor of the Gradio interface
+- Removed function calling features and LangGraph agent implementation
+- Removed Docker configuration and related files
+- Updated agent_router.py to only support code generation
+
+### Changed
+- Simplified web interface to focus on code generation UI only
+- Updated README.md with clearer, more focused documentation
+- Replaced websocket implementation with a stub for now
+- Streamlined CLI to only support code generation
+
+### Added
+- Improved entry point via launch_code_gen.py for simpler startup
+
+## [2025-03-14]
+
+### Changed
+- Removed references to unimplemented recursive code correction functionality
+- Updated documentation to reflect the actual implemented validation process
+- Simplified the code_generation_interface to remove unused correction-related code
+- Updated README.md, TODO.md, and other documentation files for accuracy
+
 ## [2025-03-13]
 
 ### Added
@@ -103,4 +129,16 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - REST API for controlling the robot
 - WebSocket server for real-time updates
 - Tool mapper for discovering and registering tools
-- SDK documentation scraper 
+- SDK documentation scraper
+
+## [2025-03-15]
+
+### Fixed
+- Corrected gripper access in code validation and documentation to use proper property syntax (e.g., `arm.gripper` instead of `arm.gripper()`)
+- Updated validation to catch incorrect gripper access patterns like `r_gripper`, `l_gripper`, or `gripper()`
+- Added clearer error messages for incorrect gripper usage in generated code
+
+### Changed
+- Enhanced code validation to provide more specific guidance on proper gripper property access
+- Updated API documentation examples to demonstrate correct gripper property usage
+- Improved error messages to better guide users on correct gripper access patterns 
