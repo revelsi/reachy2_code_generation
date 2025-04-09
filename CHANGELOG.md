@@ -4,141 +4,19 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [2025-03-27]
-
-### Major Refactoring
-- Simplified repository to focus exclusively on code generation functionality
-- Removed the frontend, API, and openAPI components in favor of the Gradio interface
-- Removed function calling features and LangGraph agent implementation
-- Removed Docker configuration and related files
-- Updated agent_router.py to only support code generation
-
-### Changed
-- Simplified web interface to focus on code generation UI only
-- Updated README.md with clearer, more focused documentation
-- Replaced websocket implementation with a stub for now
-- Streamlined CLI to only support code generation
+## [1.0.0] - 2025-04-09
 
 ### Added
-- Improved entry point via launch_code_gen.py for simpler startup
+- Initial public release of the Reachy2 code generation system
+- Gradio interface for code generation with real-time status updates
+- Code validation framework for generated Python code
+- Support for natural language to Python code translation
+- Robot connection status indicator
+- Simple launcher script (launch_code_gen.py) for easy access
 
-## [2025-03-14]
-
-### Changed
-- Removed references to unimplemented recursive code correction functionality
-- Updated documentation to reflect the actual implemented validation process
-- Simplified the code_generation_interface to remove unused correction-related code
-- Updated README.md, TODO.md, and other documentation files for accuracy
-
-## [2025-03-13]
-
-### Added
-- Enhanced Cartesian control guidance in prompt configuration with proper orientation matrices
-- Added utility function recommendation for creating pose matrices (`get_pose_matrix()`)
-- Improved documentation on proper orientation matrices for hand-forward positioning
-- Added comprehensive examples for reliable joint angle configurations
-
-### Changed
-- Updated system prompt to emphasize joint angle control over Cartesian control
-- Improved error handling recommendations for unreachable targets
-- Enhanced fallback strategy guidance for Cartesian control failures
-- Updated safe workspace ranges based on empirical testing
-- Simplified workspace validation approach to focus on reliable joint angles
-
-### Fixed
-- Corrected orientation matrix examples in prompt configuration to match official documentation
-- Fixed unreachable target issues by recommending proper orientation matrices
-- Resolved workspace validation complexity by focusing on reliable joint angle configurations
-
-## [2025-03-10]
-
-### Added
-- Added pollen-vision to official API modules for vision capabilities
-- Implemented recursive code correction for validation errors (up to 3 attempts)
-- Updated .gitignore to exclude cursor-related files and directories
-- Created dedicated Gradio interface for code generation with real-time status updates
-- Added automatic code validation and correction in the Gradio interface
-- Implemented correction history display for transparency
-- Added robot connection status indicator
-- Created simple launcher script (launch_code_gen.py) for easy access
-- Enhanced error handling for inverse kinematics and other common errors
-
-## [2025-03-05]
-
-### Added
-- Added dual-mode architecture supporting both function calling and code generation
-- Added code generation agent for translating natural language to Python code
-- Added basic code validation framework for generated code
-- Added centralized model configuration management system
-- Added UI components for switching between modes and configuring model parameters
-- Added CLI support for dual-mode operation
-- Added test script for verifying model configuration functionality
-- Added support for gpt-4o-mini model for improved performance and cost efficiency
-- Added simplified code execution workflow with minimal validation steps
-
-### Fixed
-- Fixed WebSocket server to properly notify clients of tool execution and results
-- Fixed connection handling in tool implementations to use centralized connection manager
-- Fixed import issues in generated tool files
-- Fixed duplicate code display in test_code_generator_api_tools.py
-- Fixed model configuration loading to properly respect environment variables and .env settings
-
-### Changed
-- Improved WebSocket message handling in the frontend
-- Refactored tool generation to use consistent connection pattern
-- Migrated from `get_reachy_connection` to `get_reachy` for better connection management
-- Refactored API endpoints to support dual-mode architecture
-- Enhanced web interface to support both function calling and code generation modes
-- Restructured agent initialization to use centralized model configuration
-- Simplified code execution by removing redundant safe execution wrapper
-- Updated default model to gpt-4o-mini in config.py
-- Streamlined user confirmation process for code execution
-
-## [2025-02-28]
-
-### Added
-- Development environment setup scripts (`start_dev.sh` and `start_dev.bat`) for consistent environment setup
-- Tool verification script (`verify_tools.py`) to check tool generation
-- Comprehensive test suite for tool functionality
-- CONTRIBUTING.md with guidelines for contributors
-- CHANGELOG.md to track changes
-- Improved .gitignore patterns for generated files
-- Added detailed documentation for using generated tools in README.md
-- Added tool execution result notifications via WebSocket
-- Added error message display with auto-fade in the web interface
-- Added new connection manager module for centralized Reachy connection handling
-
-### Fixed
-- Tool discovery and generation now working correctly (208 tools loaded)
-- Fixed `load_api_documentation` method to handle API documentation as a list of dictionaries
-- Updated import paths for the reorganized directory structure
-- Tool implementations now have proper error handling and consistent return formats
-
-### Changed
-- Moved utility files to the `agent/utils` directory for better organization
-- Updated README.md to reflect the current state of the project
-- Updated TODO.md to mark completed items and add new tasks
-
-## [2025-02-26]
-
-### Added
-- Initial project structure
-- LangGraph agent implementation
-- Mock robot implementation
-- Web interface for interacting with the robot
-- REST API for controlling the robot
-- WebSocket server for real-time updates
-- Tool mapper for discovering and registering tools
-- SDK documentation scraper
-
-## [2025-03-15]
-
-### Fixed
-- Corrected gripper access in code validation and documentation to use proper property syntax (e.g., `arm.gripper` instead of `arm.gripper()`)
-- Updated validation to catch incorrect gripper access patterns like `r_gripper`, `l_gripper`, or `gripper()`
-- Added clearer error messages for incorrect gripper usage in generated code
-
-### Changed
-- Enhanced code validation to provide more specific guidance on proper gripper property access
-- Updated API documentation examples to demonstrate correct gripper property usage
-- Improved error messages to better guide users on correct gripper access patterns 
+### Features
+- Natural language to Python code translation for Reachy2 robot control
+- Code validation to ensure generated code is executable
+- Real-time status updates during code generation process
+- User-friendly interface for robot interaction
+- Comprehensive error handling for common robot control errors 
