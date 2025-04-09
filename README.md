@@ -24,8 +24,8 @@ This project provides a simple, intuitive interface for generating Python code t
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/reachy_function_calling.git
-cd reachy_function_calling
+git clone https://github.com/pollen-robotics/reachy2_code_generation.git
+cd reachy2_code_generation
 ```
 
 2. Install dependencies (choose one method):
@@ -74,6 +74,19 @@ This command will:
 3. Collect SDK examples
 4. Save the documentation for use by the code generation system
 
+If you want to include documentation for vision capabilities (from pollen-vision):
+
+```bash
+make refresh-sdk-with-vision
+```
+
+This extended command will:
+1. Do everything the standard refresh does
+2. Additionally clone and extract documentation from the pollen-vision repository
+3. Include vision documentation in the final output
+
+Note: The vision-enhanced documentation will be available to the code generation system even if the pollen-vision package is not installed. However, actually using the vision capabilities in generated code requires installing the pollen-vision package (uncomment it in requirements.txt).
+
 ### Available Make Commands
 
 The project includes several useful make commands:
@@ -85,6 +98,7 @@ make lint          # Run the linter on the codebase
 make test          # Run code generation tests
 make run-gradio    # Run the Gradio interface
 make refresh-sdk   # Refresh the SDK documentation
+make refresh-sdk-with-vision  # Refresh SDK documentation including vision capabilities
 ```
 
 ## Project Focus
@@ -137,8 +151,22 @@ Available options:
 ## Project Structure
 
 - `agent/`: Code generation agent implementation
+  - `code_generation_agent.py`: Core agent for generating robot control code
+  - `code_evaluator.py`: Evaluates generated code for quality and safety
+  - `code_generation_pipeline.py`: Pipeline orchestrating the code generation workflow
+  - `code_generation_interface.py`: Gradio interface for the code generation system
 - `launch_code_gen.py`: Main launcher for the Gradio interface
 - `config.py`: Configuration settings and model parameters
+
+## How it Works
+
+The code generation system uses a three-stage pipeline:
+
+1. **Generation**: Converts natural language instructions into Python code using the Reachy 2 SDK
+2. **Evaluation**: Analyzes the code for syntax errors, API usage correctness, and safety concerns
+3. **Optimization**: Improves the generated code based on evaluation feedback (when needed)
+
+This pipeline approach ensures higher quality code that adheres to best practices for robot control.
 
 ## Contributing
 
