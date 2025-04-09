@@ -3,7 +3,7 @@ requires = ["setuptools>=42", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "reachy-function-calling"
+name = "reachy2-code-generation"
 version = "0.1.0"
 description = "A natural language interface for controlling the Reachy 2 robot"
 readme = "README.md"
@@ -32,8 +32,4 @@ python_version = "3.10"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
-disallow_incomplete_defs = true
-
-[project.scripts]
-reachy-cli = "agent.cli:main"
-reachy-web = "agent.web_interface:main" 
+disallow_incomplete_defs = true 

@@ -1,30 +1,51 @@
-# Reachy Code Generation
+# Reachy 2 Code Generation
 
-A Gradio-based interface for generating Python code to control the Reachy 2 robot.
+A powerful interface for generating, evaluating, and optimizing Python code for the Reachy 2 robot.
 
 ## Overview
 
-This project provides a simple, intuitive interface for generating Python code to control the Reachy 2 robot. Using natural language instructions, you can create code that leverages the robot's capabilities without needing to understand the full API.
+This project provides an intuitive interface for controlling the Reachy 2 robot through natural language instructions. Simply describe what you want the robot to do, and the system generates, evaluates, and optimizes executable Python code using the Reachy 2 SDK.
 
-## Features
+## Key Features
 
-- **Code Generation**: Generate Python code based on natural language instructions
-- **Code Validation**: Automatically validate generated code for errors and best practices
-- **Code Execution**: Execute the generated code directly on the Reachy robot
-- **Intuitive Interface**: Simple Gradio-based web UI for easy interaction
-- **Model Flexibility**: Support for various OpenAI models including GPT-4o-mini and more cost-effective options 
+- **Natural Language to Code**: Convert plain English instructions into Python code
+- **Code Generation Pipeline**: Three-stage process for high-quality code creation
+  - **Generation**: Creates initial code from user requests using GPT-4o
+  - **Evaluation**: Assesses code quality, safety, and API correctness using GPT-4o-mini
+  - **Optimization**: Refines code based on evaluation feedback
+- **Interactive Gradio Interface**: User-friendly web interface with real-time feedback
+- **Automatic Code Validation**: Identifies errors, warnings, and improvement opportunities
+- **Direct Code Execution**: Run code on connected Reachy robots from the interface
+- **Flexible Model Selection**: Support for various OpenAI models with configurable parameters
+
+## Generation-Evaluation-Optimization Workflow
+
+Our unique three-stage pipeline ensures robust, safe, and efficient code:
+
+1. **Generation Stage**: Your natural language request is processed by GPT-4o to create initial Python code
+2. **Evaluation Stage**: The generated code is analyzed by GPT-4o-mini for:
+   - Syntax correctness
+   - API usage validity
+   - Code safety
+   - Best practices
+   - Edge case handling
+3. **Optimization Stage**: If the evaluation score is below threshold, the code is automatically improved based on specific feedback
+
+This iterative workflow continues until reaching quality thresholds or maximum iteration count, ensuring you get the best possible results.
 
 ## System Requirements
 
-- Python 3.10+
+- Python 3.10 or higher
 - OpenAI API key
-- Reachy 2 robot (physical or virtual)
+- Reachy 2 robot (physical or simulated) - optional for code execution
 
-## Installation
+## Setup Instructions
+
+### Installation
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/pollen-robotics/reachy2_code_generation.git
+git clone https://github.com/revelsi/reachy2_code_generation.git
 cd reachy2_code_generation
 ```
 
@@ -43,11 +64,6 @@ make setup
 source venv_py310/bin/activate
 ```
 
-> **Note:** 
-> - The setup script, when sourced (using `source ./setup.sh`), will automatically activate the virtual environment in your current shell.
-> - The Make command cannot automatically activate the environment due to how Make works with subshells.
-> - Both methods will create a fresh installation from scratch.
-
 3. Set up your OpenAI API key:
 ```bash
 export OPENAI_API_KEY=your_api_key_here
@@ -55,41 +71,93 @@ export OPENAI_API_KEY=your_api_key_here
 Or create a `.env` file in the root directory:
 ```
 OPENAI_API_KEY=your_api_key_here
-MODEL=gpt-4o-mini
+MODEL=gpt-4o
 ```
 
-## Advanced Setup
+### Starting the Gradio Interface
+
+Launch the Gradio web interface with:
+
+```bash
+python launch_code_gen.py --ui
+```
+
+This starts a web server at http://localhost:7860 by default.
+
+### Command Line Options
+
+Fine-tune the application behavior with these options:
+
+```bash
+python launch_code_gen.py --ui --generator-model gpt-4o --temperature 0.3 --max-tokens 5000 --port 7861 --share
+```
+
+Key options:
+- `--generator-model`: Model for code generation (default: gpt-4o)
+- `--evaluator-model`: Model for code evaluation (default: gpt-4o-mini)
+- `--temperature`: Controls randomness (0.0 to 1.0, default: 0.2)
+- `--max-tokens`: Maximum tokens to generate (default: 4000)
+- `--port`: Web server port (default: 7860)
+- `--share`: Create a public share link via Gradio
+- `--max-iterations`: Maximum optimization cycles (default: 3)
+- `--evaluation-threshold`: Quality threshold for acceptance (default: 75.0)
+
+## Using the Gradio Interface
+
+The Gradio interface provides an intuitive way to generate and execute code for the Reachy 2 robot.
+
+### Main Interface Components
+
+1. **Input Area**: Enter your natural language request (e.g., "Wave the right arm for 3 seconds")
+2. **Generation Settings**: Adjust model, temperature, and token limits
+3. **Code Display**: View the generated/optimized Python code
+4. **Evaluation Feedback**: See quality scores, warnings, and suggestions
+5. **Execution Controls**: Run code directly on connected Reachy robots
+6. **Chat History**: Review previous requests and responses
+
+### Workflow Example
+
+1. **Enter a Request**: Type "Make the robot look left, then right, then center" in the input box
+2. **Generate Code**: Click the submit button to start the generation pipeline
+3. **Review Results**: Examine the generated code and evaluation feedback
+4. **Execute (Optional)**: If a robot is connected, run the code directly
+5. **Refine**: Adjust your request based on results or robot behavior
+
+### Tips for Effective Use
+
+- **Be Specific**: Include details like timing, positions, and sequences
+- **Start Simple**: Begin with basic movements before complex interactions
+- **Review Evaluations**: Pay attention to warnings and suggestions
+- **Iterative Refinement**: Use feedback to improve your requests
+- **Check Robot Status**: Confirm robot connectivity before execution
+
+## Example Requests
+
+Here are some effective requests to get started:
+
+1. **Basic Movement**: "Move the right arm to position x=0.3, y=0.2, z=0.1"
+2. **Sequential Actions**: "Turn the head to the right, wait 2 seconds, then look left"
+3. **Timed Movements**: "Wave the left arm up and down 3 times over a period of 5 seconds"
+4. **Coordinated Motion**: "Make the robot nod while waving its right hand"
+5. **Complex Interactions**: "Look for a red object, point at it with the right hand, and say 'I found it'"
+
+## Advanced Configuration
 
 ### Refreshing the SDK Documentation
 
-If you need to update the Reachy 2 SDK documentation:
+To update the Reachy 2 SDK documentation used by the system:
 
 ```bash
 make refresh-sdk
 ```
 
-This command will:
-1. Pull the latest SDK documentation from the repository
-2. Extract SDK API documentation
-3. Collect SDK examples
-4. Save the documentation for use by the code generation system
-
-If you want to include documentation for vision capabilities (from pollen-vision):
+To include vision capabilities (from pollen-vision):
 
 ```bash
 make refresh-sdk-with-vision
 ```
 
-This extended command will:
-1. Do everything the standard refresh does
-2. Additionally clone and extract documentation from the pollen-vision repository
-3. Include vision documentation in the final output
-
-Note: The vision-enhanced documentation will be available to the code generation system even if the pollen-vision package is not installed. However, actually using the vision capabilities in generated code requires installing the pollen-vision package (uncomment it in requirements.txt).
-
 ### Available Make Commands
-
-The project includes several useful make commands:
 
 ```bash
 make setup         # Set up the development environment
@@ -101,76 +169,21 @@ make refresh-sdk   # Refresh the SDK documentation
 make refresh-sdk-with-vision  # Refresh SDK documentation including vision capabilities
 ```
 
-## Project Focus
+## Troubleshooting
 
-This project is focused on code generation for the Reachy 2 robot. It provides a user-friendly interface for generating Python code to control the robot based on natural language instructions. The code generation system uses the Reachy 2 SDK documentation to inform the AI model about available functions and their usage.
-
-Previous functionality related to function calling and LangGraph agents has been deprecated in favor of the more flexible code generation approach.
-
-## Usage
-
-### Launch the Code Generation Interface
-
-Run one of the following commands to start the Gradio interface:
-
-```bash
-# Using the launcher script
-python launch_code_gen.py
-
-# OR using make
-make run-gradio
-```
-
-This will start a web server at http://localhost:7860 where you can:
-- Enter natural language instructions
-- See generated code with validation results
-- Execute code directly on the robot
-- Receive real-time feedback
-
-### Command Line Options
-
-The launcher supports several options:
-
-```bash
-python launch_code_gen.py --temperature 0.3 --max-tokens 5000 --port 7861
-```
-
-Available options:
-- `--temperature`: Controls randomness (0.0 to 1.0, default: 0.2)
-- `--max-tokens`: Maximum tokens to generate (default: 4000)
-- `--port`: Web server port (default: 7860)
-- `--share`: Create a public share link
-
-## Example Usage
-
-1. **Simple movement**: "Move the robot's right arm to position x=0.3, y=0.2, z=0.1"
-2. **Complex motion**: "Make the robot wave its right hand for 3 seconds"
-3. **Environmental interaction**: "Make the robot pick up an object in front of it"
-4. **Combined actions**: "Turn the robot's head to face me, then wave with its right arm"
-
-## Project Structure
-
-- `agent/`: Code generation agent implementation
-  - `code_generation_agent.py`: Core agent for generating robot control code
-  - `code_evaluator.py`: Evaluates generated code for quality and safety
-  - `code_generation_pipeline.py`: Pipeline orchestrating the code generation workflow
-  - `code_generation_interface.py`: Gradio interface for the code generation system
-- `launch_code_gen.py`: Main launcher for the Gradio interface
-- `config.py`: Configuration settings and model parameters
-
-## How it Works
-
-The code generation system uses a three-stage pipeline:
-
-1. **Generation**: Converts natural language instructions into Python code using the Reachy 2 SDK
-2. **Evaluation**: Analyzes the code for syntax errors, API usage correctness, and safety concerns
-3. **Optimization**: Improves the generated code based on evaluation feedback (when needed)
-
-This pipeline approach ensures higher quality code that adheres to best practices for robot control.
+- **Connection Issues**: Ensure robot IP is correctly configured in `.env` file (REACHY_HOST)
+- **Model Errors**: Verify your OpenAI API key has access to requested models
+- **Execution Failures**: Check robot power and connectivity status
+- **Import Errors**: Ensure all dependencies are installed with `make setup`
+- **Performance Issues**: Try reducing model complexity or token limits
 
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
+## Version History
+
+- **v0.1.0** (April 2024): Initial public release with the Generation-Evaluation-Optimization pipeline and Gradio interface.
 
 ## License
 

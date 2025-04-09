@@ -58,17 +58,51 @@ def main():
     clean_directory(TOOLS_DIR)
     clean_directory(SCHEMAS_DIR)
     
+    # Path to the raw API documentation
+    raw_docs_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
+                                "data/raw_docs/extracted/raw_api_docs.json")
+    
+    # Check if we need to generate raw documentation
+    if not os.path.exists(raw_docs_path):
+        # Step 1: Generate raw API documentation using scrape_sdk_docs.py
+        try:
+            print("\nGenerating raw API documentation...")
+            from agent.utils.scrape_sdk_docs import extract_sdk_documentation, save_sdk_documentation, collect_sdk_examples
+            
+            # Extract documentation from SDK
+            sdk_docs = extract_sdk_documentation()
+            if not sdk_docs:
+                print("Failed to extract SDK documentation. Exiting.")
+                return False
+            
+            # Collect SDK examples
+            examples = collect_sdk_examples()
+            
+            # Save raw documentation
+            save_sdk_documentation(sdk_docs, examples)
+            print("Raw API documentation generation complete.")
+        except Exception as e:
+            print(f"Error generating raw API documentation: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+    else:
+        print(f"\nRaw API documentation already exists at {raw_docs_path}")
+        print("Skipping raw documentation generation and using existing file.")
+    
+    # Step 2: Process the raw documentation with tool_mapper.py
+    print("\nProcessing API documentation...")
+    
     # Create tool mapper
     mapper = ReachyToolMapper()
     
-    # Load API documentation
-    print("\nLoading API documentation...")
+    # Load and process API documentation
     doc_path = os.path.join(DOCS_DIR, "api_documentation.json")
     if not mapper.load_api_documentation(doc_path):
-        print("Failed to load API documentation. Exiting.")
+        print("Failed to load and process API documentation. Exiting.")
         return False
     
-    # Map API to tools
+    # Step 3: Map API to tools
     print("\nMapping API to tools...")
     tools = mapper.map_api_to_tools()
     
@@ -98,7 +132,7 @@ def main():
     for module, tool_names in sorted(modules.items()):
         print(f"{module}: {len(tool_names)} tools")
     
-    # Save tool definitions
+    # Step 4: Save tool definitions
     print("\nSaving tool definitions...")
     tools_file = os.path.join(SCHEMAS_DIR, "reachy_tools.json")
     
@@ -110,7 +144,7 @@ def main():
         print(f"Error saving tool definitions: {e}")
         return False
     
-    # Generate tool implementations
+    # Step 5: Generate tool implementations
     print("\nGenerating tool implementations...")
     try:
         if not mapper.generate_tool_implementations(TOOLS_DIR):

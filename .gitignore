@@ -74,6 +74,18 @@ temp/
 # Keep launcher scripts
 !launch_code_gen.py
 
-# Gradio cache
+# Gradio cache and examples
 .gradio/
-gradio_cached_examples/ 
+gradio_cached_examples/
+flagged/
+
+# Operating system files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+
+# Development specific
+*.bak
+*.backup
+*.old
+*~ 

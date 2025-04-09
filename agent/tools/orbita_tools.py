@@ -16,40 +16,6 @@ class OrbitaTools(BaseTool):
     def register_all_tools(cls) -> None:
         """Register all orbita tools."""
         cls.register_tool(
-            name="orbita_orbita_axis_OrbitaAxis___init__",
-            func=cls.orbita_orbita_axis_OrbitaAxis___init__,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_axis_OrbitaAxis___init__",
-                description="""Initialize the axis with its initial state.
-
-Args:
-    initial_state: A dictionary containing the initial state values for the axis. The keys should include
-        "present_speed" and "present_load", with corresponding FloatValue objects as values.""",
-                parameters={'initial_state': {'type': 'object', 'description': 'A dictionary containing the initial state values for the axis. The keys should include'}},
-                required=['initial_state']
-            )
-        )
-        cls.register_tool(
-            name="orbita_orbita_axis_OrbitaAxis_present_speed",
-            func=cls.orbita_orbita_axis_OrbitaAxis_present_speed,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_axis_OrbitaAxis_present_speed",
-                description="""Get the present speed of the axis in radians per second.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="orbita_orbita_axis_OrbitaAxis_present_load",
-            func=cls.orbita_orbita_axis_OrbitaAxis_present_load,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_axis_OrbitaAxis_present_load",
-                description="""Get the present load of the axis in Newtons.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
             name="orbita_orbita_Orbita___init__",
             func=cls.orbita_orbita_Orbita___init__,
             schema=cls.create_tool_schema(
@@ -260,90 +226,6 @@ Returns:
             )
         )
         cls.register_tool(
-            name="orbita_orbita_joint_OrbitaJoint___init__",
-            func=cls.orbita_orbita_joint_OrbitaJoint___init__,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_joint_OrbitaJoint___init__",
-                description="""Initialize the OrbitaJoint with its initial state and configuration.
-
-This sets up the joint by assigning its actuator, axis type, and position order within
-the part, and updates its state based on the provided initial values.
-
-Args:
-    initial_state: A dictionary containing the initial state of the joint, with
-        each entry representing a specific parameter of the joint (e.g., present position).
-    axis_type: The type of axis for the joint (e.g., roll, pitch, yaw).
-    actuator: The actuator to which this joint belongs.
-    position_order_in_part: The position order of this joint in the overall part's
-        list of joints.""",
-                parameters={'initial_state': {'type': 'object', 'description': 'A dictionary containing the initial state of the joint, with'}, 'axis_type': {'type': 'string', 'description': 'The type of axis for the joint (e.g., roll, pitch, yaw).'}, 'actuator': {'type': 'string', 'description': 'The actuator to which this joint belongs.'}, 'position_order_in_part': {'type': 'integer', 'description': "The position order of this joint in the overall part's"}},
-                required=['initial_state', 'axis_type', 'actuator', 'position_order_in_part']
-            )
-        )
-        cls.register_tool(
-            name="orbita_orbita_joint_OrbitaJoint___repr__",
-            func=cls.orbita_orbita_joint_OrbitaJoint___repr__,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_joint_OrbitaJoint___repr__",
-                description="""Clean representation of the OrbitaJoint.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="orbita_orbita_joint_OrbitaJoint_present_position",
-            func=cls.orbita_orbita_joint_OrbitaJoint_present_position,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_joint_OrbitaJoint_present_position",
-                description="""Get the present position of the joint in degrees.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="orbita_orbita_joint_OrbitaJoint_goal_position",
-            func=cls.orbita_orbita_joint_OrbitaJoint_goal_position,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_joint_OrbitaJoint_goal_position",
-                description="""Set the goal position of the joint in degrees.
-
-The goal position is not send to the joint immediately, it is stored locally until the `send_goal_positions` method
-is called.
-
-Args:
-    value: The goal position to set, specified as a float or int.
-
-Raises:
-    TypeError: If the provided value is not a float or int.""",
-                parameters={'value': {'type': 'string', 'description': 'The goal position to set, specified as a float or int.'}},
-                required=['value']
-            )
-        )
-        cls.register_tool(
-            name="orbita_orbita_joint_OrbitaJoint_goto",
-            func=cls.orbita_orbita_joint_OrbitaJoint_goto,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_joint_OrbitaJoint_goto",
-                description="""Send the joint to the specified goal position within a given duration.
-
-Acts like a "goto" movement on the part, where "goto" movements for joints are queued on the part they belong to.
-
-Args:
-    goal_position: The target position to move the joint to.
-    duration: The time in seconds for the joint to reach the goal position. Defaults to 2.
-    wait: Whether to wait for the movement to finish before continuing. Defaults to False.
-    interpolation_mode: The type of interpolation to use for the movement, either "minimum_jerk" or "linear".
-        Defaults to "minimum_jerk".
-    degrees: Whether the goal position is specified in degrees. If True, the position is interpreted as degrees.
-        Defaults to True.
-
-Returns:
-    The GoToId associated with the movement command.""",
-                parameters={'goal_position': {'type': 'number', 'description': 'The target position to move the joint to.'}, 'duration': {'type': 'number', 'description': 'The time in seconds for the joint to reach the goal position. Defaults to 2.'}, 'wait': {'type': 'boolean', 'description': 'Whether to wait for the movement to finish before continuing. Defaults to False.'}, 'interpolation_mode': {'type': 'string', 'description': 'The type of interpolation to use for the movement, either "minimum_jerk" or "linear".'}, 'degrees': {'type': 'boolean', 'description': 'Whether the goal position is specified in degrees. If True, the position is interpreted as degrees.'}},
-                required=['goal_position', 'duration', 'wait', 'interpolation_mode', 'degrees']
-            )
-        )
-        cls.register_tool(
             name="orbita_orbita2d_Orbita2d___init__",
             func=cls.orbita_orbita2d_Orbita2d___init__,
             schema=cls.create_tool_schema(
@@ -526,6 +408,190 @@ Args:
             )
         )
         cls.register_tool(
+            name="orbita_orbita_axis_OrbitaAxis___init__",
+            func=cls.orbita_orbita_axis_OrbitaAxis___init__,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_axis_OrbitaAxis___init__",
+                description="""Initialize the axis with its initial state.
+
+Args:
+    initial_state: A dictionary containing the initial state values for the axis. The keys should include
+        "present_speed" and "present_load", with corresponding FloatValue objects as values.""",
+                parameters={'initial_state': {'type': 'object', 'description': 'A dictionary containing the initial state values for the axis. The keys should include'}},
+                required=['initial_state']
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_axis_OrbitaAxis_present_speed",
+            func=cls.orbita_orbita_axis_OrbitaAxis_present_speed,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_axis_OrbitaAxis_present_speed",
+                description="""Get the present speed of the axis in radians per second.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_axis_OrbitaAxis_present_load",
+            func=cls.orbita_orbita_axis_OrbitaAxis_present_load,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_axis_OrbitaAxis_present_load",
+                description="""Get the present load of the axis in Newtons.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_joint_OrbitaJoint___init__",
+            func=cls.orbita_orbita_joint_OrbitaJoint___init__,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_joint_OrbitaJoint___init__",
+                description="""Initialize the OrbitaJoint with its initial state and configuration.
+
+This sets up the joint by assigning its actuator, axis type, and position order within
+the part, and updates its state based on the provided initial values.
+
+Args:
+    initial_state: A dictionary containing the initial state of the joint, with
+        each entry representing a specific parameter of the joint (e.g., present position).
+    axis_type: The type of axis for the joint (e.g., roll, pitch, yaw).
+    actuator: The actuator to which this joint belongs.
+    position_order_in_part: The position order of this joint in the overall part's
+        list of joints.""",
+                parameters={'initial_state': {'type': 'object', 'description': 'A dictionary containing the initial state of the joint, with'}, 'axis_type': {'type': 'string', 'description': 'The type of axis for the joint (e.g., roll, pitch, yaw).'}, 'actuator': {'type': 'string', 'description': 'The actuator to which this joint belongs.'}, 'position_order_in_part': {'type': 'integer', 'description': "The position order of this joint in the overall part's"}},
+                required=['initial_state', 'axis_type', 'actuator', 'position_order_in_part']
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_joint_OrbitaJoint___repr__",
+            func=cls.orbita_orbita_joint_OrbitaJoint___repr__,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_joint_OrbitaJoint___repr__",
+                description="""Clean representation of the OrbitaJoint.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_joint_OrbitaJoint_present_position",
+            func=cls.orbita_orbita_joint_OrbitaJoint_present_position,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_joint_OrbitaJoint_present_position",
+                description="""Get the present position of the joint in degrees.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_joint_OrbitaJoint_goal_position",
+            func=cls.orbita_orbita_joint_OrbitaJoint_goal_position,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_joint_OrbitaJoint_goal_position",
+                description="""Set the goal position of the joint in degrees.
+
+The goal position is not send to the joint immediately, it is stored locally until the `send_goal_positions` method
+is called.
+
+Args:
+    value: The goal position to set, specified as a float or int.
+
+Raises:
+    TypeError: If the provided value is not a float or int.""",
+                parameters={'value': {'type': 'string', 'description': 'The goal position to set, specified as a float or int.'}},
+                required=['value']
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_joint_OrbitaJoint_goto",
+            func=cls.orbita_orbita_joint_OrbitaJoint_goto,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_joint_OrbitaJoint_goto",
+                description="""Send the joint to the specified goal position within a given duration.
+
+Acts like a "goto" movement on the part, where "goto" movements for joints are queued on the part they belong to.
+
+Args:
+    goal_position: The target position to move the joint to.
+    duration: The time in seconds for the joint to reach the goal position. Defaults to 2.
+    wait: Whether to wait for the movement to finish before continuing. Defaults to False.
+    interpolation_mode: The type of interpolation to use for the movement, either "minimum_jerk" or "linear".
+        Defaults to "minimum_jerk".
+    degrees: Whether the goal position is specified in degrees. If True, the position is interpreted as degrees.
+        Defaults to True.
+
+Returns:
+    The GoToId associated with the movement command.""",
+                parameters={'goal_position': {'type': 'number', 'description': 'The target position to move the joint to.'}, 'duration': {'type': 'number', 'description': 'The time in seconds for the joint to reach the goal position. Defaults to 2.'}, 'wait': {'type': 'boolean', 'description': 'Whether to wait for the movement to finish before continuing. Defaults to False.'}, 'interpolation_mode': {'type': 'string', 'description': 'The type of interpolation to use for the movement, either "minimum_jerk" or "linear".'}, 'degrees': {'type': 'boolean', 'description': 'Whether the goal position is specified in degrees. If True, the position is interpreted as degrees.'}},
+                required=['goal_position', 'duration', 'wait', 'interpolation_mode', 'degrees']
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_motor_OrbitaMotor___init__",
+            func=cls.orbita_orbita_motor_OrbitaMotor___init__,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_motor_OrbitaMotor___init__",
+                description="""Initialize the motor with its initial state.
+
+Args:
+    initial_state: A dictionary containing the initial state values for the motor. The keys should include
+        "temperature", "speed_limit", "torque_limit", "compliant", and "pid", with corresponding
+        FloatValue objects as values.
+    actuator: The actuator to which the motor belongs.""",
+                parameters={'initial_state': {'type': 'object', 'description': 'A dictionary containing the initial state values for the motor. The keys should include'}, 'actuator': {'type': 'string', 'description': 'The actuator to which the motor belongs.'}},
+                required=['initial_state', 'actuator']
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_motor_OrbitaMotor_speed_limit",
+            func=cls.orbita_orbita_motor_OrbitaMotor_speed_limit,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_motor_OrbitaMotor_speed_limit",
+                description="""Get the speed limit of the motor, as a percentage of the max allowed speed, rounded to three decimal places.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_motor_OrbitaMotor_temperature",
+            func=cls.orbita_orbita_motor_OrbitaMotor_temperature,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_motor_OrbitaMotor_temperature",
+                description="""Get the current temperature of the motor in Celsius degrees.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_motor_OrbitaMotor_torque_limit",
+            func=cls.orbita_orbita_motor_OrbitaMotor_torque_limit,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_motor_OrbitaMotor_torque_limit",
+                description="""Get the torque limit of the axis, as a percentage of the max allowed speed, rounded to three decimal places.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_motor_OrbitaMotor_compliant",
+            func=cls.orbita_orbita_motor_OrbitaMotor_compliant,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_motor_OrbitaMotor_compliant",
+                description="""Get the compliance status of the motor.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="orbita_orbita_motor_OrbitaMotor_pid",
+            func=cls.orbita_orbita_motor_OrbitaMotor_pid,
+            schema=cls.create_tool_schema(
+                name="orbita_orbita_motor_OrbitaMotor_pid",
+                description="""Get the PID gains of the motor.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
             name="orbita_utils_to_position",
             func=cls.orbita_utils_to_position,
             schema=cls.create_tool_schema(
@@ -616,148 +682,6 @@ Raises:
                 required=['value']
             )
         )
-        cls.register_tool(
-            name="orbita_orbita_motor_OrbitaMotor___init__",
-            func=cls.orbita_orbita_motor_OrbitaMotor___init__,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_motor_OrbitaMotor___init__",
-                description="""Initialize the motor with its initial state.
-
-Args:
-    initial_state: A dictionary containing the initial state values for the motor. The keys should include
-        "temperature", "speed_limit", "torque_limit", "compliant", and "pid", with corresponding
-        FloatValue objects as values.
-    actuator: The actuator to which the motor belongs.""",
-                parameters={'initial_state': {'type': 'object', 'description': 'A dictionary containing the initial state values for the motor. The keys should include'}, 'actuator': {'type': 'string', 'description': 'The actuator to which the motor belongs.'}},
-                required=['initial_state', 'actuator']
-            )
-        )
-        cls.register_tool(
-            name="orbita_orbita_motor_OrbitaMotor_speed_limit",
-            func=cls.orbita_orbita_motor_OrbitaMotor_speed_limit,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_motor_OrbitaMotor_speed_limit",
-                description="""Get the speed limit of the motor, as a percentage of the max allowed speed, rounded to three decimal places.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="orbita_orbita_motor_OrbitaMotor_temperature",
-            func=cls.orbita_orbita_motor_OrbitaMotor_temperature,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_motor_OrbitaMotor_temperature",
-                description="""Get the current temperature of the motor in Celsius degrees.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="orbita_orbita_motor_OrbitaMotor_torque_limit",
-            func=cls.orbita_orbita_motor_OrbitaMotor_torque_limit,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_motor_OrbitaMotor_torque_limit",
-                description="""Get the torque limit of the axis, as a percentage of the max allowed speed, rounded to three decimal places.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="orbita_orbita_motor_OrbitaMotor_compliant",
-            func=cls.orbita_orbita_motor_OrbitaMotor_compliant,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_motor_OrbitaMotor_compliant",
-                description="""Get the compliance status of the motor.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="orbita_orbita_motor_OrbitaMotor_pid",
-            func=cls.orbita_orbita_motor_OrbitaMotor_pid,
-            schema=cls.create_tool_schema(
-                name="orbita_orbita_motor_OrbitaMotor_pid",
-                description="""Get the PID gains of the motor.""",
-                parameters={},
-                required=[]
-            )
-        )
-
-    @classmethod
-    def orbita_orbita_axis_OrbitaAxis___init__(cls, initial_state) -> Dict[str, Any]:
-        """Initialize the axis with its initial state.
-        
-        Args:
-            initial_state: A dictionary containing the initial state values for the axis. The keys should include
-                "present_speed" and "present_load", with corresponding FloatValue objects as values."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = reachy.orbita
-
-            # Call the function with parameters
-            result = obj.axis_OrbitaAxis___init__(initial_state)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def orbita_orbita_axis_OrbitaAxis_present_speed(cls, ) -> Dict[str, Any]:
-        """Get the present speed of the axis in radians per second."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = reachy.orbita
-
-            # Call the function with parameters
-            result = obj.axis_OrbitaAxis_present_speed()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def orbita_orbita_axis_OrbitaAxis_present_load(cls, ) -> Dict[str, Any]:
-        """Get the present load of the axis in Newtons."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = reachy.orbita
-
-            # Call the function with parameters
-            result = obj.axis_OrbitaAxis_present_load()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
 
     @classmethod
     def orbita_orbita_Orbita___init__(cls, uid, name, orbita_type, stub, part) -> Dict[str, Any]:
@@ -1166,160 +1090,6 @@ Args:
 
 
     @classmethod
-    def orbita_orbita_joint_OrbitaJoint___init__(cls, initial_state, axis_type, actuator, position_order_in_part) -> Dict[str, Any]:
-        """Initialize the OrbitaJoint with its initial state and configuration.
-        
-        This sets up the joint by assigning its actuator, axis type, and position order within
-        the part, and updates its state based on the provided initial values.
-        
-        Args:
-            initial_state: A dictionary containing the initial state of the joint, with
-                each entry representing a specific parameter of the joint (e.g., present position).
-            axis_type: The type of axis for the joint (e.g., roll, pitch, yaw).
-            actuator: The actuator to which this joint belongs.
-            position_order_in_part: The position order of this joint in the overall part's
-                list of joints."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = reachy.orbita
-
-            # Call the function with parameters
-            result = obj.joint_OrbitaJoint___init__(initial_state, axis_type, actuator, position_order_in_part)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def orbita_orbita_joint_OrbitaJoint___repr__(cls, ) -> Dict[str, Any]:
-        """Clean representation of the OrbitaJoint."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = reachy.orbita
-
-            # Call the function with parameters
-            result = obj.joint_OrbitaJoint___repr__()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def orbita_orbita_joint_OrbitaJoint_present_position(cls, ) -> Dict[str, Any]:
-        """Get the present position of the joint in degrees."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = reachy.orbita
-
-            # Call the function with parameters
-            result = obj.joint_OrbitaJoint_present_position()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def orbita_orbita_joint_OrbitaJoint_goal_position(cls, value) -> Dict[str, Any]:
-        """Set the goal position of the joint in degrees.
-        
-        The goal position is not send to the joint immediately, it is stored locally until the `send_goal_positions` method
-        is called.
-        
-        Args:
-            value: The goal position to set, specified as a float or int.
-        
-        Raises:
-            TypeError: If the provided value is not a float or int."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = reachy.orbita
-
-            # Call the function with parameters
-            result = obj.joint_OrbitaJoint_goal_position(value)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def orbita_orbita_joint_OrbitaJoint_goto(cls, goal_position, duration, wait, interpolation_mode, degrees) -> Dict[str, Any]:
-        """Send the joint to the specified goal position within a given duration.
-        
-        Acts like a "goto" movement on the part, where "goto" movements for joints are queued on the part they belong to.
-        
-        Args:
-            goal_position: The target position to move the joint to.
-            duration: The time in seconds for the joint to reach the goal position. Defaults to 2.
-            wait: Whether to wait for the movement to finish before continuing. Defaults to False.
-            interpolation_mode: The type of interpolation to use for the movement, either "minimum_jerk" or "linear".
-                Defaults to "minimum_jerk".
-            degrees: Whether the goal position is specified in degrees. If True, the position is interpreted as degrees.
-                Defaults to True.
-        
-        Returns:
-            The GoToId associated with the movement command."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = reachy.orbita
-
-            # Call the function with parameters
-            result = obj.joint_OrbitaJoint_goto(goal_position, duration, wait, interpolation_mode, degrees)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
     def orbita_orbita2d_Orbita2d___init__(cls, uid, name, axis1, axis2, initial_state, grpc_channel, part, joints_position_order) -> Dict[str, Any]:
         """Initialize the Orbita2d actuator with its joints, motors, and axes.
         
@@ -1670,23 +1440,21 @@ Args:
 
 
     @classmethod
-    def orbita_utils_to_position(cls, internal_pos) -> Dict[str, Any]:
-        """Convert an internal angular value in radians to a value in degrees.
+    def orbita_orbita_axis_OrbitaAxis___init__(cls, initial_state) -> Dict[str, Any]:
+        """Initialize the axis with its initial state.
         
         Args:
-            internal_pos: The internal angular value in radians.
-        
-        Returns:
-            The corresponding angular value in degrees."""
+            initial_state: A dictionary containing the initial state values for the axis. The keys should include
+                "present_speed" and "present_load", with corresponding FloatValue objects as values."""
         try:
             # Get Reachy connection
             reachy = get_reachy()
             
             # Get the target object
-            obj = getattr(reachy, 'utils')
+            obj = reachy.orbita
 
             # Call the function with parameters
-            result = obj.to_position(internal_pos)
+            result = obj.axis_OrbitaAxis___init__(initial_state)
 
             return {
                 "success": True,
@@ -1700,28 +1468,157 @@ Args:
 
 
     @classmethod
-    def orbita_utils_to_internal_position(cls, pos) -> Dict[str, Any]:
-        """Convert an angular value in degrees to a value in radians.
+    def orbita_orbita_axis_OrbitaAxis_present_speed(cls, ) -> Dict[str, Any]:
+        """Get the present speed of the axis in radians per second."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = reachy.orbita
+
+            # Call the function with parameters
+            result = obj.axis_OrbitaAxis_present_speed()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def orbita_orbita_axis_OrbitaAxis_present_load(cls, ) -> Dict[str, Any]:
+        """Get the present load of the axis in Newtons."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = reachy.orbita
+
+            # Call the function with parameters
+            result = obj.axis_OrbitaAxis_present_load()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def orbita_orbita_joint_OrbitaJoint___init__(cls, initial_state, axis_type, actuator, position_order_in_part) -> Dict[str, Any]:
+        """Initialize the OrbitaJoint with its initial state and configuration.
         
-        The server expects values in radians, so conversion is necessary.
+        This sets up the joint by assigning its actuator, axis type, and position order within
+        the part, and updates its state based on the provided initial values.
         
         Args:
-            pos: The angular value in degrees.
+            initial_state: A dictionary containing the initial state of the joint, with
+                each entry representing a specific parameter of the joint (e.g., present position).
+            axis_type: The type of axis for the joint (e.g., roll, pitch, yaw).
+            actuator: The actuator to which this joint belongs.
+            position_order_in_part: The position order of this joint in the overall part's
+                list of joints."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = reachy.orbita
+
+            # Call the function with parameters
+            result = obj.joint_OrbitaJoint___init__(initial_state, axis_type, actuator, position_order_in_part)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def orbita_orbita_joint_OrbitaJoint___repr__(cls, ) -> Dict[str, Any]:
+        """Clean representation of the OrbitaJoint."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = reachy.orbita
+
+            # Call the function with parameters
+            result = obj.joint_OrbitaJoint___repr__()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def orbita_orbita_joint_OrbitaJoint_present_position(cls, ) -> Dict[str, Any]:
+        """Get the present position of the joint in degrees."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = reachy.orbita
+
+            # Call the function with parameters
+            result = obj.joint_OrbitaJoint_present_position()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def orbita_orbita_joint_OrbitaJoint_goal_position(cls, value) -> Dict[str, Any]:
+        """Set the goal position of the joint in degrees.
         
-        Returns:
-            The corresponding value in radians.
+        The goal position is not send to the joint immediately, it is stored locally until the `send_goal_positions` method
+        is called.
+        
+        Args:
+            value: The goal position to set, specified as a float or int.
         
         Raises:
-            TypeError: If the provided value is not of type int or float."""
+            TypeError: If the provided value is not a float or int."""
         try:
             # Get Reachy connection
             reachy = get_reachy()
             
             # Get the target object
-            obj = getattr(reachy, 'utils')
+            obj = reachy.orbita
 
             # Call the function with parameters
-            result = obj.to_internal_position(pos)
+            result = obj.joint_OrbitaJoint_goal_position(value)
 
             return {
                 "success": True,
@@ -1735,89 +1632,31 @@ Args:
 
 
     @classmethod
-    def orbita_utils_unwrapped_pid_value(cls, value) -> Dict[str, Any]:
-        """Unwrap the internal PID value from a gRPC protobuf object to a Python value.
+    def orbita_orbita_joint_OrbitaJoint_goto(cls, goal_position, duration, wait, interpolation_mode, degrees) -> Dict[str, Any]:
+        """Send the joint to the specified goal position within a given duration.
+        
+        Acts like a "goto" movement on the part, where "goto" movements for joints are queued on the part they belong to.
         
         Args:
-            value: The gRPC protobuf object containing the PID values.
+            goal_position: The target position to move the joint to.
+            duration: The time in seconds for the joint to reach the goal position. Defaults to 2.
+            wait: Whether to wait for the movement to finish before continuing. Defaults to False.
+            interpolation_mode: The type of interpolation to use for the movement, either "minimum_jerk" or "linear".
+                Defaults to "minimum_jerk".
+            degrees: Whether the goal position is specified in degrees. If True, the position is interpreted as degrees.
+                Defaults to True.
         
         Returns:
-            A tuple representing the unwrapped PID gains (p, i, d)."""
+            The GoToId associated with the movement command."""
         try:
             # Get Reachy connection
             reachy = get_reachy()
             
             # Get the target object
-            obj = getattr(reachy, 'utils')
+            obj = reachy.orbita
 
             # Call the function with parameters
-            result = obj.unwrapped_pid_value(value)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def orbita_utils_wrapped_proto_value(cls, value) -> Dict[str, Any]:
-        """Wrap a simple Python value to the corresponding gRPC protobuf type.
-        
-        Args:
-            value: The value to be wrapped, which can be a bool, float, or int.
-        
-        Returns:
-            The corresponding gRPC protobuf object (BoolValue, FloatValue, or UInt32Value).
-        
-        Raises:
-            TypeError: If the provided value is not a supported type."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'utils')
-
-            # Call the function with parameters
-            result = obj.wrapped_proto_value(value)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def orbita_utils_wrapped_pid_value(cls, value) -> Dict[str, Any]:
-        """Wrap a simple Python value to the corresponding gRPC protobuf type.
-        
-        Args:
-            value: The value to be wrapped, which can be a bool, float, or int.
-        
-        Returns:
-            The corresponding gRPC protobuf object (BoolValue, FloatValue, or UInt32Value).
-        
-        Raises:
-            TypeError: If the provided value is not a supported type."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'utils')
-
-            # Call the function with parameters
-            result = obj.wrapped_pid_value(value)
+            result = obj.joint_OrbitaJoint_goto(goal_position, duration, wait, interpolation_mode, degrees)
 
             return {
                 "success": True,
@@ -1968,6 +1807,167 @@ Args:
 
             # Call the function with parameters
             result = obj.motor_OrbitaMotor_pid()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def orbita_utils_to_position(cls, internal_pos) -> Dict[str, Any]:
+        """Convert an internal angular value in radians to a value in degrees.
+        
+        Args:
+            internal_pos: The internal angular value in radians.
+        
+        Returns:
+            The corresponding angular value in degrees."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'utils')
+
+            # Call the function with parameters
+            result = obj.to_position(internal_pos)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def orbita_utils_to_internal_position(cls, pos) -> Dict[str, Any]:
+        """Convert an angular value in degrees to a value in radians.
+        
+        The server expects values in radians, so conversion is necessary.
+        
+        Args:
+            pos: The angular value in degrees.
+        
+        Returns:
+            The corresponding value in radians.
+        
+        Raises:
+            TypeError: If the provided value is not of type int or float."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'utils')
+
+            # Call the function with parameters
+            result = obj.to_internal_position(pos)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def orbita_utils_unwrapped_pid_value(cls, value) -> Dict[str, Any]:
+        """Unwrap the internal PID value from a gRPC protobuf object to a Python value.
+        
+        Args:
+            value: The gRPC protobuf object containing the PID values.
+        
+        Returns:
+            A tuple representing the unwrapped PID gains (p, i, d)."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'utils')
+
+            # Call the function with parameters
+            result = obj.unwrapped_pid_value(value)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def orbita_utils_wrapped_proto_value(cls, value) -> Dict[str, Any]:
+        """Wrap a simple Python value to the corresponding gRPC protobuf type.
+        
+        Args:
+            value: The value to be wrapped, which can be a bool, float, or int.
+        
+        Returns:
+            The corresponding gRPC protobuf object (BoolValue, FloatValue, or UInt32Value).
+        
+        Raises:
+            TypeError: If the provided value is not a supported type."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'utils')
+
+            # Call the function with parameters
+            result = obj.wrapped_proto_value(value)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def orbita_utils_wrapped_pid_value(cls, value) -> Dict[str, Any]:
+        """Wrap a simple Python value to the corresponding gRPC protobuf type.
+        
+        Args:
+            value: The value to be wrapped, which can be a bool, float, or int.
+        
+        Returns:
+            The corresponding gRPC protobuf object (BoolValue, FloatValue, or UInt32Value).
+        
+        Raises:
+            TypeError: If the provided value is not a supported type."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'utils')
+
+            # Call the function with parameters
+            result = obj.wrapped_pid_value(value)
 
             return {
                 "success": True,

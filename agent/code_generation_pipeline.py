@@ -24,22 +24,18 @@ PipelineResult = Dict[str, Any]
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger("pipeline")
 
 # Forward references for type hints
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from agent.code_generation_agent import ReachyCodeGenerationAgent
     from agent.code_evaluator import CodeEvaluator
-    from websocket_server import WebsocketServer
 
 # Ensure the parent directory is in sys.path
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
-
-# Import components
-from agent.code_generation_agent import ReachyCodeGenerationAgent
-from agent.code_evaluator import CodeEvaluator
 
 # Type definitions for pipeline results
 class EvaluationResult(TypedDict, total=False):
@@ -75,25 +71,22 @@ class PipelineResult(TypedDict):
 
 class CodeGenerationPipeline:
     """
-    Pipeline for generating, evaluating, and improving code for the Reachy 2 robot.
+    Simplified pipeline for generating, evaluating, and improving code for the Reachy 2 robot.
     
     This pipeline:
-    1. Generates initial code based on user requests using the LLM (using MODEL from config)
-    2. Evaluates the generated code using the code evaluator (using GPT-4o-mini)
-    3. Optimizing the code based on evaluation feedback using the integrated approach (using MODEL from config)
-    
-    The pipeline tracks the entire process and provides detailed reporting.
+    1. Generates initial code based on user requests
+    2. Evaluates the generated code using the code evaluator
+    3. Optimizes the code based on evaluation feedback
+    4. Repeats the evaluate-optimize cycle until quality threshold is met or max iterations reached
     """
     
     def __init__(
         self, 
         generator: 'ReachyCodeGenerationAgent',
-        evaluator: Optional['CodeEvaluator'] = None,
+        evaluator: 'CodeEvaluator',
         evaluation_threshold: float = 75.0,
         max_iterations: int = 3,
-        generator_temperature: float = 0.2,
-        callback_function: Optional[Callable] = None,
-        websocket_server: Optional['WebsocketServer'] = None
+        callback_function: Optional[Callable] = None
     ):
         """
         Initialize the code generation pipeline.
@@ -103,16 +96,13 @@ class CodeGenerationPipeline:
             evaluator: The code evaluator.
             evaluation_threshold: The threshold for considering code good enough (0-100).
             max_iterations: Maximum number of optimization iterations.
-            generator_temperature: Temperature for the generator.
             callback_function: Function to call with status updates.
-            websocket_server: Optional WebSocket server for status updates.
         """
         self.generator = generator
-        self.evaluator = evaluator or CodeEvaluator()
+        self.evaluator = evaluator
         self.evaluation_threshold = evaluation_threshold
         self.max_iterations = max_iterations
         self.callback_function = callback_function
-        self.websocket_server = websocket_server
         
         # Configure logging
         self.logger = logging.getLogger("pipeline")
@@ -121,99 +111,10 @@ class CodeGenerationPipeline:
         self.logger.info("Initializing Code Generation Pipeline with:")
         self.logger.info(f"  - Evaluation threshold: {evaluation_threshold}")
         self.logger.info(f"  - Max iterations: {max_iterations}")
-        self.logger.info(f"  - Generator model: {MODEL}")
         
-    def summarize_result(self, result: PipelineResult) -> str:
-        """Summarize the pipeline result in a human-readable format."""
-        if not result:
-            return "No result available."
-        
-        summary = []
-        summary.append(f"Code Generation Pipeline Summary for: {result['original_request']}")
-        summary.append(f"Timestamp: {result['timestamp']}")
-        summary.append(f"Duration: {result['duration']:.2f} seconds\n")
-        
-        summary.append(f"Final Score: {result['final_score']:.1f}/100")
-        summary.append(f"Success: {'Yes' if result['success'] else 'No'}\n")
-        
-        # Add evaluation summary
-        eval_result = result.get("evaluation_result", {})
-        summary.append("Evaluation Results:")
-        summary.append(f"- Score: {eval_result.get('score', 0.0):.1f}/100")
-        summary.append(f"- Valid: {'Yes' if eval_result.get('valid', False) else 'No'}")
-        
-        if eval_result.get("errors", []):
-            summary.append(f"- Errors: {len(eval_result.get('errors', []))}")
-        if eval_result.get("warnings", []):
-            summary.append(f"- Warnings: {len(eval_result.get('warnings', []))}")
-            
-        # Add optimization summary if available
-        if result.get("optimization_result"):
-            summary.append("\nOptimization Results:")
-            summary.append(f"- Iterations: {result['iterations']}")
-            
-            changes = result["optimization_result"].get("changes_made", [])
-            if changes:
-                summary.append(f"- Changes Made: {len(changes)}")
-                for change in changes[:3]:  # Show first 3 changes
-                    summary.append(f"  * {change}")
-                if len(changes) > 3:
-                    summary.append(f"  * ... and {len(changes) - 3} more changes")
-            else:
-                summary.append("- No changes were made during optimization")
-                
-            if result["optimization_result"].get("explanation"):
-                summary.append(f"- {result['optimization_result']['explanation']}")
-        
-        # Final code section
-        final_code = result.get("optimized_code") or result.get("generated_code", "")
-        if final_code:
-            summary.append("\nFinal Code:")
-            summary.append("```python")
-            summary.append(final_code)
-            summary.append("```")
-        
-        return "\n".join(summary)
-
-    def _send_status_update(self, status: str) -> None:
-        """
-        Send a status update via WebSocket if available.
-        
-        Args:
-            status: The status message to send.
-        """
-        if self.websocket_server:
-            try:
-                import json
-                message = {
-                    "type": "status_update",
-                    "data": {
-                        "status": status,
-                        "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
-                    }
-                }
-                
-                # Check if broadcast method exists
-                if hasattr(self.websocket_server, 'broadcast'):
-                    self.websocket_server.broadcast(json.dumps(message))
-                    self.logger.debug(f"Sent status update: {status}")
-            except Exception as e:
-                self.logger.error(f"Error sending status update: {e}")
-                self.logger.error(traceback.format_exc())
-                
-        # Also call the callback function if provided
-        if self.callback_function:
-            try:
-                self.callback_function(status)
-            except Exception as e:
-                self.logger.error(f"Error calling status callback: {e}")
-                self.logger.error(traceback.format_exc())
-
     def generate_code(self, user_request: str, optimize: bool = True) -> PipelineResult:
         """
-        Generate code from a natural language request, evaluate it, and optimize it using
-        an integrated approach where the same generator is used for both initial generation
-        and optimization with evaluation feedback.
+        Generate code from a natural language request, evaluate it, and optimize it.
         
         Args:
             user_request: The user's natural language request.
@@ -239,174 +140,147 @@ class CodeGenerationPipeline:
         }
         
         try:
-            # 1. Generate initial code
+            # 1. Generate initial code using the generator agent
             self.logger.info("Generating initial code...")
-            self._send_status_update("Generating initial code...")
+            self._notify("Generating initial code...")
             
-            generation_response = self.generator.process_message(user_request)
-            
-            generated_code = generation_response.get("code", "")
-            result["generated_code"] = generated_code
-            
-            if not generated_code:
-                self.logger.warning("No code was generated")
-                result["success"] = False
+            try:
+                response = self.generator.generate_code(user_request)
+                generated_code = response.get("code", "")
+                
+                if not generated_code:
+                    self.logger.warning("No code was generated")
+                    result["success"] = False
+                    return result
+                    
+                result["generated_code"] = generated_code
+                
+            except Exception as gen_error:
+                self.logger.error(f"Error generating code: {gen_error}")
+                self.logger.error(traceback.format_exc())
                 return result
-            
+                
             # 2. Evaluate the generated code
             self.logger.info("Evaluating generated code...")
-            self._send_status_update("Evaluating generated code...")
+            self._notify("Evaluating generated code...")
             
-            evaluation_result = self.evaluator.evaluate_code(
-                code=generated_code,
-                user_request=user_request,
-                evaluation_mode="standard"
-            )
-            
-            result["evaluation_result"] = evaluation_result
-            result["final_score"] = evaluation_result.get("score", 0.0)
-            
-            # Log evaluation results
-            self.logger.info(f"Initial evaluation score: {evaluation_result.get('score', 0.0)}/100")
-            self.logger.info(f"Valid: {evaluation_result.get('valid', False)}")
-            if evaluation_result.get("errors", []):
-                self.logger.info(f"Errors: {len(evaluation_result.get('errors', []))}")
-            if evaluation_result.get("warnings", []):
-                self.logger.info(f"Warnings: {len(evaluation_result.get('warnings', []))}")
-            
+            try:
+                evaluation_result = self.evaluator.evaluate_code(
+                    code=generated_code,
+                    user_request=user_request
+                )
+                
+                result["evaluation_result"] = evaluation_result
+                result["final_score"] = evaluation_result.get("score", 0.0)
+                
+                self._log_evaluation_result(evaluation_result)
+                
+            except Exception as eval_error:
+                self.logger.error(f"Error evaluating code: {eval_error}")
+                self.logger.error(traceback.format_exc())
+                return result
+                
             # Check if code is already good enough
             if evaluation_result.get("score", 0.0) >= self.evaluation_threshold:
                 self.logger.info("Code already meets quality threshold, skipping optimization")
                 result["success"] = True
-                result["optimized_code"] = generated_code  # No optimization needed
-                
-                # Set duration and return result
+                result["optimized_code"] = generated_code
                 result["duration"] = time.time() - start_time
                 return result
-            
-            # 3. Optimize the code if requested - Using integrated approach
-            if optimize:
-                self.logger.info("Using integrated optimization approach...")
-                self._send_status_update("Optimizing code with integrated approach...")
                 
-                # Track optimization iterations
+            # 3. Optimize the code if requested
+            if optimize:
+                self.logger.info("Starting code optimization...")
+                self._notify("Optimizing code...")
+                
                 current_code = generated_code
                 current_score = evaluation_result.get("score", 0.0)
-                changes = []
+                current_evaluation = evaluation_result
                 iterations_count = 0
+                changes = []
                 
                 # Perform optimization iterations
                 for iteration in range(self.max_iterations):
                     iterations_count += 1
-                    self.logger.info(f"Starting integrated optimization iteration {iteration + 1}/{self.max_iterations}")
+                    self.logger.info(f"Starting optimization iteration {iteration + 1}/{self.max_iterations}")
                     
-                    # Create optimization prompt with evaluation feedback
-                    formatted_errors = "\n".join([f"- {error}" for error in evaluation_result.get("errors", [])])
-                    formatted_warnings = "\n".join([f"- {warning}" for warning in evaluation_result.get("warnings", [])])
-                    formatted_suggestions = "\n".join([f"- {suggestion}" for suggestion in evaluation_result.get("suggestions", [])])
+                    # Create detailed feedback for optimization
+                    optimization_feedback = self._format_evaluation_feedback(current_evaluation)
                     
-                    optimization_prompt = f"""
-I need to improve the code I previously generated for the request: "{user_request}"
-
-The initial code was:
-```python
-{current_code}
-```
-
-Evaluation feedback (score: {current_score}/100):
-
-CRITICAL ERRORS TO FIX:
-{formatted_errors if formatted_errors else "None"}
-
-WARNINGS TO ADDRESS:
-{formatted_warnings if formatted_warnings else "None"}
-
-SUGGESTIONS FOR IMPROVEMENT:
-{formatted_suggestions if formatted_suggestions else "None"}
-
-ADDITIONAL EXPLANATION:
-{evaluation_result.get("explanation", "No additional explanation provided.")}
-
-Please improve this code while following ALL the original guidelines for the Reachy 2 robot API. 
-Fix the errors and warnings, and implement the suggestions where appropriate.
-Ensure the code follows best practices for safety, has proper error handling, and correctly uses the Reachy 2 SDK.
-Return only the improved code without explanation.
-"""
-                    
-                    # Use the same generator with the optimization prompt
-                    self.logger.info(f"Generating improved code in iteration {iteration + 1}...")
-                    optimization_response = self.generator.process_message(optimization_prompt)
-                    
-                    # Extract the optimized code
-                    optimized_code = optimization_response.get("code", current_code)
-                    
-                    # Check if the code actually changed
-                    if optimized_code == current_code:
-                        self.logger.info(f"No changes made in iteration {iteration + 1}, stopping optimization")
-                        break
-                    
-                    # Record that we made changes in this iteration
-                    changes.append(f"Iteration {iteration + 1}: Code improved based on evaluation feedback")
-                    
-                    # Update the current code
-                    current_code = optimized_code
-                    
-                    # Re-evaluate the optimized code
-                    self.logger.info(f"Re-evaluating improved code from iteration {iteration + 1}...")
-                    new_evaluation_result = self.evaluator.evaluate_code(
-                        code=optimized_code,
-                        user_request=user_request,
-                        evaluation_mode="standard"
-                    )
-                    
-                    # Update evaluation result and score
-                    evaluation_result = new_evaluation_result
-                    new_score = evaluation_result.get("score", 0.0)
-                    
-                    # Log the new score
-                    self.logger.info(f"Iteration {iteration + 1} score: {new_score}/100")
-                    
-                    # Check if we've improved the score
-                    if new_score > current_score:
-                        self.logger.info(f"Score improved from {current_score} to {new_score}")
-                        current_score = new_score
+                    # Generate optimized code
+                    try:
+                        optimized_code = self._optimize_code(
+                            code=current_code,
+                            user_request=user_request,
+                            feedback=optimization_feedback
+                        )
                         
-                        # Check if we've reached the threshold
-                        if current_score >= self.evaluation_threshold:
-                            self.logger.info(f"Score {current_score} meets threshold {self.evaluation_threshold}, stopping optimization")
+                        # Skip if no changes were made
+                        if optimized_code == current_code:
+                            self.logger.info(f"No changes made in iteration {iteration + 1}")
                             break
-                    else:
-                        self.logger.info(f"Score did not improve (was {current_score}, now {new_score})")
-                        # If score didn't improve, we might still continue if there are more iterations left
+                            
+                        # Update current code
+                        current_code = optimized_code
+                        changes.append(f"Iteration {iteration + 1}: Code improved based on feedback")
+                        
+                    except Exception as opt_error:
+                        self.logger.error(f"Error in optimization iteration {iteration + 1}: {opt_error}")
+                        self.logger.error(traceback.format_exc())
+                        break
+                        
+                    # Re-evaluate the optimized code
+                    try:
+                        new_evaluation = self.evaluator.evaluate_code(
+                            code=current_code,
+                            user_request=user_request
+                        )
+                        
+                        new_score = new_evaluation.get("score", 0.0)
+                        self.logger.info(f"Iteration {iteration + 1} score: {new_score}/100")
+                        
+                        # Update evaluation and score
+                        current_evaluation = new_evaluation
+                        
+                        # Check if we've improved
+                        if new_score > current_score:
+                            self.logger.info(f"Score improved from {current_score} to {new_score}")
+                            current_score = new_score
+                            
+                            # Check if we've reached the threshold
+                            if current_score >= self.evaluation_threshold:
+                                self.logger.info(f"Score {current_score} meets threshold, stopping")
+                                break
+                                
+                        else:
+                            self.logger.info(f"Score did not improve (was {current_score}, now {new_score})")
+                            
+                    except Exception as eval_error:
+                        self.logger.error(f"Error evaluating optimized code: {eval_error}")
+                        self.logger.error(traceback.format_exc())
+                        break
                 
                 # Update result with optimization data
                 result["optimized_code"] = current_code
+                result["final_code"] = current_code
                 result["final_score"] = current_score
                 result["iterations"] = iterations_count
+                result["evaluation_result"] = current_evaluation
                 
-                # Create a simplified optimization result structure for compatibility
+                # Create optimization result summary
                 result["optimization_result"] = {
                     "original_code": generated_code,
                     "optimized_code": current_code,
                     "changes_made": changes,
                     "evaluation_score": current_score,
                     "success": len(changes) > 0,
-                    "explanation": f"Integrated optimization completed with {len(changes)} iterations."
+                    "explanation": f"Optimization completed with {len(changes)} iterations."
                 }
                 
-                # Log optimization results
-                if len(changes) > 0:
-                    self.logger.info(f"Integrated optimization successful with {len(changes)} iterations")
-                    self.logger.info(f"Final score: {current_score}/100")
-                    result["success"] = True
-                else:
-                    self.logger.warning("Integrated optimization did not make any changes")
-                    result["optimized_code"] = generated_code  # Use original code if optimization failed
-            
-            # Set success flag based on final score
-            result["success"] = result["final_score"] >= self.evaluation_threshold
-            
-            # Set duration and return result
+                # Set success flag based on final score
+                result["success"] = current_score >= self.evaluation_threshold
+                
+            # Set final duration
             result["duration"] = time.time() - start_time
             return result
             
@@ -414,10 +288,102 @@ Return only the improved code without explanation.
             self.logger.error(f"Error in code generation pipeline: {e}")
             self.logger.error(traceback.format_exc())
             
-            # Return partial result on error
+            # Return partial result
             result["success"] = False
             result["duration"] = time.time() - start_time
             return result
+    
+    def _notify(self, message: str) -> None:
+        """Send a notification via the callback function if provided."""
+        if self.callback_function:
+            try:
+                self.callback_function(message)
+            except Exception as e:
+                self.logger.error(f"Error in notification callback: {e}")
+    
+    def _log_evaluation_result(self, evaluation: Dict[str, Any]) -> None:
+        """Log the evaluation result."""
+        self.logger.info(f"Evaluation score: {evaluation.get('score', 0.0)}/100")
+        self.logger.info(f"Valid: {evaluation.get('valid', False)}")
+        
+        if evaluation.get("errors", []):
+            self.logger.info(f"Errors: {len(evaluation.get('errors', []))}")
+            for error in evaluation.get("errors", [])[:3]:  # Log first 3 errors
+                self.logger.info(f"  - {error}")
+                
+        if evaluation.get("warnings", []):
+            self.logger.info(f"Warnings: {len(evaluation.get('warnings', []))}")
+            for warning in evaluation.get("warnings", [])[:3]:  # Log first 3 warnings
+                self.logger.info(f"  - {warning}")
+    
+    def _format_evaluation_feedback(self, evaluation: Dict[str, Any]) -> str:
+        """Format evaluation feedback for the optimization step."""
+        errors = "\n".join([f"- {error}" for error in evaluation.get("errors", [])])
+        warnings = "\n".join([f"- {warning}" for warning in evaluation.get("warnings", [])])
+        suggestions = "\n".join([f"- {suggestion}" for suggestion in evaluation.get("suggestions", [])])
+        
+        feedback = f"""
+Evaluation feedback (score: {evaluation.get('score', 0.0)}/100):
+
+CRITICAL ERRORS TO FIX:
+{errors if errors else "None"}
+
+WARNINGS TO ADDRESS:
+{warnings if warnings else "None"}
+
+SUGGESTIONS FOR IMPROVEMENT:
+{suggestions if suggestions else "None"}
+
+ADDITIONAL EXPLANATION:
+{evaluation.get("explanation", "No additional explanation provided.")}
+"""
+        
+        return feedback
+    
+    def _optimize_code(self, code: str, user_request: str, feedback: str) -> str:
+        """Optimize code based on evaluation feedback."""
+        # Build the optimization prompt
+        optimization_prompt = f"""I need to improve code for the request: "{user_request}"
+
+ORIGINAL CODE:
+```python
+{code}
+```
+
+EVALUATION FEEDBACK:
+{feedback}
+
+Please optimize this code following the optimization instructions in your system prompt.
+Focus on fixing all errors first, then address warnings and implement suggested improvements.
+Follow ALL best practices for the Reachy 2 robot SDK, especially regarding safety and error handling.
+Return ONLY the improved Python code without explanation."""
+
+        # Call the generator to optimize the code
+        response = self.generator.generate_code(optimization_prompt)
+        optimized_code = response.get("code", code)
+        
+        return optimized_code
+        
+    def summarize_result(self, result: Dict[str, Any]) -> str:
+        """
+        Create a minimal summary of the pipeline result for backward compatibility.
+        
+        Args:
+            result: The pipeline result.
+            
+        Returns:
+            str: A minimal summary.
+        """
+        # Extract key information
+        score = result.get("final_score", 0)
+        success = result.get("success", False)
+        evaluation = result.get("evaluation_result", {})
+        
+        # Format the summary
+        status = "✅ SUCCESS" if success else "⚠️ ISSUES DETECTED"
+        summary = f"Code Generation: {status} (Score: {score:.1f}/100)"
+        
+        return summary
 
 
 def main():
@@ -434,7 +400,7 @@ def main():
     parser.add_argument("--max-iterations", type=int, default=3, help="Maximum optimization iterations")
     parser.add_argument("--temperature", type=float, default=0.2, help="Temperature for generation")
     parser.add_argument("--evaluation-threshold", type=float, default=75.0, help="Score threshold for considering code good enough")
-    parser.add_argument("--output", type=str, help="Output file for the generated code")
+    parser.add_argument("--execute", action="store_true", help="Execute the generated code on the connected Reachy robot")
     
     args = parser.parse_args()
     
@@ -467,7 +433,7 @@ def main():
     evaluator = CodeEvaluator(
         api_key=api_key,
         model="gpt-4o-mini",  # Always use GPT-4o-mini for evaluation
-        temperature=max(0.1, args.temperature - 0.1)  # Lower temperature for evaluation
+        temperature=0.1  # Lower temperature for evaluation
     )
     
     # Create the pipeline
@@ -491,23 +457,90 @@ def main():
         optimize=not args.no_optimize
     )
     
-    # Print the summary
+    # Display evaluation results
+    evaluation = result.get("evaluation_result", {})
+    success = result.get("success", False)
+    score = result.get("final_score", 0)
+    
     print("\n" + "="*80)
-    print(pipeline.summarize_result(result))
+    print(f"CODE GENERATION {'SUCCESSFUL' if success else 'COMPLETED WITH ISSUES'}")
+    print(f"Score: {score:.1f}/100")
+    
+    if evaluation.get("errors"):
+        print("\nErrors:")
+        for error in evaluation.get("errors", []):
+            print(f"  - {error}")
+    
+    if evaluation.get("warnings"):
+        print("\nWarnings:")
+        for warning in evaluation.get("warnings", []):
+            print(f"  - {warning}")
+    
     print("="*80 + "\n")
     
-    # Output the code
-    code_to_output = result.get("optimized_code") or result.get("generated_code", "")
+    # Get the final code
+    final_code = result.get("optimized_code") or result.get("generated_code", "")
     
-    if args.output:
-        with open(args.output, "w") as f:
-            f.write(code_to_output)
-        print(f"Generated code written to {args.output}")
-    else:
-        print("Generated Code:")
-        print("="*80)
-        print(code_to_output)
-        print("="*80)
+    # Display the code
+    print("Generated Code:")
+    print("="*80)
+    print(final_code)
+    print("="*80)
+    
+    # Execute the code if requested and the robot is connected
+    if args.execute and final_code:
+        try:
+            # First try to import reachy_sdk to check if robot support is available
+            import importlib
+            reachy_sdk_spec = importlib.util.find_spec("reachy_sdk")
+            
+            if reachy_sdk_spec is None:
+                print("\nCannot execute: reachy_sdk module not installed.")
+                print("Please install the Reachy SDK to enable execution.")
+            else:
+                print("\nExecuting code on Reachy robot...")
+                
+                # Create a temporary script file
+                import tempfile
+                with tempfile.NamedTemporaryFile(suffix='.py', delete=False, mode='w') as temp_file:
+                    temp_file_path = temp_file.name
+                    temp_file.write(final_code)
+                
+                try:
+                    # Execute the code
+                    import subprocess
+                    process = subprocess.Popen(['python', temp_file_path], 
+                                              stdout=subprocess.PIPE, 
+                                              stderr=subprocess.PIPE,
+                                              text=True)
+                    
+                    stdout, stderr = process.communicate(timeout=30)  # 30 second timeout
+                    
+                    # Print execution results
+                    if stdout:
+                        print("\nExecution output:")
+                        print(stdout)
+                    
+                    if stderr:
+                        print("\nExecution errors:")
+                        print(stderr)
+                        
+                    if process.returncode == 0:
+                        print("\nCode executed successfully on Reachy robot.")
+                    else:
+                        print(f"\nExecution failed with exit code {process.returncode}.")
+                        
+                except subprocess.TimeoutExpired:
+                    process.kill()
+                    print("\nExecution timed out after 30 seconds. The process was terminated.")
+                finally:
+                    # Clean up the temporary file
+                    os.unlink(temp_file_path)
+        except Exception as e:
+            print(f"\nError during execution: {e}")
+            print("Please check your Reachy robot connection and try again.")
+    elif args.execute:
+        print("\nNo code was generated, cannot execute.")
 
 
 if __name__ == "__main__":

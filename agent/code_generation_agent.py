@@ -16,9 +16,6 @@ from openai import OpenAI
 import httpx
 import re
 
-from .code_generation_interface import CodeGenerationInterface
-from .prompt_config import get_prompt_sections, get_default_prompt_order
-
 # Configure logging
 logging.basicConfig(level=logging.INFO,
                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
@@ -30,7 +27,7 @@ if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
 # Import configuration
-from config import OPENAI_API_KEY, MODEL
+from config import OPENAI_API_KEY, MODEL, AVAILABLE_MODELS, get_model_config
 
 # Replace with a stub implementation for now
 def get_websocket_server():
@@ -263,8 +260,18 @@ def generate_api_summary(api_docs):
         "reachy2_sdk.media",
         "reachy2_sdk.orbita",
         "reachy2_sdk.sensors",
-        "pollen_vision"
     ]
+    
+    # Check if pollen_vision is installed and add it to official modules if it is
+    try:
+        import importlib.util
+        if importlib.util.find_spec("pollen_vision") is not None:
+            logging.getLogger("code_generation_agent").info("pollen_vision module found, adding to official API modules")
+            official_api_modules.append("pollen_vision")
+        else:
+            logging.getLogger("code_generation_agent").info("pollen_vision module not found, skipping")
+    except ImportError:
+        logging.getLogger("code_generation_agent").info("pollen_vision module not found, skipping")
     
     # Extract classes and their methods from the documentation
     classes = {}
@@ -424,51 +431,78 @@ class ReachyCodeGenerationAgent:
     
     def __init__(
         self,
-        api_key: str,
-        model: str = "gpt-4o-mini",
+        api_key: Optional[str] = None,
+        model: str = MODEL,
         temperature: float = 0.2,
         max_tokens: int = 4096,
-        kinematics_guide_path: str = "agent/docs/reachy2_kinematics_prompt.md",
+        top_p: float = 0.95,
+        frequency_penalty: float = 0,
+        presence_penalty: float = 0,
+        model_config: Optional[Dict[str, Any]] = None,
     ):
-        """Initialize the code generation agent.
+        """Initialize the Reachy code generation agent.
 
         Args:
             api_key: The OpenAI API key.
             model: The OpenAI model to use.
             temperature: The temperature for the model (0.0 to 1.0).
             max_tokens: The maximum number of tokens to generate.
-            kinematics_guide_path: Path to the kinematics guide.
+            top_p: The top_p value for the model (0.0 to 1.0).
+            frequency_penalty: The frequency penalty for the model (-2.0 to 2.0).
+            presence_penalty: The presence penalty for the model (-2.0 to 2.0).
+            model_config: Optional model configuration dictionary.
         """
+        # Set up logger
+        self.logger = logger
+        
+        # Get OpenAI API key from environment if not provided
+        if api_key is None:
+            api_key = os.environ.get("OPENAI_API_KEY", OPENAI_API_KEY)
+            if not api_key:
+                raise ValueError("No OpenAI API key provided")
+        
+        # Store API key
         self.api_key = api_key
+        
+        # Set up model configuration
         self.model = model
         self.temperature = temperature
         self.max_tokens = max_tokens
-        self.kinematics_guide_path = kinematics_guide_path
+        self.top_p = top_p
+        self.frequency_penalty = frequency_penalty
+        self.presence_penalty = presence_penalty
         
-        # Initialize logger
-        self.logger = logging.getLogger("code_generation_agent")
+        # Override with model_config if provided
+        if model_config:
+            self.model = model_config.get("model", self.model)
+            self.temperature = model_config.get("temperature", self.temperature)
+            self.max_tokens = model_config.get("max_tokens", self.max_tokens)
+            self.top_p = model_config.get("top_p", self.top_p)
+            self.frequency_penalty = model_config.get("frequency_penalty", self.frequency_penalty)
+            self.presence_penalty = model_config.get("presence_penalty", self.presence_penalty)
         
-        # Initialize conversation history
-        self.conversation_history = []
-        
-        # Initialize OpenAI client
-        self.client = OpenAI(api_key=api_key)
-        
-        # Initialize API documentation and official elements
-        self.api_docs = load_api_documentation()
-        self.official_modules = set()
-        self.official_classes = set()
-        
-        # Initialize code generation interface
-        self.interface = CodeGenerationInterface(
-            api_key=api_key,
-            model=model,
-            temperature=temperature,
-            max_tokens=max_tokens
-        )
+        # Build system prompt
+        self.system_prompt = self._build_system_prompt()
         
         # Extract official API elements
         self._extract_official_api_elements()
+        
+        # Create a code generation interface for generating code
+        from agent.code_generation_interface import CodeGenerationInterface
+        self.interface = CodeGenerationInterface(
+            api_key=api_key,
+            model=self.model,
+            temperature=self.temperature,
+            max_tokens=self.max_tokens,
+            top_p=self.top_p,
+            frequency_penalty=self.frequency_penalty,
+            presence_penalty=self.presence_penalty
+        )
+        
+        # Initialize conversation history
+        self.messages = [
+            {"role": "system", "content": self.system_prompt}
+        ]
         
         self.logger.debug(f"Initialized code generation agent with model: {model}")
     
@@ -486,17 +520,42 @@ class ReachyCodeGenerationAgent:
             message: The message from the user.
 
         Returns:
-            Dict[str, Any]: The response from the agent.
+            Dict[str, Any]: The response from the agent with code, message, and raw_response.
         """
-        system_prompt = self._build_system_prompt()
-        
-        # Generate code using the interface
-        response = self.interface.generate_code(
-            system_prompt=system_prompt,
-            user_prompt=message,
-        )
-        
-        return response
+        try:
+            system_prompt = self._build_system_prompt()
+            
+            # Generate code using the interface
+            response = self.interface.generate_code(
+                system_prompt=system_prompt,
+                user_prompt=message,
+            )
+            
+            # Ensure response is properly formatted
+            if not isinstance(response, dict):
+                logger.error(f"Interface returned non-dictionary response: {type(response)}")
+                return {
+                    "code": "",
+                    "message": "Error: Failed to generate code due to an internal error.",
+                    "raw_response": str(response)
+                }
+                
+            # Ensure all required fields are present
+            if "code" not in response:
+                code, explanation = self._extract_code_and_explanation(response.get("raw_response", ""))
+                response["code"] = code
+                response["message"] = explanation
+            
+            return response
+            
+        except Exception as e:
+            logger.error(f"Error in process_message: {e}")
+            logger.error(traceback.format_exc())
+            return {
+                "code": "",
+                "message": f"Error generating code: {str(e)}",
+                "raw_response": ""
+            }
     
     def _generate_code(self) -> str:
         """
@@ -547,228 +606,34 @@ class ReachyCodeGenerationAgent:
             return "", response
     
     def _extract_official_api_elements(self):
-        """Extract official modules and classes from the API documentation."""
-        # Initialize sets if they don't exist
-        if not hasattr(self, 'official_modules'):
-            self.official_modules = set()
-        if not hasattr(self, 'official_classes'):
-            self.official_classes = set()
-            
-        # Check if API docs are available
-        if not hasattr(self, 'api_docs') or not self.api_docs:
-            self.logger.warning("No API documentation available for extracting official elements")
-            return
+        """Extract the official API modules and classes."""
+        # Use the prompt_config functions to get API information
+        from agent.prompt_config import load_api_documentation, get_official_api_modules
         
-        # Define the official API modules (these are the ones from the Reachy SDK)
-        official_api_modules = [
-            "reachy2_sdk.reachy_sdk",
-            "reachy2_sdk.parts",
-            "reachy2_sdk.utils",
-            "reachy2_sdk.config",
-            "reachy2_sdk.media",
-            "reachy2_sdk.orbita",
-            "reachy2_sdk.sensors",
-            "pollen_vision"
-        ]
+        # Initialize 
+        self.official_modules = []
+        self.official_classes = set()
+        
+        # Load API documentation through prompt_config
+        api_docs = load_api_documentation()  # This now returns a list format
+        
+        if api_docs:
+            # Get official modules
+            self.official_modules = get_official_api_modules()
             
-        for item in self.api_docs:
-            if item.get("type") == "module":
-                module_name = item.get("name")
-                # Only include modules from the official list
-                if module_name and any(module_name.startswith(prefix) for prefix in official_api_modules):
-                    self.official_modules.add(module_name)
-            
-            if item.get("type") == "class":
-                class_name = item.get("name")
-                module_name = item.get("module", "")
-                # Only include classes from official modules
-                if module_name and any(module_name.startswith(prefix) for prefix in official_api_modules):
-                    if class_name:
-                        self.official_classes.add(class_name)
+            # Extract classes from the documentation
+            # Process API docs as a list of items
+            for item in api_docs:
+                if isinstance(item, dict) and item.get("type") == "class":
+                    class_name = item.get("name")
+                    module_name = item.get("module", "")
+                    
+                    # Only include classes from official modules
+                    if module_name and any(module_name.startswith(prefix) for prefix in self.official_modules):
+                        if class_name:
+                            self.official_classes.add(class_name)
         
         self.logger.debug(f"Extracted {len(self.official_modules)} official modules and {len(self.official_classes)} official classes")
-    
-    def _validate_code(self, code: str) -> CodeValidationResult:
-        """
-        Validate the generated code.
-        
-        Args:
-            code: The generated code.
-            
-        Returns:
-            CodeValidationResult: The validation result.
-        """
-        if not code:
-            return {
-                "valid": False,
-                "errors": ["No code was generated"],
-                "warnings": []
-            }
-        
-        errors = []
-        warnings = []
-        
-        # Basic syntax check
-        try:
-            compile(code, '<string>', 'exec')
-        except SyntaxError as e:
-            errors.append(f"Syntax error: {str(e)}")
-        
-        # Check for required imports
-        if "from reachy2_sdk import ReachySDK" not in code:
-            warnings.append("Missing import for ReachySDK from reachy2_sdk")
-        
-        # Check for connection setup
-        if "ReachySDK(" not in code:
-            warnings.append("Code does not initialize ReachySDK to establish a connection")
-        
-        # Check for turn_on
-        if "turn_on()" not in code:
-            warnings.append("CRITICAL: Missing reachy.turn_on() call. Always turn on the robot before using it.")
-        
-        # Check for turn_off_smoothly instead of turn_off
-        if "turn_off()" in code:
-            warnings.append("CRITICAL: Using turn_off() instead of turn_off_smoothly(). Always use turn_off_smoothly() to prevent damage to the robot.")
-        
-        if "turn_off_smoothly()" not in code:
-            warnings.append("CRITICAL: Missing reachy.turn_off_smoothly() call. Always turn off the robot smoothly when done.")
-        
-        # Check for error handling
-        if "try:" not in code:
-            warnings.append("No error handling (try/except) found in the code")
-        
-        # Check for cleanup
-        if "disconnect()" not in code:
-            warnings.append("No disconnect operation found in the code")
-            
-        # Check for finally block
-        if "finally:" not in code:
-            warnings.append("No finally block found for ensuring cleanup operations")
-        
-        # Check for potentially unsafe operations
-        unsafe_patterns = [
-            "os.system", "subprocess", "eval(", "exec(", "import shutil",
-            "__import__", "open(", "pickle", "shelve", "marshal",
-            "socket", "requests.post", "requests.put", "requests.delete"
-        ]
-        for pattern in unsafe_patterns:
-            # Use more precise pattern matching to avoid false positives
-            if pattern == "file(":
-                # Check for the actual file() function, not substrings like "audio_file("
-                import re
-                if re.search(r'\bfile\(', code):
-                    errors.append(f"Potentially unsafe operation detected: {pattern}")
-            elif pattern in code:
-                errors.append(f"Potentially unsafe operation detected: {pattern}")
-        
-        # Check for non-API imports and functions
-        non_api_patterns = [
-            "import agent", 
-            "from agent", 
-            "connection_manager",
-            "get_reachy()",
-            "get_reachy ",
-            "connect_to_reachy",
-            "disconnect_reachy"
-        ]
-        for pattern in non_api_patterns:
-            if pattern in code:
-                errors.append(f"Non-API code detected: The code uses internal functions that are not part of the official Reachy 2 SDK API.")
-                break  # Only report this error once
-        
-        # Check for incorrect property usage (calling properties as methods)
-        property_patterns = [
-            "r_arm()", "l_arm()", "head()", "cameras()", 
-            "gripper()", "r_gripper", "l_gripper",  # Updated to catch incorrect gripper access
-            ".gripper()"  # Added to catch cases where gripper is called as a method
-        ]
-        for pattern in property_patterns:
-            if pattern in code:
-                if pattern in ["r_gripper", "l_gripper"]:
-                    errors.append(f"Incorrect gripper access: Use 'arm.gripper' instead of '{pattern}' (e.g., reachy.r_arm.gripper)")
-                elif pattern == "gripper()" or pattern == ".gripper()":
-                    errors.append(f"Incorrect gripper usage: 'gripper' is a property, not a method. Use without parentheses (e.g., reachy.r_arm.gripper)")
-                else:
-                    errors.append(f"Incorrect property usage: '{pattern}' is a property, not a method. Use without parentheses.")
-        
-        # Check for incorrect arm goto usage
-        if "goto" in code:
-            import re
-            # Look for arm goto calls with incorrect number of joint positions
-            arm_goto_matches = re.findall(r'(?:r_arm|l_arm|right_arm|left_arm)\.goto\s*\(\s*\[(.*?)\]', code, re.DOTALL)
-            for match in arm_goto_matches:
-                # Count the number of values in the joint positions array
-                values = [v.strip() for v in match.split(',')]
-                if len(values) != 7:
-                    errors.append(f"Incorrect arm goto usage: The positions array must have exactly 7 values for the 7 joints, but found {len(values)}.")
-            
-        # Check for potential workspace issues
-        workspace_warnings = self._check_workspace_issues(code)
-        if workspace_warnings:
-            warnings.extend(workspace_warnings)
-        
-        return {
-            "valid": len(errors) == 0,
-            "errors": errors,
-            "warnings": warnings
-        }
-        
-    def _check_workspace_issues(self, code: str) -> List[str]:
-        """
-        Check for potential workspace issues in the generated code.
-        
-        Args:
-            code: The generated code.
-            
-        Returns:
-            List[str]: List of warnings about potential workspace issues.
-        """
-        warnings = []
-        
-        # Define safe ranges
-        safe_ranges = {
-            "r_arm": {
-                "x": (0.2, 0.4),  # forward from chest (meters)
-                "y": (-0.3, -0.1),  # to the right of center (meters)
-                "z": (-0.1, 0.3),  # vertical position (meters)
-            },
-            "l_arm": {
-                "x": (0.2, 0.4),  # forward from chest (meters)
-                "y": (0.1, 0.3),  # to the left of center (meters)
-                "z": (-0.1, 0.3),  # vertical position (meters)
-            }
-        }
-        
-        # Check for potential out-of-range X values
-        if "0.5" in code and ("x" in code.lower() or "position" in code.lower()):
-            warnings.append("CRITICAL: Potential unreachable target - X value may be too large (> 0.4m)")
-        
-        # Check for potential out-of-range Y values for right arm
-        if "y" in code.lower() and "-0.4" in code:
-            warnings.append("CRITICAL: Potential unreachable target - Y value for right arm may be too far right (< -0.3m)")
-        
-        # Check for potential out-of-range Y values for left arm
-        if "y" in code.lower() and "0.4" in code:
-            warnings.append("CRITICAL: Potential unreachable target - Y value for left arm may be too far left (> 0.3m)")
-        
-        # Check for potential out-of-range Z values
-        if "z" in code.lower() and ("0.4" in code or "-0.2" in code):
-            warnings.append("CRITICAL: Potential unreachable target - Z value may be outside safe range (-0.1m to 0.3m)")
-        
-        # Check for numpy arrays that might define target positions
-        if "np.array" in code and "[[" in code:
-            # Look for potential transformation matrices
-            if not all(limit in code for limit in ["0.2", "0.3", "0.4"]):
-                warnings.append("CRITICAL: Target positions may be outside safe workspace limits. Ensure X: 0.2-0.4m, Y: ±0.1-0.3m, Z: -0.1-0.3m")
-        
-        # Check if the code includes reachability checks
-        if "inverse_kinematics" in code and "try:" in code and "except" in code:
-            # Code has proper error handling for inverse kinematics
-            pass
-        elif "inverse_kinematics" in code:
-            warnings.append("CRITICAL: Using inverse_kinematics without proper error handling. Always use try/except to handle unreachable targets.")
-        
-        return warnings
     
     def _analyze_execution_error(self, stderr: str, output: str) -> str:
         """
@@ -801,71 +666,125 @@ class ReachyCodeGenerationAgent:
             feedback += "3. Check that the position values are within the robot's reach (typically within 0.6 meters)\n"
             feedback += "4. Consider using joint angles directly instead of inverse kinematics\n"
         
+        # Check for API errors
+        elif "AttributeError: " in stderr:
+            import re
+            attr_match = re.search(r"AttributeError: '(.+?)' object has no attribute '(.+?)'", stderr)
+            if attr_match:
+                obj_type, attr_name = attr_match.groups()
+                feedback += f"API USAGE ERROR: The '{obj_type}' object does not have an attribute named '{attr_name}'.\n\n"
+                feedback += "Suggestions:\n"
+                feedback += f"1. Check the spelling of '{attr_name}'\n"
+                feedback += f"2. Verify that '{attr_name}' is a valid property or method of '{obj_type}'\n"
+                feedback += "3. Refer to the Reachy 2 SDK documentation for the correct API\n"
+            else:
+                feedback += "API USAGE ERROR: Incorrect attribute access.\n\n"
+                feedback += "Suggestions:\n"
+                feedback += "1. Check the API documentation for correct property and method names\n"
+                feedback += "2. Verify that you're accessing properties and methods on the correct objects\n"
+        
+        # Check for gripper errors
+        elif "gripper" in stderr.lower() and ("error" in stderr.lower() or "exception" in stderr.lower()):
+            feedback += "GRIPPER ERROR: Issue with gripper control.\n\n"
+            feedback += "Suggestions:\n"
+            feedback += "1. Access the gripper through the arm: reachy.r_arm.gripper\n"
+            feedback += "2. Use the correct gripper methods: .open() or .close() or .move()\n"
+            feedback += "3. Check if the gripper is properly attached and functioning\n"
+        
         # Check for connection errors
-        elif "Failed to connect to" in stderr or "Connection refused" in stderr:
-            feedback += "CONNECTION ERROR: Could not connect to the robot or simulator.\n\n"
+        elif "connection" in stderr.lower() and ("error" in stderr.lower() or "exception" in stderr.lower()):
+            feedback += "CONNECTION ERROR: Issue connecting to the Reachy robot.\n\n"
             feedback += "Suggestions:\n"
-            feedback += "1. Make sure the robot or simulator is running\n"
-            feedback += "2. Check that you're connecting to the correct IP address and port\n"
-            feedback += "3. Verify that there are no firewall issues blocking the connection\n"
+            feedback += "1. Verify that the Reachy robot or simulation is running\n"
+            feedback += "2. Check the host IP or hostname is correct\n"
+            feedback += "3. Verify that the gRPC service is running and accessible\n"
         
-        # Check for import errors
-        elif "ImportError" in stderr or "ModuleNotFoundError" in stderr:
-            feedback += "IMPORT ERROR: Could not import required modules.\n\n"
+        # Generic Python errors
+        elif "ImportError: " in stderr or "ModuleNotFoundError: " in stderr:
+            feedback += "IMPORT ERROR: Missing Python module.\n\n"
             feedback += "Suggestions:\n"
-            feedback += "1. Make sure all required packages are installed\n"
+            feedback += "1. Ensure all required packages are installed\n"
             feedback += "2. Check for typos in import statements\n"
-            feedback += "3. Verify that the module paths are correct\n"
+            feedback += "3. Verify that you're using the correct import path\n"
         
-        # Check for syntax errors
-        elif "SyntaxError" in stderr:
-            feedback += "SYNTAX ERROR: There's a syntax error in the generated code.\n\n"
-            feedback += "Suggestions:\n"
-            feedback += "1. Check for missing parentheses, brackets, or quotes\n"
-            feedback += "2. Verify that indentation is correct\n"
-            feedback += "3. Look for typos or invalid syntax\n"
-        
-        # If no specific error was identified, provide general feedback
-        if not feedback:
-            feedback = "An error occurred during execution. Please check the error message for details."
+        # Default generic error feedback
+        else:
+            feedback += "EXECUTION ERROR: The code encountered an error during execution.\n\n"
+            feedback += "Error details from the logs:\n"
+            
+            # Extract the most relevant parts of the error
+            error_lines = []
+            for line in stderr.split('\n'):
+                if "Error:" in line or "Exception:" in line:
+                    error_lines.append(line)
+            
+            # If no specific error lines were found, include the last few lines
+            if not error_lines and stderr:
+                error_lines = stderr.split('\n')[-3:]
+            
+            # Add the error lines to the feedback
+            for line in error_lines:
+                feedback += f"- {line.strip()}\n"
+            
+            feedback += "\nSuggestions:\n"
+            feedback += "1. Check for logical errors in your code\n"
+            feedback += "2. Verify that you're using the Reachy 2 SDK correctly\n"
+            feedback += "3. Add more explicit error handling to identify the issue\n"
         
         return feedback
 
     def execute_code(self, code: str, confirm: bool = True, force: bool = False) -> Dict[str, Any]:
         """
-        Execute the generated code on the virtual Reachy robot.
+        Execute the generated code.
         
         Args:
-            code: The generated code to execute.
-            confirm: Whether to ask for user confirmation before execution.
+            code: The code to execute.
+            confirm: Whether to require confirmation before execution.
             force: Whether to force execution even if validation fails.
             
         Returns:
             Dict[str, Any]: The execution result.
         """
-        if not code:
+        if not code or not code.strip():
             return {
                 "success": False,
                 "message": "No code provided for execution",
                 "output": ""
             }
         
-        # Validate the code first
-        validation_result = self._validate_code(code)
+        # Validate the code using the CodeEvaluator if available
+        try:
+            from agent.code_evaluator import CodeEvaluator
+            evaluator = CodeEvaluator(api_key=self.api_key, model="gpt-4o-mini")
+            validation_result = evaluator.evaluate_code(code, "Validate code before execution")
+            valid = validation_result.get("valid", False)
+            warnings = validation_result.get("warnings", [])
+            errors = validation_result.get("errors", [])
+        except Exception as e:
+            self.logger.warning(f"Could not use CodeEvaluator for validation: {e}")
+            # Simple basic check if evaluator is not available
+            valid = True
+            errors = []
+            warnings = []
+            try:
+                compile(code, '<string>', 'exec')
+            except SyntaxError as e:
+                valid = False
+                errors = [f"Syntax error: {str(e)}"]
         
         # Check if the code is valid (but don't prevent execution if force=True)
-        if not validation_result["valid"] and not force:
+        if not valid and not force:
             # Instead of preventing execution, just add warnings and require confirmation
-            validation_result["warnings"].append("Code validation failed. Execution may be risky.")
+            warnings.append("Code validation failed. Execution may be risky.")
             
             # Always require confirmation for invalid code
             confirm = True
         
         # Check for critical warnings (but don't prevent execution if force=True)
-        critical_warnings = [w for w in validation_result["warnings"] if "CRITICAL" in w]
+        critical_warnings = [w for w in warnings if "CRITICAL" in w]
         if critical_warnings and not force:
             # Instead of preventing execution, just add warnings and require confirmation
-            validation_result["warnings"].append("Code contains critical issues that could damage the robot.")
+            warnings.append("Code contains critical issues that could damage the robot.")
             
             # Always require confirmation for code with critical warnings
             confirm = True
@@ -875,7 +794,11 @@ class ReachyCodeGenerationAgent:
             return {
                 "requires_confirmation": True,
                 "code": code,
-                "validation": validation_result,
+                "validation": {
+                    "valid": valid,
+                    "errors": errors,
+                    "warnings": warnings
+                },
                 "message": "Code is ready for execution. Please confirm to proceed."
             }
         
@@ -1026,27 +949,10 @@ class ReachyCodeGenerationAgent:
             str: The system prompt.
         """
         # Get prompt sections and default order
+        from agent.prompt_config import get_prompt_sections, get_default_prompt_order
+        
         sections = get_prompt_sections()
         section_order = get_default_prompt_order()
-        
-        # Load kinematics guide
-        kinematics_guide = ""
-        
-        try:
-            with open(self.kinematics_guide_path, "r") as f:
-                kinematics_guide = f.read()
-        except Exception as e:
-            self.logger.error(f"Failed to load kinematics guide: {e}")
-            kinematics_guide = "ERROR: Kinematics guide not found."
-        
-        # Generate API summary on-the-fly
-        api_docs = load_api_documentation()
-        if api_docs:
-            api_summary = generate_api_summary(api_docs)
-            self.logger.info("Generated API summary from documentation")
-        else:
-            self.logger.error("Failed to load API documentation")
-            api_summary = "ERROR: API documentation not found."
         
         # Build the prompt by concatenating sections in order
         prompt_parts = []
@@ -1055,13 +961,81 @@ class ReachyCodeGenerationAgent:
             if section_name in sections:
                 prompt_parts.append(sections[section_name])
         
-        # Insert kinematics guide and API summary at appropriate positions
-        # Add them after the code structure section
-        code_structure_index = section_order.index("code_structure")
-        
-        if code_structure_index >= 0 and code_structure_index < len(prompt_parts):
-            prompt_parts.insert(code_structure_index + 1, f"KINEMATICS GUIDE:\n{kinematics_guide}")
-            prompt_parts.insert(code_structure_index + 2, f"API SUMMARY:\n{api_summary}")
-        
         # Join all parts with double newlines for better readability
-        return "\n\n".join(prompt_parts) 
+        return "\n\n".join(prompt_parts)
+
+    def generate_code(self, user_request: str) -> Dict[str, Any]:
+        """Generate code using the OpenAI API with a simple direct approach.
+        
+        Args:
+            user_request: The user request to generate code for.
+            
+        Returns:
+            Dict with generated code and metadata.
+        """
+        self.logger.info(f"Generating code for request: {user_request[:100]}...")
+        
+        try:
+            # Build system prompt - use the comprehensive prompt instead of simplified version
+            system_prompt = self._build_system_prompt()
+
+            # Simple OpenAI API call
+            client = OpenAI(api_key=self.api_key)
+            response = client.chat.completions.create(
+                model=self.model,
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_request}
+                ],
+                temperature=self.temperature,
+                max_tokens=self.max_tokens
+            )
+            
+            # Extract content
+            content = response.choices[0].message.content
+            
+            # Extract code from content
+            code = self._extract_code(content)
+            
+            return {
+                "code": code,
+                "raw_response": content,
+                "model": self.model,
+                "success": bool(code)
+            }
+            
+        except Exception as e:
+            self.logger.error(f"Error generating code: {e}")
+            self.logger.error(traceback.format_exc())
+            return {
+                "code": "",
+                "error": str(e),
+                "success": False,
+                "raw_response": ""
+            }
+    
+    def _extract_code(self, content: str) -> str:
+        """Extract code from the response content.
+        
+        Args:
+            content: Raw response content.
+            
+        Returns:
+            str: Extracted code.
+        """
+        # First check for Python code blocks
+        if "```python" in content:
+            parts = content.split("```python")
+            if len(parts) > 1:
+                code_parts = parts[1].split("```", 1)
+                if code_parts:
+                    return code_parts[0].strip()
+        
+        # Otherwise check for any code blocks
+        if "```" in content:
+            parts = content.split("```")
+            if len(parts) > 1:
+                return parts[1].strip()
+        
+        # If no code blocks found, return the whole content
+        return content.strip() 

@@ -89,4 +89,11 @@ run-gradio:
 refresh-sdk:
 	@echo "Refreshing SDK documentation..."
 	@. $(VENV_NAME)/bin/activate && python -m agent.utils.refresh_sdk
-	@echo "SDK documentation refresh complete!" 
+	@echo "SDK documentation refresh complete!"
+	@echo "NOTE: The optimized api_documentation.json has been automatically created in agent/docs/"
+
+refresh-sdk-with-vision:
+	@echo "Refreshing SDK documentation including vision components..."
+	@. $(VENV_NAME)/bin/activate && EXTRACT_VISION_DOCS=1 python -m agent.utils.refresh_sdk
+	@echo "SDK documentation refresh complete!"
+	@echo "NOTE: The optimized api_documentation.json has been automatically created in agent/docs/" 

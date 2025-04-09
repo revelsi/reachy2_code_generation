@@ -244,135 +244,184 @@ class ReachyToolMapper:
         Returns:
             bool: True if successful, False otherwise.
         """
-        # If doc_path is provided, load from file
+        raw_docs = []
+        
+        # If doc_path is provided, try to load from file first
+        raw_docs_path = None
         if doc_path and os.path.exists(doc_path):
+            # We've got the target path, but we need to check if we have raw docs
+            raw_docs_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), 
+                                       "data/raw_docs/extracted")
+            raw_docs_path = os.path.join(raw_docs_dir, "raw_api_docs.json")
+        
+        # Try to load raw documentation
+        if raw_docs_path and os.path.exists(raw_docs_path):
             try:
-                with open(doc_path, 'r') as f:
-                    sdk_docs = json.load(f)
-                
-                # Convert the list of documented items into a module-based dictionary
-                self.api_documentation = {}
-                for item in sdk_docs:
-                    module_name = item.get("module", "")
-                    if not module_name:
-                        continue
-                        
-                    if module_name not in self.api_documentation:
-                        self.api_documentation[module_name] = {
-                            "functions": {},
-                            "classes": {},
-                            "docstring": ""
-                        }
-                    
-                    # Process based on item type
-                    if item["type"] == "module":
-                        self.api_documentation[module_name]["docstring"] = item.get("docstring", "")
-                        
-                    elif item["type"] == "function":
-                        self.api_documentation[module_name]["functions"][item["name"]] = {
-                            "docstring": item.get("docstring", ""),
-                            "parameters": item.get("parameters", {}),
-                            "return_type": item.get("return_type"),
-                            "source": item.get("source", ""),
-                            "signature": item.get("signature", "")
-                        }
-                        
-                    elif item["type"] == "class":
-                        class_name = item["name"]
-                        self.api_documentation[module_name]["classes"][class_name] = {
-                            "docstring": item.get("docstring", ""),
-                            "methods": {},
-                            "bases": item.get("bases", [])
-                        }
-                        
-                        # Process class methods
-                        for method in item.get("methods", []):
-                            method_name = method["name"]
-                            self.api_documentation[module_name]["classes"][class_name]["methods"][method_name] = {
-                                "docstring": method.get("docstring", ""),
-                                "parameters": method.get("parameters", {}),
-                                "return_type": method.get("return_type"),
-                                "source": method.get("source", ""),
-                                "signature": method.get("signature", ""),
-                                "is_async": method.get("is_async", False),
-                                "decorators": method.get("decorators", [])
-                            }
-                
-                print(f"Loaded API documentation from {doc_path}")
-                return True
+                with open(raw_docs_path, 'r') as f:
+                    raw_docs = json.load(f)
+                print(f"Loaded raw API documentation from {raw_docs_path}")
             except Exception as e:
-                print(f"Error loading API documentation: {e}")
+                print(f"Error loading raw API documentation: {e}")
+                raw_docs = []
+        
+        # If we couldn't load raw docs, try to generate them
+        if not raw_docs:
+            try:
+                from agent.utils.scrape_sdk_docs import extract_sdk_documentation
+                raw_docs = extract_sdk_documentation()
+                print(f"Generated {len(raw_docs)} API documentation items from SDK")
+            except Exception as e:
+                print(f"Error generating API documentation: {e}")
                 return False
         
-        # Otherwise, try to generate documentation
-        try:
-            # Import the documentation generator
-            from agent.utils.scrape_sdk_docs import extract_sdk_documentation
-            
-            # Extract documentation
-            sdk_docs = extract_sdk_documentation()
-            
-            # Convert the list of documented items into a module-based dictionary
-            self.api_documentation = {}
-            for item in sdk_docs:
-                module_name = item.get("module", "")
-                if not module_name:
-                    continue
-                    
-                if module_name not in self.api_documentation:
-                    self.api_documentation[module_name] = {
-                        "functions": {},
-                        "classes": {},
-                        "docstring": ""
-                    }
+        # Convert the list of documented items into a module-based dictionary
+        # This is the core of our API - creating a clean, structured version
+        self.api_documentation = {}
+        
+        # Create compact documentation without source code and only essential fields
+        compact_docs = []
+        
+        print("Creating compact documentation from raw API data...")
+        
+        for item in raw_docs:
+            # Skip items without a module or name
+            if not item.get("module") or not item.get("name"):
+                continue
                 
-                # Process based on item type
-                if item["type"] == "module":
-                    self.api_documentation[module_name]["docstring"] = item.get("docstring", "")
-                    
-                elif item["type"] == "function":
-                    self.api_documentation[module_name]["functions"][item["name"]] = {
-                        "docstring": item.get("docstring", ""),
-                        "parameters": item.get("parameters", {}),
-                        "return_type": item.get("return_type"),
-                        "source": item.get("source", ""),
-                        "signature": item.get("signature", "")
-                    }
-                    
-                elif item["type"] == "class":
-                    class_name = item["name"]
-                    self.api_documentation[module_name]["classes"][class_name] = {
-                        "docstring": item.get("docstring", ""),
-                        "methods": {},
-                        "bases": item.get("bases", [])
-                    }
-                    
-                    # Process class methods
-                    for method in item.get("methods", []):
-                        method_name = method["name"]
-                        self.api_documentation[module_name]["classes"][class_name]["methods"][method_name] = {
-                            "docstring": method.get("docstring", ""),
-                            "parameters": method.get("parameters", {}),
-                            "return_type": method.get("return_type"),
-                            "source": method.get("source", ""),
-                            "signature": method.get("signature", ""),
-                            "is_async": method.get("is_async", False),
-                            "decorators": method.get("decorators", [])
-                        }
+            # Create compact version of the item with only essential fields
+            compact_item = {
+                "type": item["type"],
+                "name": item["name"],
+                "module": item["module"],
+            }
             
-            # Save the documentation if successful
-            if self.api_documentation and doc_path:
+            # Add docstring if available (keep it short for modules)
+            if "docstring" in item:
+                if item["type"] == "module":
+                    # For modules, just get the first paragraph to save space
+                    paragraphs = item["docstring"].strip().split("\n\n")
+                    compact_item["docstring"] = paragraphs[0] if paragraphs else item["docstring"]
+                else:
+                    compact_item["docstring"] = item["docstring"]
+            
+            # Add essential fields based on type
+            if item["type"] == "function" or item["type"] == "method":
+                # Add essential function fields
+                if "signature" in item:
+                    compact_item["signature"] = item["signature"]
+                if "return_type" in item:
+                    compact_item["return_type"] = item["return_type"]
+                if "parameters" in item:
+                    # Filter out self parameter for methods
+                    parameters = {k: v for k, v in item["parameters"].items() if k != "self"}
+                    if parameters:
+                        compact_item["parameters"] = parameters
+                if "class" in item and item["class"]:
+                    compact_item["class"] = item["class"]
+                
+            elif item["type"] == "class":
+                # For classes, handle methods specially
+                if "methods" in item:
+                    compact_methods = []
+                    for method in item["methods"]:
+                        # Skip private methods
+                        if method["name"].startswith("_") and not method["name"].startswith("__"):
+                            continue
+                            
+                        # Create compact method
+                        compact_method = {
+                            "type": method["type"],
+                            "name": method["name"],
+                            "module": method["module"],
+                        }
+                        
+                        # Add docstring
+                        if "docstring" in method:
+                            compact_method["docstring"] = method["docstring"]
+                            
+                        # Add essential method fields
+                        if "signature" in method:
+                            compact_method["signature"] = method["signature"]
+                        if "return_type" in method:
+                            compact_method["return_type"] = method["return_type"]
+                        if "parameters" in method:
+                            # Filter out self parameter
+                            parameters = {k: v for k, v in method["parameters"].items() if k != "self"}
+                            if parameters:
+                                compact_method["parameters"] = parameters
+                        
+                        compact_methods.append(compact_method)
+                    
+                    if compact_methods:
+                        compact_item["methods"] = compact_methods
+                        
+                # Include bases if available
+                if "bases" in item and item["bases"]:
+                    compact_item["bases"] = item["bases"]
+            
+            # Add the compact item to the list
+            compact_docs.append(compact_item)
+            
+            # Build structured API dictionary
+            module_name = item.get("module", "")
+            if module_name not in self.api_documentation:
+                self.api_documentation[module_name] = {
+                    "functions": {},
+                    "classes": {},
+                    "docstring": ""
+                }
+            
+            # Process based on item type
+            if item["type"] == "module":
+                self.api_documentation[module_name]["docstring"] = item.get("docstring", "")
+                
+            elif item["type"] == "function":
+                self.api_documentation[module_name]["functions"][item["name"]] = {
+                    "docstring": item.get("docstring", ""),
+                    "parameters": item.get("parameters", {}),
+                    "return_type": item.get("return_type"),
+                    "source": item.get("source", ""),
+                    "signature": item.get("signature", "")
+                }
+                
+            elif item["type"] == "class":
+                class_name = item["name"]
+                self.api_documentation[module_name]["classes"][class_name] = {
+                    "docstring": item.get("docstring", ""),
+                    "methods": {},
+                    "bases": item.get("bases", [])
+                }
+                
+                # Process class methods
+                for method in item.get("methods", []):
+                    method_name = method["name"]
+                    self.api_documentation[module_name]["classes"][class_name]["methods"][method_name] = {
+                        "docstring": method.get("docstring", ""),
+                        "parameters": method.get("parameters", {}),
+                        "return_type": method.get("return_type"),
+                        "source": method.get("source", ""),
+                        "signature": method.get("signature", ""),
+                        "is_async": method.get("is_async", False),
+                        "decorators": method.get("decorators", [])
+                    }
+        
+        # Save the compact documentation if successful
+        if compact_docs and doc_path:
+            try:
                 os.makedirs(os.path.dirname(doc_path), exist_ok=True)
                 with open(doc_path, 'w') as f:
-                    json.dump(sdk_docs, f, indent=2)
-                print(f"Generated and saved API documentation to {doc_path}")
-            return True
-        except ImportError:
-            print("Could not import SDK documentation generator. Running in demo/simulation mode.")
-            return False
-        except Exception as e:
-            print(f"Error generating API documentation: {e}")
-            return False
+                    json.dump(compact_docs, f, indent=2)
+                
+                # Calculate sizes for reporting
+                raw_size = len(json.dumps(raw_docs)) / 1024
+                compact_size = os.path.getsize(doc_path) / 1024
+                
+                print(f"Created and saved compact API documentation to {doc_path}")
+                print(f"Size comparison: Raw: {raw_size:.1f}KB, Compact: {compact_size:.1f}KB ({compact_size/raw_size*100:.1f}%)")
+            except Exception as e:
+                print(f"Error saving compact API documentation: {e}")
+        
+        return bool(self.api_documentation)
     
     def map_api_to_tools(self, focus_modules=None) -> Dict[str, Dict[str, Any]]:
         """

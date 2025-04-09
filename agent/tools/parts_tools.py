@@ -16,431 +16,6 @@ class PartsTools(BaseTool):
     def register_all_tools(cls) -> None:
         """Register all parts tools."""
         cls.register_tool(
-            name="parts_goto_based_part_IGoToBasedPart___init__",
-            func=cls.parts_goto_based_part_IGoToBasedPart___init__,
-            schema=cls.create_tool_schema(
-                name="parts_goto_based_part_IGoToBasedPart___init__",
-                description="""Initialize the IGoToBasedPart interface.
-
-Sets up the common attributes needed for handling goto-based movements. This includes
-associating the part with the interface and setting up the gRPC stub for performing
-goto commands.
-
-Args:
-    part: The robot part that uses this interface, such as an Arm or Head.
-    goto_stub: The gRPC stub used to send goto commands to the robot part.""",
-                parameters={'part': {'type': 'string', 'description': 'The robot part that uses this interface, such as an Arm or Head.'}, 'goto_stub': {'type': 'string', 'description': 'The gRPC stub used to send goto commands to the robot part.'}},
-                required=['part', 'goto_stub']
-            )
-        )
-        cls.register_tool(
-            name="parts_goto_based_part_IGoToBasedPart_get_goto_playing",
-            func=cls.parts_goto_based_part_IGoToBasedPart_get_goto_playing,
-            schema=cls.create_tool_schema(
-                name="parts_goto_based_part_IGoToBasedPart_get_goto_playing",
-                description="""Return the GoToId of the currently playing goto movement on a specific part.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_goto_based_part_IGoToBasedPart_get_goto_queue",
-            func=cls.parts_goto_based_part_IGoToBasedPart_get_goto_queue,
-            schema=cls.create_tool_schema(
-                name="parts_goto_based_part_IGoToBasedPart_get_goto_queue",
-                description="""Return a list of all GoToIds waiting to be played on a specific part.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_goto_based_part_IGoToBasedPart_cancel_all_goto",
-            func=cls.parts_goto_based_part_IGoToBasedPart_cancel_all_goto,
-            schema=cls.create_tool_schema(
-                name="parts_goto_based_part_IGoToBasedPart_cancel_all_goto",
-                description="""Request the cancellation of all playing and waiting goto commands for a specific part.
-
-Returns:
-    A GoToAck acknowledging the cancellation of all goto commands.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_joints_based_part_JointsBasedPart___init__",
-            func=cls.parts_joints_based_part_JointsBasedPart___init__,
-            schema=cls.create_tool_schema(
-                name="parts_joints_based_part_JointsBasedPart___init__",
-                description="""Initialize the JointsBasedPart with its common attributes.
-
-Sets up the gRPC communication channel and service stub for controlling the joint-based
-part of the robot, such as an arm or head.
-
-Args:
-    proto_msg: A protocol message representing the part's configuration. It can be an
-        Arm_proto or Head_proto object.
-    grpc_channel: The gRPC channel used to communicate with the corresponding service.
-    stub: The service stub for the gRPC communication, which can be an ArmServiceStub or
-        HeadServiceStub, depending on the part type.""",
-                parameters={'proto_msg': {'type': 'string', 'description': "A protocol message representing the part's configuration. It can be an"}, 'grpc_channel': {'type': 'string', 'description': 'The gRPC channel used to communicate with the corresponding service.'}, 'stub': {'type': 'string', 'description': 'The service stub for the gRPC communication, which can be an ArmServiceStub or'}},
-                required=['proto_msg', 'grpc_channel', 'stub']
-            )
-        )
-        cls.register_tool(
-            name="parts_joints_based_part_JointsBasedPart_joints",
-            func=cls.parts_joints_based_part_JointsBasedPart_joints,
-            schema=cls.create_tool_schema(
-                name="parts_joints_based_part_JointsBasedPart_joints",
-                description="""Get all the arm's joints.
-
-Returns:
-    A dictionary of all the arm's joints, with joint names as keys and joint objects as values.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_joints_based_part_JointsBasedPart_get_current_positions",
-            func=cls.parts_joints_based_part_JointsBasedPart_get_current_positions,
-            schema=cls.create_tool_schema(
-                name="parts_joints_based_part_JointsBasedPart_get_current_positions",
-                description="""Get the current positions of all joints.
-
-Returns:
-    A list of float values representing the present positions in degrees of the arm's joints.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_joints_based_part_JointsBasedPart_send_goal_positions",
-            func=cls.parts_joints_based_part_JointsBasedPart_send_goal_positions,
-            schema=cls.create_tool_schema(
-                name="parts_joints_based_part_JointsBasedPart_send_goal_positions",
-                description="""Send goal positions to the part's joints.
-
-If goal positions have been specified for any joint of the part, sends them to the robot.
-
-Args :
-    check_positions: A boolean indicating whether to check the positions after sending the command.
-        Defaults to True.""",
-                parameters={'check_positions': {'type': 'boolean', 'description': 'A boolean indicating whether to check the positions after sending the command.'}},
-                required=['check_positions']
-            )
-        )
-        cls.register_tool(
-            name="parts_joints_based_part_JointsBasedPart_set_torque_limits",
-            func=cls.parts_joints_based_part_JointsBasedPart_set_torque_limits,
-            schema=cls.create_tool_schema(
-                name="parts_joints_based_part_JointsBasedPart_set_torque_limits",
-                description="""Set the torque limit as a percentage of the maximum torque for all motors of the part.
-
-Args:
-    torque_limit: The desired torque limit as a percentage (0-100) of the maximum torque. Can be
-        specified as a float or int.""",
-                parameters={'torque_limit': {'type': 'integer', 'description': 'The desired torque limit as a percentage (0-100) of the maximum torque. Can be'}},
-                required=['torque_limit']
-            )
-        )
-        cls.register_tool(
-            name="parts_joints_based_part_JointsBasedPart_set_speed_limits",
-            func=cls.parts_joints_based_part_JointsBasedPart_set_speed_limits,
-            schema=cls.create_tool_schema(
-                name="parts_joints_based_part_JointsBasedPart_set_speed_limits",
-                description="""Set the speed limit as a percentage of the maximum speed for all motors of the part.
-
-Args:
-    speed_limit: The desired speed limit as a percentage (0-100) of the maximum speed. Can be
-        specified as a float or int.""",
-                parameters={'speed_limit': {'type': 'integer', 'description': 'The desired speed limit as a percentage (0-100) of the maximum speed. Can be'}},
-                required=['speed_limit']
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase___init__",
-            func=cls.parts_mobile_base_MobileBase___init__,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase___init__",
-                description="""Initialize the MobileBase with its gRPC communication and configuration.
-
-This sets up the gRPC communication channel and service stubs for controlling the
-mobile base, initializes the drive and control modes.
-It also sets up the LIDAR safety monitoring.
-
-Args:
-    mb_msg: A MobileBase_proto message containing the configuration details for the mobile base.
-    initial_state: The initial state of the mobile base, as a MobileBaseState object.
-    grpc_channel: The gRPC channel used to communicate with the mobile base service.
-    goto_stub: The gRPC service stub for the GoTo service.""",
-                parameters={'mb_msg': {'type': 'string', 'description': 'A MobileBase_proto message containing the configuration details for the mobile base.'}, 'initial_state': {'type': 'string', 'description': 'The initial state of the mobile base, as a MobileBaseState object.'}, 'grpc_channel': {'type': 'string', 'description': 'The gRPC channel used to communicate with the mobile base service.'}, 'goto_stub': {'type': 'string', 'description': 'The gRPC service stub for the GoTo service.'}},
-                required=['mb_msg', 'initial_state', 'grpc_channel', 'goto_stub']
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase___repr__",
-            func=cls.parts_mobile_base_MobileBase___repr__,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase___repr__",
-                description="""Clean representation of a mobile base.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_battery_voltage",
-            func=cls.parts_mobile_base_MobileBase_battery_voltage,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_battery_voltage",
-                description="""Return the battery voltage.
-
-The battery should be recharged if the voltage reaches 24.5V or below. If the battery level is low,
-a warning message is logged.
-
-Returns:
-    The current battery voltage as a float, rounded to one decimal place.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_odometry",
-            func=cls.parts_mobile_base_MobileBase_odometry,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_odometry",
-                description="""Return the odometry of the base.
-
-The odometry includes the x and y positions in meters and theta in degrees, along with the
-velocities in the x, y directions in meters per degrees and the angular velocity in degrees per second.
-
-Returns:
-    A dictionary containing the current odometry with keys 'x', 'y', 'theta', 'vx', 'vy', and 'vtheta',
-    each rounded to three decimal places.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_last_cmd_vel",
-            func=cls.parts_mobile_base_MobileBase_last_cmd_vel,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_last_cmd_vel",
-                description="""Return the last command velocity sent to the base.
-
-The velocity includes the x and y components in meters per second and the theta component in degrees per second.
-
-Returns:
-    A dictionary containing the last command velocity with keys 'x', 'y', and 'theta',
-    each rounded to three decimal places.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_is_on",
-            func=cls.parts_mobile_base_MobileBase_is_on,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_is_on",
-                description="""Check if the mobile base is currently stiff (not in free-wheel mode).
-
-Returns:
-    `True` if the mobile base is not compliant (stiff), `False` otherwise.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_is_off",
-            func=cls.parts_mobile_base_MobileBase_is_off,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_is_off",
-                description="""Check if the mobile base is currently compliant (in free-wheel mode).
-
-Returns:
-    True if the mobile base is compliant (in free-wheel mode), `False` otherwise.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_get_current_odometry",
-            func=cls.parts_mobile_base_MobileBase_get_current_odometry,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_get_current_odometry",
-                description="""Get the current odometry of the mobile base in its reference frame.
-
-Args:
-    degrees (bool, optional): Whether to return the orientation (`theta` and `vtheta`) in degrees.
-                            Defaults to True.
-
-Returns:
-    Dict[str, float]: A dictionary containing the current odometry of the mobile base with:
-    - 'x': Position along the x-axis (in meters).
-    - 'y': Position along the y-axis (in meters).
-    - 'theta': Orientation (in degrees by default, radians if `degrees=False`).
-    - 'vx': Linear velocity along the x-axis (in meters per second).
-    - 'vy': Linear velocity along the y-axis (in meters per second).
-    - 'vtheta': Angular velocity (in degrees per second by default, radians if `degrees=False`).""",
-                parameters={'degrees': {'type': 'boolean', 'description': 'Parameter degrees'}},
-                required=['degrees']
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_goto",
-            func=cls.parts_mobile_base_MobileBase_goto,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_goto",
-                description="""Send the mobile base to a specified target position.
-
-The (x, y) coordinates define the position in Cartesian space, and theta specifies the orientation in degrees.
-The zero position is set when the mobile base is started or when the `reset_odometry` method is called. A timeout
-can be provided to avoid the mobile base getting stuck. The tolerance values define the acceptable margins for
-reaching the target position.
-
-Args:
-    x: The target x-coordinate in meters.
-    y: The target y-coordinate in meters.
-    theta: The target orientation in degrees.
-    wait: If True, the function waits until the movement is completed before returning.
-            Defaults to False.
-    degrees: If True, the theta value and angle_tolerance are treated as degrees.
-            Defaults to True.
-    distance_tolerance: Optional; the tolerance to the target position to consider the goto finished, in meters.
-    angle_tolerance: Optional; the angle tolerance to the target to consider the goto finished, in meters.
-    timeout: Optional; the maximum time allowed to reach the target, in seconds.
-
-Returns:
-    GoToId: The unique GoToId identifier for the movement command.
-
-Raises:
-    TypeError: If the target is not reached and the mobile base is stopped due to an obstacle.""",
-                parameters={'x': {'type': 'number', 'description': 'The target x-coordinate in meters.'}, 'y': {'type': 'number', 'description': 'The target y-coordinate in meters.'}, 'theta': {'type': 'number', 'description': 'The target orientation in degrees.'}, 'wait': {'type': 'boolean', 'description': 'If True, the function waits until the movement is completed before returning.'}, 'degrees': {'type': 'boolean', 'description': 'If True, the theta value and angle_tolerance are treated as degrees.'}, 'distance_tolerance': {'type': 'number', 'description': 'Optional; the tolerance to the target position to consider the goto finished, in meters.'}, 'angle_tolerance': {'type': 'number', 'description': 'Optional; the angle tolerance to the target to consider the goto finished, in meters.'}, 'timeout': {'type': 'number', 'description': 'Optional; the maximum time allowed to reach the target, in seconds.'}},
-                required=['x', 'y', 'theta', 'wait', 'degrees', 'distance_tolerance', 'angle_tolerance', 'timeout']
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_translate_by",
-            func=cls.parts_mobile_base_MobileBase_translate_by,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_translate_by",
-                description="""Send a target position relative to the current position of the mobile base.
-
-The (x, y) coordinates specify the desired translation in the mobile base's Cartesian space.
-
-Args:
-    x: The desired translation along the x-axis in meters.
-    y: The desired translation along the y-axis in meters.
-    wait:  If True, the function waits until the movement is completed before returning.
-    distance_tolerance: Optional; The distance tolerance to the target to consider the goto finished, in meters.
-    timeout: An optional timeout for reaching the target position, in seconds.
-
-Returns:
-    The GoToId of the movement command, created using the `goto` method.""",
-                parameters={'x': {'type': 'number', 'description': 'The desired translation along the x-axis in meters.'}, 'y': {'type': 'number', 'description': 'The desired translation along the y-axis in meters.'}, 'wait': {'type': 'boolean', 'description': 'If True, the function waits until the movement is completed before returning.'}, 'distance_tolerance': {'type': 'number', 'description': 'Optional; The distance tolerance to the target to consider the goto finished, in meters.'}, 'timeout': {'type': 'number', 'description': 'An optional timeout for reaching the target position, in seconds.'}},
-                required=['x', 'y', 'wait', 'distance_tolerance', 'timeout']
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_rotate_by",
-            func=cls.parts_mobile_base_MobileBase_rotate_by,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_rotate_by",
-                description="""Send a target rotation relative to the current rotation of the mobile base.
-
-The theta parameter defines the desired rotation in degrees.
-
-Args:
-    theta: The desired rotation in degrees, relative to the current orientation.
-    wait: If True, the function waits until the rotation is completed before returning.
-    degrees: If True, the theta value and angle_tolerance are treated as degrees, otherwise as radians.
-    angle_tolerance: Optional; The angle tolerance to the target to consider the goto finished.
-    timeout: An optional timeout for completing the rotation, in seconds.""",
-                parameters={'theta': {'type': 'number', 'description': 'The desired rotation in degrees, relative to the current orientation.'}, 'wait': {'type': 'boolean', 'description': 'If True, the function waits until the rotation is completed before returning.'}, 'degrees': {'type': 'boolean', 'description': 'If True, the theta value and angle_tolerance are treated as degrees, otherwise as radians.'}, 'angle_tolerance': {'type': 'number', 'description': 'Optional; The angle tolerance to the target to consider the goto finished.'}, 'timeout': {'type': 'number', 'description': 'An optional timeout for completing the rotation, in seconds.'}},
-                required=['theta', 'wait', 'degrees', 'angle_tolerance', 'timeout']
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_reset_odometry",
-            func=cls.parts_mobile_base_MobileBase_reset_odometry,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_reset_odometry",
-                description="""Reset the odometry.
-
-This method resets the mobile base's odometry, so that the current position is now (x, y, theta) = (0, 0, 0).
-If any goto is being played, stop the goto and the queued ones.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_set_goal_speed",
-            func=cls.parts_mobile_base_MobileBase_set_goal_speed,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_set_goal_speed",
-                description="""Set the goal speed for the mobile base.
-
-This method sets the target velocities for the mobile base's movement along the x and y axes, as well as
-its rotational speed. The actual movement is executed after calling `send_speed_command`.
-
-Args:
-    vx (float | int, optional): Linear velocity along the x-axis in meters per second. Defaults to 0.
-    vy (float | int, optional): Linear velocity along the y-axis in meters per second. Defaults to 0.
-    vtheta (float | int, optional): Rotational velocity (around the z-axis) in degrees per second. Defaults to 0.
-
-Raises:
-    TypeError: If any of the velocity values (`vx`, `vy`, `vtheta`) are not of type `float` or `int`.
-
-Notes:
-    - Use `send_speed_command` after this method to execute the movement.
-    - The velocities will be used to command the mobile base for a short duration (0.2 seconds).""",
-                parameters={'vx': {'type': 'string', 'description': 'Parameter vx'}, 'vy': {'type': 'string', 'description': 'Parameter vy'}, 'vtheta': {'type': 'string', 'description': 'Parameter vtheta'}},
-                required=['vx', 'vy', 'vtheta']
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_send_speed_command",
-            func=cls.parts_mobile_base_MobileBase_send_speed_command,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_send_speed_command",
-                description="""Send the speed command to the mobile base, based on previously set goal speeds.
-
-This method sends the velocity commands for the mobile base that were set with `set_goal_speed`.
-The command will be executed for a duration of 200ms, which is predefined at the ROS level of the mobile base code.
-
-Raises:
-    ValueError: If the absolute value of `x_vel`, `y_vel`, or `rot_vel` exceeds the configured maximum values.
-    Warning: If the mobile base is off, no command is sent, and a warning is logged.
-
-Notes:
-    - This method is optimal for sending frequent speed instructions to the mobile base.
-    - The goal velocities must be set with `set_goal_speed` before calling this function.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_set_max_xy_goto",
-            func=cls.parts_mobile_base_MobileBase_set_max_xy_goto,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_set_max_xy_goto",
-                description="""Set the maximum displacement in the x and y directions for the mobile base.
-
-Args:
-    value: The maximum displacement value to be set, in meters.""",
-                parameters={'value': {'type': 'number', 'description': 'The maximum displacement value to be set, in meters.'}},
-                required=['value']
-            )
-        )
-        cls.register_tool(
-            name="parts_mobile_base_MobileBase_goto_posture",
-            func=cls.parts_mobile_base_MobileBase_goto_posture,
-            schema=cls.create_tool_schema(
-                name="parts_mobile_base_MobileBase_goto_posture",
-                description="""Mobile base is not affected by goto_posture. No command is sent.""",
-                parameters={'common_posture': {'type': 'string', 'description': 'Parameter common_posture'}, 'duration': {'type': 'number', 'description': 'Parameter duration'}, 'wait': {'type': 'boolean', 'description': 'Parameter wait'}, 'wait_for_goto_end': {'type': 'boolean', 'description': 'Parameter wait_for_goto_end'}, 'interpolation_mode': {'type': 'string', 'description': 'Parameter interpolation_mode'}},
-                required=['common_posture', 'duration', 'wait', 'wait_for_goto_end', 'interpolation_mode']
-            )
-        )
-        cls.register_tool(
             name="parts_arm_Arm___init__",
             func=cls.parts_arm_Arm___init__,
             schema=cls.create_tool_schema(
@@ -916,6 +491,157 @@ Args :
             )
         )
         cls.register_tool(
+            name="parts_goto_based_part_IGoToBasedPart___init__",
+            func=cls.parts_goto_based_part_IGoToBasedPart___init__,
+            schema=cls.create_tool_schema(
+                name="parts_goto_based_part_IGoToBasedPart___init__",
+                description="""Initialize the IGoToBasedPart interface.
+
+Sets up the common attributes needed for handling goto-based movements. This includes
+associating the part with the interface and setting up the gRPC stub for performing
+goto commands.
+
+Args:
+    part: The robot part that uses this interface, such as an Arm or Head.
+    goto_stub: The gRPC stub used to send goto commands to the robot part.""",
+                parameters={'part': {'type': 'string', 'description': 'The robot part that uses this interface, such as an Arm or Head.'}, 'goto_stub': {'type': 'string', 'description': 'The gRPC stub used to send goto commands to the robot part.'}},
+                required=['part', 'goto_stub']
+            )
+        )
+        cls.register_tool(
+            name="parts_goto_based_part_IGoToBasedPart_get_goto_playing",
+            func=cls.parts_goto_based_part_IGoToBasedPart_get_goto_playing,
+            schema=cls.create_tool_schema(
+                name="parts_goto_based_part_IGoToBasedPart_get_goto_playing",
+                description="""Return the GoToId of the currently playing goto movement on a specific part.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_goto_based_part_IGoToBasedPart_get_goto_queue",
+            func=cls.parts_goto_based_part_IGoToBasedPart_get_goto_queue,
+            schema=cls.create_tool_schema(
+                name="parts_goto_based_part_IGoToBasedPart_get_goto_queue",
+                description="""Return a list of all GoToIds waiting to be played on a specific part.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_goto_based_part_IGoToBasedPart_cancel_all_goto",
+            func=cls.parts_goto_based_part_IGoToBasedPart_cancel_all_goto,
+            schema=cls.create_tool_schema(
+                name="parts_goto_based_part_IGoToBasedPart_cancel_all_goto",
+                description="""Request the cancellation of all playing and waiting goto commands for a specific part.
+
+Returns:
+    A GoToAck acknowledging the cancellation of all goto commands.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_hand_Hand___init__",
+            func=cls.parts_hand_Hand___init__,
+            schema=cls.create_tool_schema(
+                name="parts_hand_Hand___init__",
+                description="""Initialize the Hand component.
+
+Sets up the necessary attributes and configuration for the hand, including the gRPC
+stub and initial state.
+
+Args:
+    hand_msg: The Hand_proto object containing the configuration details for the hand.
+    grpc_channel: The gRPC channel used to communicate with the hand's gRPC service.
+    goto_stub: The gRPC stub for controlling goto movements.""",
+                parameters={'hand_msg': {'type': 'string', 'description': 'The Hand_proto object containing the configuration details for the hand.'}, 'grpc_channel': {'type': 'string', 'description': "The gRPC channel used to communicate with the hand's gRPC service."}, 'goto_stub': {'type': 'string', 'description': 'The gRPC stub for controlling goto movements.'}},
+                required=['hand_msg', 'grpc_channel', 'goto_stub']
+            )
+        )
+        cls.register_tool(
+            name="parts_hand_Hand_is_on",
+            func=cls.parts_hand_Hand_is_on,
+            schema=cls.create_tool_schema(
+                name="parts_hand_Hand_is_on",
+                description="""Check if the hand is stiff.
+
+Returns:
+    `True` if the hand is on (not compliant), `False` otherwise.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_hand_Hand_is_off",
+            func=cls.parts_hand_Hand_is_off,
+            schema=cls.create_tool_schema(
+                name="parts_hand_Hand_is_off",
+                description="""Check if the hand is compliant.
+
+Returns:
+    `True` if the hand is off (compliant), `False` otherwise.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_hand_Hand_is_moving",
+            func=cls.parts_hand_Hand_is_moving,
+            schema=cls.create_tool_schema(
+                name="parts_hand_Hand_is_moving",
+                description="""Check if the hand is currently moving.
+
+Returns:
+    `True` if any joint of the hand is moving, `False` otherwise.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_hand_Hand_open",
+            func=cls.parts_hand_Hand_open,
+            schema=cls.create_tool_schema(
+                name="parts_hand_Hand_open",
+                description="""Open the hand.
+
+Raises:
+    RuntimeError: If the gripper is off and the open request cannot be sent.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_hand_Hand_close",
+            func=cls.parts_hand_Hand_close,
+            schema=cls.create_tool_schema(
+                name="parts_hand_Hand_close",
+                description="""Close the hand.
+
+Raises:
+    RuntimeError: If the gripper is off and the close request cannot be sent.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_hand_Hand_send_goal_positions",
+            func=cls.parts_hand_Hand_send_goal_positions,
+            schema=cls.create_tool_schema(
+                name="parts_hand_Hand_send_goal_positions",
+                description="""Send the goal positions to the hand's joints.
+
+If any goal position has been specified for any of the gripper's joints, sends them to the robot.
+If the hand is off, the command is not sent.
+
+Args :
+    check_positions: A boolean indicating whether to check the positions after sending the command.
+        Defaults to True.""",
+                parameters={'check_positions': {'type': 'boolean', 'description': 'A boolean indicating whether to check the positions after sending the command.'}},
+                required=['check_positions']
+            )
+        )
+        cls.register_tool(
             name="parts_head_Head___init__",
             func=cls.parts_head_Head___init__,
             schema=cls.create_tool_schema(
@@ -1112,103 +838,377 @@ Returns:
             )
         )
         cls.register_tool(
-            name="parts_hand_Hand___init__",
-            func=cls.parts_hand_Hand___init__,
+            name="parts_joints_based_part_JointsBasedPart___init__",
+            func=cls.parts_joints_based_part_JointsBasedPart___init__,
             schema=cls.create_tool_schema(
-                name="parts_hand_Hand___init__",
-                description="""Initialize the Hand component.
+                name="parts_joints_based_part_JointsBasedPart___init__",
+                description="""Initialize the JointsBasedPart with its common attributes.
 
-Sets up the necessary attributes and configuration for the hand, including the gRPC
-stub and initial state.
+Sets up the gRPC communication channel and service stub for controlling the joint-based
+part of the robot, such as an arm or head.
 
 Args:
-    hand_msg: The Hand_proto object containing the configuration details for the hand.
-    grpc_channel: The gRPC channel used to communicate with the hand's gRPC service.
-    goto_stub: The gRPC stub for controlling goto movements.""",
-                parameters={'hand_msg': {'type': 'string', 'description': 'The Hand_proto object containing the configuration details for the hand.'}, 'grpc_channel': {'type': 'string', 'description': "The gRPC channel used to communicate with the hand's gRPC service."}, 'goto_stub': {'type': 'string', 'description': 'The gRPC stub for controlling goto movements.'}},
-                required=['hand_msg', 'grpc_channel', 'goto_stub']
+    proto_msg: A protocol message representing the part's configuration. It can be an
+        Arm_proto or Head_proto object.
+    grpc_channel: The gRPC channel used to communicate with the corresponding service.
+    stub: The service stub for the gRPC communication, which can be an ArmServiceStub or
+        HeadServiceStub, depending on the part type.""",
+                parameters={'proto_msg': {'type': 'string', 'description': "A protocol message representing the part's configuration. It can be an"}, 'grpc_channel': {'type': 'string', 'description': 'The gRPC channel used to communicate with the corresponding service.'}, 'stub': {'type': 'string', 'description': 'The service stub for the gRPC communication, which can be an ArmServiceStub or'}},
+                required=['proto_msg', 'grpc_channel', 'stub']
             )
         )
         cls.register_tool(
-            name="parts_hand_Hand_is_on",
-            func=cls.parts_hand_Hand_is_on,
+            name="parts_joints_based_part_JointsBasedPart_joints",
+            func=cls.parts_joints_based_part_JointsBasedPart_joints,
             schema=cls.create_tool_schema(
-                name="parts_hand_Hand_is_on",
-                description="""Check if the hand is stiff.
+                name="parts_joints_based_part_JointsBasedPart_joints",
+                description="""Get all the arm's joints.
 
 Returns:
-    `True` if the hand is on (not compliant), `False` otherwise.""",
+    A dictionary of all the arm's joints, with joint names as keys and joint objects as values.""",
                 parameters={},
                 required=[]
             )
         )
         cls.register_tool(
-            name="parts_hand_Hand_is_off",
-            func=cls.parts_hand_Hand_is_off,
+            name="parts_joints_based_part_JointsBasedPart_get_current_positions",
+            func=cls.parts_joints_based_part_JointsBasedPart_get_current_positions,
             schema=cls.create_tool_schema(
-                name="parts_hand_Hand_is_off",
-                description="""Check if the hand is compliant.
+                name="parts_joints_based_part_JointsBasedPart_get_current_positions",
+                description="""Get the current positions of all joints.
 
 Returns:
-    `True` if the hand is off (compliant), `False` otherwise.""",
+    A list of float values representing the present positions in degrees of the arm's joints.""",
                 parameters={},
                 required=[]
             )
         )
         cls.register_tool(
-            name="parts_hand_Hand_is_moving",
-            func=cls.parts_hand_Hand_is_moving,
+            name="parts_joints_based_part_JointsBasedPart_send_goal_positions",
+            func=cls.parts_joints_based_part_JointsBasedPart_send_goal_positions,
             schema=cls.create_tool_schema(
-                name="parts_hand_Hand_is_moving",
-                description="""Check if the hand is currently moving.
+                name="parts_joints_based_part_JointsBasedPart_send_goal_positions",
+                description="""Send goal positions to the part's joints.
 
-Returns:
-    `True` if any joint of the hand is moving, `False` otherwise.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_hand_Hand_open",
-            func=cls.parts_hand_Hand_open,
-            schema=cls.create_tool_schema(
-                name="parts_hand_Hand_open",
-                description="""Open the hand.
-
-Raises:
-    RuntimeError: If the gripper is off and the open request cannot be sent.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_hand_Hand_close",
-            func=cls.parts_hand_Hand_close,
-            schema=cls.create_tool_schema(
-                name="parts_hand_Hand_close",
-                description="""Close the hand.
-
-Raises:
-    RuntimeError: If the gripper is off and the close request cannot be sent.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="parts_hand_Hand_send_goal_positions",
-            func=cls.parts_hand_Hand_send_goal_positions,
-            schema=cls.create_tool_schema(
-                name="parts_hand_Hand_send_goal_positions",
-                description="""Send the goal positions to the hand's joints.
-
-If any goal position has been specified for any of the gripper's joints, sends them to the robot.
-If the hand is off, the command is not sent.
+If goal positions have been specified for any joint of the part, sends them to the robot.
 
 Args :
     check_positions: A boolean indicating whether to check the positions after sending the command.
         Defaults to True.""",
                 parameters={'check_positions': {'type': 'boolean', 'description': 'A boolean indicating whether to check the positions after sending the command.'}},
                 required=['check_positions']
+            )
+        )
+        cls.register_tool(
+            name="parts_joints_based_part_JointsBasedPart_set_torque_limits",
+            func=cls.parts_joints_based_part_JointsBasedPart_set_torque_limits,
+            schema=cls.create_tool_schema(
+                name="parts_joints_based_part_JointsBasedPart_set_torque_limits",
+                description="""Set the torque limit as a percentage of the maximum torque for all motors of the part.
+
+Args:
+    torque_limit: The desired torque limit as a percentage (0-100) of the maximum torque. Can be
+        specified as a float or int.""",
+                parameters={'torque_limit': {'type': 'integer', 'description': 'The desired torque limit as a percentage (0-100) of the maximum torque. Can be'}},
+                required=['torque_limit']
+            )
+        )
+        cls.register_tool(
+            name="parts_joints_based_part_JointsBasedPart_set_speed_limits",
+            func=cls.parts_joints_based_part_JointsBasedPart_set_speed_limits,
+            schema=cls.create_tool_schema(
+                name="parts_joints_based_part_JointsBasedPart_set_speed_limits",
+                description="""Set the speed limit as a percentage of the maximum speed for all motors of the part.
+
+Args:
+    speed_limit: The desired speed limit as a percentage (0-100) of the maximum speed. Can be
+        specified as a float or int.""",
+                parameters={'speed_limit': {'type': 'integer', 'description': 'The desired speed limit as a percentage (0-100) of the maximum speed. Can be'}},
+                required=['speed_limit']
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase___init__",
+            func=cls.parts_mobile_base_MobileBase___init__,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase___init__",
+                description="""Initialize the MobileBase with its gRPC communication and configuration.
+
+This sets up the gRPC communication channel and service stubs for controlling the
+mobile base, initializes the drive and control modes.
+It also sets up the LIDAR safety monitoring.
+
+Args:
+    mb_msg: A MobileBase_proto message containing the configuration details for the mobile base.
+    initial_state: The initial state of the mobile base, as a MobileBaseState object.
+    grpc_channel: The gRPC channel used to communicate with the mobile base service.
+    goto_stub: The gRPC service stub for the GoTo service.""",
+                parameters={'mb_msg': {'type': 'string', 'description': 'A MobileBase_proto message containing the configuration details for the mobile base.'}, 'initial_state': {'type': 'string', 'description': 'The initial state of the mobile base, as a MobileBaseState object.'}, 'grpc_channel': {'type': 'string', 'description': 'The gRPC channel used to communicate with the mobile base service.'}, 'goto_stub': {'type': 'string', 'description': 'The gRPC service stub for the GoTo service.'}},
+                required=['mb_msg', 'initial_state', 'grpc_channel', 'goto_stub']
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase___repr__",
+            func=cls.parts_mobile_base_MobileBase___repr__,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase___repr__",
+                description="""Clean representation of a mobile base.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_battery_voltage",
+            func=cls.parts_mobile_base_MobileBase_battery_voltage,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_battery_voltage",
+                description="""Return the battery voltage.
+
+The battery should be recharged if the voltage reaches 24.5V or below. If the battery level is low,
+a warning message is logged.
+
+Returns:
+    The current battery voltage as a float, rounded to one decimal place.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_odometry",
+            func=cls.parts_mobile_base_MobileBase_odometry,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_odometry",
+                description="""Return the odometry of the base.
+
+The odometry includes the x and y positions in meters and theta in degrees, along with the
+velocities in the x, y directions in meters per degrees and the angular velocity in degrees per second.
+
+Returns:
+    A dictionary containing the current odometry with keys 'x', 'y', 'theta', 'vx', 'vy', and 'vtheta',
+    each rounded to three decimal places.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_last_cmd_vel",
+            func=cls.parts_mobile_base_MobileBase_last_cmd_vel,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_last_cmd_vel",
+                description="""Return the last command velocity sent to the base.
+
+The velocity includes the x and y components in meters per second and the theta component in degrees per second.
+
+Returns:
+    A dictionary containing the last command velocity with keys 'x', 'y', and 'theta',
+    each rounded to three decimal places.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_is_on",
+            func=cls.parts_mobile_base_MobileBase_is_on,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_is_on",
+                description="""Check if the mobile base is currently stiff (not in free-wheel mode).
+
+Returns:
+    `True` if the mobile base is not compliant (stiff), `False` otherwise.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_is_off",
+            func=cls.parts_mobile_base_MobileBase_is_off,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_is_off",
+                description="""Check if the mobile base is currently compliant (in free-wheel mode).
+
+Returns:
+    True if the mobile base is compliant (in free-wheel mode), `False` otherwise.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_get_current_odometry",
+            func=cls.parts_mobile_base_MobileBase_get_current_odometry,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_get_current_odometry",
+                description="""Get the current odometry of the mobile base in its reference frame.
+
+Args:
+    degrees (bool, optional): Whether to return the orientation (`theta` and `vtheta`) in degrees.
+                            Defaults to True.
+
+Returns:
+    Dict[str, float]: A dictionary containing the current odometry of the mobile base with:
+    - 'x': Position along the x-axis (in meters).
+    - 'y': Position along the y-axis (in meters).
+    - 'theta': Orientation (in degrees by default, radians if `degrees=False`).
+    - 'vx': Linear velocity along the x-axis (in meters per second).
+    - 'vy': Linear velocity along the y-axis (in meters per second).
+    - 'vtheta': Angular velocity (in degrees per second by default, radians if `degrees=False`).""",
+                parameters={'degrees': {'type': 'boolean', 'description': 'Parameter degrees'}},
+                required=['degrees']
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_goto",
+            func=cls.parts_mobile_base_MobileBase_goto,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_goto",
+                description="""Send the mobile base to a specified target position.
+
+The (x, y) coordinates define the position in Cartesian space, and theta specifies the orientation in degrees.
+The zero position is set when the mobile base is started or when the `reset_odometry` method is called. A timeout
+can be provided to avoid the mobile base getting stuck. The tolerance values define the acceptable margins for
+reaching the target position.
+
+Args:
+    x: The target x-coordinate in meters.
+    y: The target y-coordinate in meters.
+    theta: The target orientation in degrees.
+    wait: If True, the function waits until the movement is completed before returning.
+            Defaults to False.
+    degrees: If True, the theta value and angle_tolerance are treated as degrees.
+            Defaults to True.
+    distance_tolerance: Optional; the tolerance to the target position to consider the goto finished, in meters.
+    angle_tolerance: Optional; the angle tolerance to the target to consider the goto finished, in meters.
+    timeout: Optional; the maximum time allowed to reach the target, in seconds.
+
+Returns:
+    GoToId: The unique GoToId identifier for the movement command.
+
+Raises:
+    TypeError: If the target is not reached and the mobile base is stopped due to an obstacle.""",
+                parameters={'x': {'type': 'number', 'description': 'The target x-coordinate in meters.'}, 'y': {'type': 'number', 'description': 'The target y-coordinate in meters.'}, 'theta': {'type': 'number', 'description': 'The target orientation in degrees.'}, 'wait': {'type': 'boolean', 'description': 'If True, the function waits until the movement is completed before returning.'}, 'degrees': {'type': 'boolean', 'description': 'If True, the theta value and angle_tolerance are treated as degrees.'}, 'distance_tolerance': {'type': 'number', 'description': 'Optional; the tolerance to the target position to consider the goto finished, in meters.'}, 'angle_tolerance': {'type': 'number', 'description': 'Optional; the angle tolerance to the target to consider the goto finished, in meters.'}, 'timeout': {'type': 'number', 'description': 'Optional; the maximum time allowed to reach the target, in seconds.'}},
+                required=['x', 'y', 'theta', 'wait', 'degrees', 'distance_tolerance', 'angle_tolerance', 'timeout']
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_translate_by",
+            func=cls.parts_mobile_base_MobileBase_translate_by,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_translate_by",
+                description="""Send a target position relative to the current position of the mobile base.
+
+The (x, y) coordinates specify the desired translation in the mobile base's Cartesian space.
+
+Args:
+    x: The desired translation along the x-axis in meters.
+    y: The desired translation along the y-axis in meters.
+    wait:  If True, the function waits until the movement is completed before returning.
+    distance_tolerance: Optional; The distance tolerance to the target to consider the goto finished, in meters.
+    timeout: An optional timeout for reaching the target position, in seconds.
+
+Returns:
+    The GoToId of the movement command, created using the `goto` method.""",
+                parameters={'x': {'type': 'number', 'description': 'The desired translation along the x-axis in meters.'}, 'y': {'type': 'number', 'description': 'The desired translation along the y-axis in meters.'}, 'wait': {'type': 'boolean', 'description': 'If True, the function waits until the movement is completed before returning.'}, 'distance_tolerance': {'type': 'number', 'description': 'Optional; The distance tolerance to the target to consider the goto finished, in meters.'}, 'timeout': {'type': 'number', 'description': 'An optional timeout for reaching the target position, in seconds.'}},
+                required=['x', 'y', 'wait', 'distance_tolerance', 'timeout']
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_rotate_by",
+            func=cls.parts_mobile_base_MobileBase_rotate_by,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_rotate_by",
+                description="""Send a target rotation relative to the current rotation of the mobile base.
+
+The theta parameter defines the desired rotation in degrees.
+
+Args:
+    theta: The desired rotation in degrees, relative to the current orientation.
+    wait: If True, the function waits until the rotation is completed before returning.
+    degrees: If True, the theta value and angle_tolerance are treated as degrees, otherwise as radians.
+    angle_tolerance: Optional; The angle tolerance to the target to consider the goto finished.
+    timeout: An optional timeout for completing the rotation, in seconds.""",
+                parameters={'theta': {'type': 'number', 'description': 'The desired rotation in degrees, relative to the current orientation.'}, 'wait': {'type': 'boolean', 'description': 'If True, the function waits until the rotation is completed before returning.'}, 'degrees': {'type': 'boolean', 'description': 'If True, the theta value and angle_tolerance are treated as degrees, otherwise as radians.'}, 'angle_tolerance': {'type': 'number', 'description': 'Optional; The angle tolerance to the target to consider the goto finished.'}, 'timeout': {'type': 'number', 'description': 'An optional timeout for completing the rotation, in seconds.'}},
+                required=['theta', 'wait', 'degrees', 'angle_tolerance', 'timeout']
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_reset_odometry",
+            func=cls.parts_mobile_base_MobileBase_reset_odometry,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_reset_odometry",
+                description="""Reset the odometry.
+
+This method resets the mobile base's odometry, so that the current position is now (x, y, theta) = (0, 0, 0).
+If any goto is being played, stop the goto and the queued ones.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_set_goal_speed",
+            func=cls.parts_mobile_base_MobileBase_set_goal_speed,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_set_goal_speed",
+                description="""Set the goal speed for the mobile base.
+
+This method sets the target velocities for the mobile base's movement along the x and y axes, as well as
+its rotational speed. The actual movement is executed after calling `send_speed_command`.
+
+Args:
+    vx (float | int, optional): Linear velocity along the x-axis in meters per second. Defaults to 0.
+    vy (float | int, optional): Linear velocity along the y-axis in meters per second. Defaults to 0.
+    vtheta (float | int, optional): Rotational velocity (around the z-axis) in degrees per second. Defaults to 0.
+
+Raises:
+    TypeError: If any of the velocity values (`vx`, `vy`, `vtheta`) are not of type `float` or `int`.
+
+Notes:
+    - Use `send_speed_command` after this method to execute the movement.
+    - The velocities will be used to command the mobile base for a short duration (0.2 seconds).""",
+                parameters={'vx': {'type': 'string', 'description': 'Parameter vx'}, 'vy': {'type': 'string', 'description': 'Parameter vy'}, 'vtheta': {'type': 'string', 'description': 'Parameter vtheta'}},
+                required=['vx', 'vy', 'vtheta']
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_send_speed_command",
+            func=cls.parts_mobile_base_MobileBase_send_speed_command,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_send_speed_command",
+                description="""Send the speed command to the mobile base, based on previously set goal speeds.
+
+This method sends the velocity commands for the mobile base that were set with `set_goal_speed`.
+The command will be executed for a duration of 200ms, which is predefined at the ROS level of the mobile base code.
+
+Raises:
+    ValueError: If the absolute value of `x_vel`, `y_vel`, or `rot_vel` exceeds the configured maximum values.
+    Warning: If the mobile base is off, no command is sent, and a warning is logged.
+
+Notes:
+    - This method is optimal for sending frequent speed instructions to the mobile base.
+    - The goal velocities must be set with `set_goal_speed` before calling this function.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_set_max_xy_goto",
+            func=cls.parts_mobile_base_MobileBase_set_max_xy_goto,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_set_max_xy_goto",
+                description="""Set the maximum displacement in the x and y directions for the mobile base.
+
+Args:
+    value: The maximum displacement value to be set, in meters.""",
+                parameters={'value': {'type': 'number', 'description': 'The maximum displacement value to be set, in meters.'}},
+                required=['value']
+            )
+        )
+        cls.register_tool(
+            name="parts_mobile_base_MobileBase_goto_posture",
+            func=cls.parts_mobile_base_MobileBase_goto_posture,
+            schema=cls.create_tool_schema(
+                name="parts_mobile_base_MobileBase_goto_posture",
+                description="""Mobile base is not affected by goto_posture. No command is sent.""",
+                parameters={'common_posture': {'type': 'string', 'description': 'Parameter common_posture'}, 'duration': {'type': 'number', 'description': 'Parameter duration'}, 'wait': {'type': 'boolean', 'description': 'Parameter wait'}, 'wait_for_goto_end': {'type': 'boolean', 'description': 'Parameter wait_for_goto_end'}, 'interpolation_mode': {'type': 'string', 'description': 'Parameter interpolation_mode'}},
+                required=['common_posture', 'duration', 'wait', 'wait_for_goto_end', 'interpolation_mode']
             )
         )
         cls.register_tool(
@@ -1374,795 +1374,6 @@ Returns:
                 required=[]
             )
         )
-
-    @classmethod
-    def parts_goto_based_part_IGoToBasedPart___init__(cls, part, goto_stub) -> Dict[str, Any]:
-        """Initialize the IGoToBasedPart interface.
-        
-        Sets up the common attributes needed for handling goto-based movements. This includes
-        associating the part with the interface and setting up the gRPC stub for performing
-        goto commands.
-        
-        Args:
-            part: The robot part that uses this interface, such as an Arm or Head.
-            goto_stub: The gRPC stub used to send goto commands to the robot part."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_part_IGoToBasedPart___init__(part, goto_stub)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_goto_based_part_IGoToBasedPart_get_goto_playing(cls, ) -> Dict[str, Any]:
-        """Return the GoToId of the currently playing goto movement on a specific part."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_part_IGoToBasedPart_get_goto_playing()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_goto_based_part_IGoToBasedPart_get_goto_queue(cls, ) -> Dict[str, Any]:
-        """Return a list of all GoToIds waiting to be played on a specific part."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_part_IGoToBasedPart_get_goto_queue()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_goto_based_part_IGoToBasedPart_cancel_all_goto(cls, ) -> Dict[str, Any]:
-        """Request the cancellation of all playing and waiting goto commands for a specific part.
-        
-        Returns:
-            A GoToAck acknowledging the cancellation of all goto commands."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_part_IGoToBasedPart_cancel_all_goto()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_joints_based_part_JointsBasedPart___init__(cls, proto_msg, grpc_channel, stub) -> Dict[str, Any]:
-        """Initialize the JointsBasedPart with its common attributes.
-        
-        Sets up the gRPC communication channel and service stub for controlling the joint-based
-        part of the robot, such as an arm or head.
-        
-        Args:
-            proto_msg: A protocol message representing the part's configuration. It can be an
-                Arm_proto or Head_proto object.
-            grpc_channel: The gRPC channel used to communicate with the corresponding service.
-            stub: The service stub for the gRPC communication, which can be an ArmServiceStub or
-                HeadServiceStub, depending on the part type."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'joints')
-
-            # Call the function with parameters
-            result = obj.based_part_JointsBasedPart___init__(proto_msg, grpc_channel, stub)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_joints_based_part_JointsBasedPart_joints(cls, ) -> Dict[str, Any]:
-        """Get all the arm's joints.
-        
-        Returns:
-            A dictionary of all the arm's joints, with joint names as keys and joint objects as values."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'joints')
-
-            # Call the function with parameters
-            result = obj.based_part_JointsBasedPart_joints()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_joints_based_part_JointsBasedPart_get_current_positions(cls, ) -> Dict[str, Any]:
-        """Get the current positions of all joints.
-        
-        Returns:
-            A list of float values representing the present positions in degrees of the arm's joints."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'joints')
-
-            # Call the function with parameters
-            result = obj.based_part_JointsBasedPart_get_current_positions()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_joints_based_part_JointsBasedPart_send_goal_positions(cls, check_positions) -> Dict[str, Any]:
-        """Send goal positions to the part's joints.
-        
-        If goal positions have been specified for any joint of the part, sends them to the robot.
-        
-        Args :
-            check_positions: A boolean indicating whether to check the positions after sending the command.
-                Defaults to True."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'joints')
-
-            # Call the function with parameters
-            result = obj.based_part_JointsBasedPart_send_goal_positions(check_positions)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_joints_based_part_JointsBasedPart_set_torque_limits(cls, torque_limit) -> Dict[str, Any]:
-        """Set the torque limit as a percentage of the maximum torque for all motors of the part.
-        
-        Args:
-            torque_limit: The desired torque limit as a percentage (0-100) of the maximum torque. Can be
-                specified as a float or int."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'joints')
-
-            # Call the function with parameters
-            result = obj.based_part_JointsBasedPart_set_torque_limits(torque_limit)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_joints_based_part_JointsBasedPart_set_speed_limits(cls, speed_limit) -> Dict[str, Any]:
-        """Set the speed limit as a percentage of the maximum speed for all motors of the part.
-        
-        Args:
-            speed_limit: The desired speed limit as a percentage (0-100) of the maximum speed. Can be
-                specified as a float or int."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'joints')
-
-            # Call the function with parameters
-            result = obj.based_part_JointsBasedPart_set_speed_limits(speed_limit)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase___init__(cls, mb_msg, initial_state, grpc_channel, goto_stub) -> Dict[str, Any]:
-        """Initialize the MobileBase with its gRPC communication and configuration.
-        
-        This sets up the gRPC communication channel and service stubs for controlling the
-        mobile base, initializes the drive and control modes.
-        It also sets up the LIDAR safety monitoring.
-        
-        Args:
-            mb_msg: A MobileBase_proto message containing the configuration details for the mobile base.
-            initial_state: The initial state of the mobile base, as a MobileBaseState object.
-            grpc_channel: The gRPC channel used to communicate with the mobile base service.
-            goto_stub: The gRPC service stub for the GoTo service."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase___init__(mb_msg, initial_state, grpc_channel, goto_stub)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase___repr__(cls, ) -> Dict[str, Any]:
-        """Clean representation of a mobile base."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase___repr__()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_battery_voltage(cls, ) -> Dict[str, Any]:
-        """Return the battery voltage.
-        
-        The battery should be recharged if the voltage reaches 24.5V or below. If the battery level is low,
-        a warning message is logged.
-        
-        Returns:
-            The current battery voltage as a float, rounded to one decimal place."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_battery_voltage()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_odometry(cls, ) -> Dict[str, Any]:
-        """Return the odometry of the base.
-        
-        The odometry includes the x and y positions in meters and theta in degrees, along with the
-        velocities in the x, y directions in meters per degrees and the angular velocity in degrees per second.
-        
-        Returns:
-            A dictionary containing the current odometry with keys 'x', 'y', 'theta', 'vx', 'vy', and 'vtheta',
-            each rounded to three decimal places."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_odometry()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_last_cmd_vel(cls, ) -> Dict[str, Any]:
-        """Return the last command velocity sent to the base.
-        
-        The velocity includes the x and y components in meters per second and the theta component in degrees per second.
-        
-        Returns:
-            A dictionary containing the last command velocity with keys 'x', 'y', and 'theta',
-            each rounded to three decimal places."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_last_cmd_vel()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_is_on(cls, ) -> Dict[str, Any]:
-        """Check if the mobile base is currently stiff (not in free-wheel mode).
-        
-        Returns:
-            `True` if the mobile base is not compliant (stiff), `False` otherwise."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_is_on()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_is_off(cls, ) -> Dict[str, Any]:
-        """Check if the mobile base is currently compliant (in free-wheel mode).
-        
-        Returns:
-            True if the mobile base is compliant (in free-wheel mode), `False` otherwise."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_is_off()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_get_current_odometry(cls, degrees) -> Dict[str, Any]:
-        """Get the current odometry of the mobile base in its reference frame.
-        
-        Args:
-            degrees (bool, optional): Whether to return the orientation (`theta` and `vtheta`) in degrees.
-                                    Defaults to True.
-        
-        Returns:
-            Dict[str, float]: A dictionary containing the current odometry of the mobile base with:
-            - 'x': Position along the x-axis (in meters).
-            - 'y': Position along the y-axis (in meters).
-            - 'theta': Orientation (in degrees by default, radians if `degrees=False`).
-            - 'vx': Linear velocity along the x-axis (in meters per second).
-            - 'vy': Linear velocity along the y-axis (in meters per second).
-            - 'vtheta': Angular velocity (in degrees per second by default, radians if `degrees=False`)."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_get_current_odometry(degrees)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_goto(cls, x, y, theta, wait, degrees, distance_tolerance, angle_tolerance, timeout) -> Dict[str, Any]:
-        """Send the mobile base to a specified target position.
-        
-        The (x, y) coordinates define the position in Cartesian space, and theta specifies the orientation in degrees.
-        The zero position is set when the mobile base is started or when the `reset_odometry` method is called. A timeout
-        can be provided to avoid the mobile base getting stuck. The tolerance values define the acceptable margins for
-        reaching the target position.
-        
-        Args:
-            x: The target x-coordinate in meters.
-            y: The target y-coordinate in meters.
-            theta: The target orientation in degrees.
-            wait: If True, the function waits until the movement is completed before returning.
-                    Defaults to False.
-            degrees: If True, the theta value and angle_tolerance are treated as degrees.
-                    Defaults to True.
-            distance_tolerance: Optional; the tolerance to the target position to consider the goto finished, in meters.
-            angle_tolerance: Optional; the angle tolerance to the target to consider the goto finished, in meters.
-            timeout: Optional; the maximum time allowed to reach the target, in seconds.
-        
-        Returns:
-            GoToId: The unique GoToId identifier for the movement command.
-        
-        Raises:
-            TypeError: If the target is not reached and the mobile base is stopped due to an obstacle."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_goto(x, y, theta, wait, degrees, distance_tolerance, angle_tolerance, timeout)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_translate_by(cls, x, y, wait, distance_tolerance, timeout) -> Dict[str, Any]:
-        """Send a target position relative to the current position of the mobile base.
-        
-        The (x, y) coordinates specify the desired translation in the mobile base's Cartesian space.
-        
-        Args:
-            x: The desired translation along the x-axis in meters.
-            y: The desired translation along the y-axis in meters.
-            wait:  If True, the function waits until the movement is completed before returning.
-            distance_tolerance: Optional; The distance tolerance to the target to consider the goto finished, in meters.
-            timeout: An optional timeout for reaching the target position, in seconds.
-        
-        Returns:
-            The GoToId of the movement command, created using the `goto` method."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_translate_by(x, y, wait, distance_tolerance, timeout)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_rotate_by(cls, theta, wait, degrees, angle_tolerance, timeout) -> Dict[str, Any]:
-        """Send a target rotation relative to the current rotation of the mobile base.
-        
-        The theta parameter defines the desired rotation in degrees.
-        
-        Args:
-            theta: The desired rotation in degrees, relative to the current orientation.
-            wait: If True, the function waits until the rotation is completed before returning.
-            degrees: If True, the theta value and angle_tolerance are treated as degrees, otherwise as radians.
-            angle_tolerance: Optional; The angle tolerance to the target to consider the goto finished.
-            timeout: An optional timeout for completing the rotation, in seconds."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_rotate_by(theta, wait, degrees, angle_tolerance, timeout)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_reset_odometry(cls, ) -> Dict[str, Any]:
-        """Reset the odometry.
-        
-        This method resets the mobile base's odometry, so that the current position is now (x, y, theta) = (0, 0, 0).
-        If any goto is being played, stop the goto and the queued ones."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_reset_odometry()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_set_goal_speed(cls, vx, vy, vtheta) -> Dict[str, Any]:
-        """Set the goal speed for the mobile base.
-        
-        This method sets the target velocities for the mobile base's movement along the x and y axes, as well as
-        its rotational speed. The actual movement is executed after calling `send_speed_command`.
-        
-        Args:
-            vx (float | int, optional): Linear velocity along the x-axis in meters per second. Defaults to 0.
-            vy (float | int, optional): Linear velocity along the y-axis in meters per second. Defaults to 0.
-            vtheta (float | int, optional): Rotational velocity (around the z-axis) in degrees per second. Defaults to 0.
-        
-        Raises:
-            TypeError: If any of the velocity values (`vx`, `vy`, `vtheta`) are not of type `float` or `int`.
-        
-        Notes:
-            - Use `send_speed_command` after this method to execute the movement.
-            - The velocities will be used to command the mobile base for a short duration (0.2 seconds)."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_set_goal_speed(vx, vy, vtheta)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_send_speed_command(cls, ) -> Dict[str, Any]:
-        """Send the speed command to the mobile base, based on previously set goal speeds.
-        
-        This method sends the velocity commands for the mobile base that were set with `set_goal_speed`.
-        The command will be executed for a duration of 200ms, which is predefined at the ROS level of the mobile base code.
-        
-        Raises:
-            ValueError: If the absolute value of `x_vel`, `y_vel`, or `rot_vel` exceeds the configured maximum values.
-            Warning: If the mobile base is off, no command is sent, and a warning is logged.
-        
-        Notes:
-            - This method is optimal for sending frequent speed instructions to the mobile base.
-            - The goal velocities must be set with `set_goal_speed` before calling this function."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_send_speed_command()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_set_max_xy_goto(cls, value) -> Dict[str, Any]:
-        """Set the maximum displacement in the x and y directions for the mobile base.
-        
-        Args:
-            value: The maximum displacement value to be set, in meters."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_set_max_xy_goto(value)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_mobile_base_MobileBase_goto_posture(cls, common_posture, duration, wait, wait_for_goto_end, interpolation_mode) -> Dict[str, Any]:
-        """Mobile base is not affected by goto_posture. No command is sent."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'mobile')
-
-            # Call the function with parameters
-            result = obj.base_MobileBase_goto_posture(common_posture, duration, wait, wait_for_goto_end, interpolation_mode)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
 
     @classmethod
     def parts_arm_Arm___init__(cls, arm_msg, initial_state, grpc_channel, goto_stub) -> Dict[str, Any]:
@@ -2962,6 +2173,311 @@ Returns:
 
 
     @classmethod
+    def parts_goto_based_part_IGoToBasedPart___init__(cls, part, goto_stub) -> Dict[str, Any]:
+        """Initialize the IGoToBasedPart interface.
+        
+        Sets up the common attributes needed for handling goto-based movements. This includes
+        associating the part with the interface and setting up the gRPC stub for performing
+        goto commands.
+        
+        Args:
+            part: The robot part that uses this interface, such as an Arm or Head.
+            goto_stub: The gRPC stub used to send goto commands to the robot part."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_part_IGoToBasedPart___init__(part, goto_stub)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_goto_based_part_IGoToBasedPart_get_goto_playing(cls, ) -> Dict[str, Any]:
+        """Return the GoToId of the currently playing goto movement on a specific part."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_part_IGoToBasedPart_get_goto_playing()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_goto_based_part_IGoToBasedPart_get_goto_queue(cls, ) -> Dict[str, Any]:
+        """Return a list of all GoToIds waiting to be played on a specific part."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_part_IGoToBasedPart_get_goto_queue()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_goto_based_part_IGoToBasedPart_cancel_all_goto(cls, ) -> Dict[str, Any]:
+        """Request the cancellation of all playing and waiting goto commands for a specific part.
+        
+        Returns:
+            A GoToAck acknowledging the cancellation of all goto commands."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_part_IGoToBasedPart_cancel_all_goto()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_hand_Hand___init__(cls, hand_msg, grpc_channel, goto_stub) -> Dict[str, Any]:
+        """Initialize the Hand component.
+        
+        Sets up the necessary attributes and configuration for the hand, including the gRPC
+        stub and initial state.
+        
+        Args:
+            hand_msg: The Hand_proto object containing the configuration details for the hand.
+            grpc_channel: The gRPC channel used to communicate with the hand's gRPC service.
+            goto_stub: The gRPC stub for controlling goto movements."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'hand')
+
+            # Call the function with parameters
+            result = obj.Hand___init__(hand_msg, grpc_channel, goto_stub)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_hand_Hand_is_on(cls, ) -> Dict[str, Any]:
+        """Check if the hand is stiff.
+        
+        Returns:
+            `True` if the hand is on (not compliant), `False` otherwise."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'hand')
+
+            # Call the function with parameters
+            result = obj.Hand_is_on()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_hand_Hand_is_off(cls, ) -> Dict[str, Any]:
+        """Check if the hand is compliant.
+        
+        Returns:
+            `True` if the hand is off (compliant), `False` otherwise."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'hand')
+
+            # Call the function with parameters
+            result = obj.Hand_is_off()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_hand_Hand_is_moving(cls, ) -> Dict[str, Any]:
+        """Check if the hand is currently moving.
+        
+        Returns:
+            `True` if any joint of the hand is moving, `False` otherwise."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'hand')
+
+            # Call the function with parameters
+            result = obj.Hand_is_moving()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_hand_Hand_open(cls, ) -> Dict[str, Any]:
+        """Open the hand.
+        
+        Raises:
+            RuntimeError: If the gripper is off and the open request cannot be sent."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'hand')
+
+            # Call the function with parameters
+            result = obj.Hand_open()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_hand_Hand_close(cls, ) -> Dict[str, Any]:
+        """Close the hand.
+        
+        Raises:
+            RuntimeError: If the gripper is off and the close request cannot be sent."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'hand')
+
+            # Call the function with parameters
+            result = obj.Hand_close()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_hand_Hand_send_goal_positions(cls, check_positions) -> Dict[str, Any]:
+        """Send the goal positions to the hand's joints.
+        
+        If any goal position has been specified for any of the gripper's joints, sends them to the robot.
+        If the hand is off, the command is not sent.
+        
+        Args :
+            check_positions: A boolean indicating whether to check the positions after sending the command.
+                Defaults to True."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'hand')
+
+            # Call the function with parameters
+            result = obj.Hand_send_goal_positions(check_positions)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
     def parts_head_Head___init__(cls, head_msg, initial_state, grpc_channel, goto_stub) -> Dict[str, Any]:
         """Initialize the Head component with its actuators.
         
@@ -3312,25 +2828,27 @@ Returns:
 
 
     @classmethod
-    def parts_hand_Hand___init__(cls, hand_msg, grpc_channel, goto_stub) -> Dict[str, Any]:
-        """Initialize the Hand component.
+    def parts_joints_based_part_JointsBasedPart___init__(cls, proto_msg, grpc_channel, stub) -> Dict[str, Any]:
+        """Initialize the JointsBasedPart with its common attributes.
         
-        Sets up the necessary attributes and configuration for the hand, including the gRPC
-        stub and initial state.
+        Sets up the gRPC communication channel and service stub for controlling the joint-based
+        part of the robot, such as an arm or head.
         
         Args:
-            hand_msg: The Hand_proto object containing the configuration details for the hand.
-            grpc_channel: The gRPC channel used to communicate with the hand's gRPC service.
-            goto_stub: The gRPC stub for controlling goto movements."""
+            proto_msg: A protocol message representing the part's configuration. It can be an
+                Arm_proto or Head_proto object.
+            grpc_channel: The gRPC channel used to communicate with the corresponding service.
+            stub: The service stub for the gRPC communication, which can be an ArmServiceStub or
+                HeadServiceStub, depending on the part type."""
         try:
             # Get Reachy connection
             reachy = get_reachy()
             
             # Get the target object
-            obj = getattr(reachy, 'hand')
+            obj = getattr(reachy, 'joints')
 
             # Call the function with parameters
-            result = obj.Hand___init__(hand_msg, grpc_channel, goto_stub)
+            result = obj.based_part_JointsBasedPart___init__(proto_msg, grpc_channel, stub)
 
             return {
                 "success": True,
@@ -3344,20 +2862,20 @@ Returns:
 
 
     @classmethod
-    def parts_hand_Hand_is_on(cls, ) -> Dict[str, Any]:
-        """Check if the hand is stiff.
+    def parts_joints_based_part_JointsBasedPart_joints(cls, ) -> Dict[str, Any]:
+        """Get all the arm's joints.
         
         Returns:
-            `True` if the hand is on (not compliant), `False` otherwise."""
+            A dictionary of all the arm's joints, with joint names as keys and joint objects as values."""
         try:
             # Get Reachy connection
             reachy = get_reachy()
             
             # Get the target object
-            obj = getattr(reachy, 'hand')
+            obj = getattr(reachy, 'joints')
 
             # Call the function with parameters
-            result = obj.Hand_is_on()
+            result = obj.based_part_JointsBasedPart_joints()
 
             return {
                 "success": True,
@@ -3371,20 +2889,20 @@ Returns:
 
 
     @classmethod
-    def parts_hand_Hand_is_off(cls, ) -> Dict[str, Any]:
-        """Check if the hand is compliant.
+    def parts_joints_based_part_JointsBasedPart_get_current_positions(cls, ) -> Dict[str, Any]:
+        """Get the current positions of all joints.
         
         Returns:
-            `True` if the hand is off (compliant), `False` otherwise."""
+            A list of float values representing the present positions in degrees of the arm's joints."""
         try:
             # Get Reachy connection
             reachy = get_reachy()
             
             # Get the target object
-            obj = getattr(reachy, 'hand')
+            obj = getattr(reachy, 'joints')
 
             # Call the function with parameters
-            result = obj.Hand_is_off()
+            result = obj.based_part_JointsBasedPart_get_current_positions()
 
             return {
                 "success": True,
@@ -3398,92 +2916,10 @@ Returns:
 
 
     @classmethod
-    def parts_hand_Hand_is_moving(cls, ) -> Dict[str, Any]:
-        """Check if the hand is currently moving.
+    def parts_joints_based_part_JointsBasedPart_send_goal_positions(cls, check_positions) -> Dict[str, Any]:
+        """Send goal positions to the part's joints.
         
-        Returns:
-            `True` if any joint of the hand is moving, `False` otherwise."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'hand')
-
-            # Call the function with parameters
-            result = obj.Hand_is_moving()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_hand_Hand_open(cls, ) -> Dict[str, Any]:
-        """Open the hand.
-        
-        Raises:
-            RuntimeError: If the gripper is off and the open request cannot be sent."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'hand')
-
-            # Call the function with parameters
-            result = obj.Hand_open()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_hand_Hand_close(cls, ) -> Dict[str, Any]:
-        """Close the hand.
-        
-        Raises:
-            RuntimeError: If the gripper is off and the close request cannot be sent."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'hand')
-
-            # Call the function with parameters
-            result = obj.Hand_close()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def parts_hand_Hand_send_goal_positions(cls, check_positions) -> Dict[str, Any]:
-        """Send the goal positions to the hand's joints.
-        
-        If any goal position has been specified for any of the gripper's joints, sends them to the robot.
-        If the hand is off, the command is not sent.
+        If goal positions have been specified for any joint of the part, sends them to the robot.
         
         Args :
             check_positions: A boolean indicating whether to check the positions after sending the command.
@@ -3493,10 +2929,574 @@ Returns:
             reachy = get_reachy()
             
             # Get the target object
-            obj = getattr(reachy, 'hand')
+            obj = getattr(reachy, 'joints')
 
             # Call the function with parameters
-            result = obj.Hand_send_goal_positions(check_positions)
+            result = obj.based_part_JointsBasedPart_send_goal_positions(check_positions)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_joints_based_part_JointsBasedPart_set_torque_limits(cls, torque_limit) -> Dict[str, Any]:
+        """Set the torque limit as a percentage of the maximum torque for all motors of the part.
+        
+        Args:
+            torque_limit: The desired torque limit as a percentage (0-100) of the maximum torque. Can be
+                specified as a float or int."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'joints')
+
+            # Call the function with parameters
+            result = obj.based_part_JointsBasedPart_set_torque_limits(torque_limit)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_joints_based_part_JointsBasedPart_set_speed_limits(cls, speed_limit) -> Dict[str, Any]:
+        """Set the speed limit as a percentage of the maximum speed for all motors of the part.
+        
+        Args:
+            speed_limit: The desired speed limit as a percentage (0-100) of the maximum speed. Can be
+                specified as a float or int."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'joints')
+
+            # Call the function with parameters
+            result = obj.based_part_JointsBasedPart_set_speed_limits(speed_limit)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase___init__(cls, mb_msg, initial_state, grpc_channel, goto_stub) -> Dict[str, Any]:
+        """Initialize the MobileBase with its gRPC communication and configuration.
+        
+        This sets up the gRPC communication channel and service stubs for controlling the
+        mobile base, initializes the drive and control modes.
+        It also sets up the LIDAR safety monitoring.
+        
+        Args:
+            mb_msg: A MobileBase_proto message containing the configuration details for the mobile base.
+            initial_state: The initial state of the mobile base, as a MobileBaseState object.
+            grpc_channel: The gRPC channel used to communicate with the mobile base service.
+            goto_stub: The gRPC service stub for the GoTo service."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase___init__(mb_msg, initial_state, grpc_channel, goto_stub)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase___repr__(cls, ) -> Dict[str, Any]:
+        """Clean representation of a mobile base."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase___repr__()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_battery_voltage(cls, ) -> Dict[str, Any]:
+        """Return the battery voltage.
+        
+        The battery should be recharged if the voltage reaches 24.5V or below. If the battery level is low,
+        a warning message is logged.
+        
+        Returns:
+            The current battery voltage as a float, rounded to one decimal place."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_battery_voltage()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_odometry(cls, ) -> Dict[str, Any]:
+        """Return the odometry of the base.
+        
+        The odometry includes the x and y positions in meters and theta in degrees, along with the
+        velocities in the x, y directions in meters per degrees and the angular velocity in degrees per second.
+        
+        Returns:
+            A dictionary containing the current odometry with keys 'x', 'y', 'theta', 'vx', 'vy', and 'vtheta',
+            each rounded to three decimal places."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_odometry()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_last_cmd_vel(cls, ) -> Dict[str, Any]:
+        """Return the last command velocity sent to the base.
+        
+        The velocity includes the x and y components in meters per second and the theta component in degrees per second.
+        
+        Returns:
+            A dictionary containing the last command velocity with keys 'x', 'y', and 'theta',
+            each rounded to three decimal places."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_last_cmd_vel()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_is_on(cls, ) -> Dict[str, Any]:
+        """Check if the mobile base is currently stiff (not in free-wheel mode).
+        
+        Returns:
+            `True` if the mobile base is not compliant (stiff), `False` otherwise."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_is_on()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_is_off(cls, ) -> Dict[str, Any]:
+        """Check if the mobile base is currently compliant (in free-wheel mode).
+        
+        Returns:
+            True if the mobile base is compliant (in free-wheel mode), `False` otherwise."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_is_off()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_get_current_odometry(cls, degrees) -> Dict[str, Any]:
+        """Get the current odometry of the mobile base in its reference frame.
+        
+        Args:
+            degrees (bool, optional): Whether to return the orientation (`theta` and `vtheta`) in degrees.
+                                    Defaults to True.
+        
+        Returns:
+            Dict[str, float]: A dictionary containing the current odometry of the mobile base with:
+            - 'x': Position along the x-axis (in meters).
+            - 'y': Position along the y-axis (in meters).
+            - 'theta': Orientation (in degrees by default, radians if `degrees=False`).
+            - 'vx': Linear velocity along the x-axis (in meters per second).
+            - 'vy': Linear velocity along the y-axis (in meters per second).
+            - 'vtheta': Angular velocity (in degrees per second by default, radians if `degrees=False`)."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_get_current_odometry(degrees)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_goto(cls, x, y, theta, wait, degrees, distance_tolerance, angle_tolerance, timeout) -> Dict[str, Any]:
+        """Send the mobile base to a specified target position.
+        
+        The (x, y) coordinates define the position in Cartesian space, and theta specifies the orientation in degrees.
+        The zero position is set when the mobile base is started or when the `reset_odometry` method is called. A timeout
+        can be provided to avoid the mobile base getting stuck. The tolerance values define the acceptable margins for
+        reaching the target position.
+        
+        Args:
+            x: The target x-coordinate in meters.
+            y: The target y-coordinate in meters.
+            theta: The target orientation in degrees.
+            wait: If True, the function waits until the movement is completed before returning.
+                    Defaults to False.
+            degrees: If True, the theta value and angle_tolerance are treated as degrees.
+                    Defaults to True.
+            distance_tolerance: Optional; the tolerance to the target position to consider the goto finished, in meters.
+            angle_tolerance: Optional; the angle tolerance to the target to consider the goto finished, in meters.
+            timeout: Optional; the maximum time allowed to reach the target, in seconds.
+        
+        Returns:
+            GoToId: The unique GoToId identifier for the movement command.
+        
+        Raises:
+            TypeError: If the target is not reached and the mobile base is stopped due to an obstacle."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_goto(x, y, theta, wait, degrees, distance_tolerance, angle_tolerance, timeout)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_translate_by(cls, x, y, wait, distance_tolerance, timeout) -> Dict[str, Any]:
+        """Send a target position relative to the current position of the mobile base.
+        
+        The (x, y) coordinates specify the desired translation in the mobile base's Cartesian space.
+        
+        Args:
+            x: The desired translation along the x-axis in meters.
+            y: The desired translation along the y-axis in meters.
+            wait:  If True, the function waits until the movement is completed before returning.
+            distance_tolerance: Optional; The distance tolerance to the target to consider the goto finished, in meters.
+            timeout: An optional timeout for reaching the target position, in seconds.
+        
+        Returns:
+            The GoToId of the movement command, created using the `goto` method."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_translate_by(x, y, wait, distance_tolerance, timeout)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_rotate_by(cls, theta, wait, degrees, angle_tolerance, timeout) -> Dict[str, Any]:
+        """Send a target rotation relative to the current rotation of the mobile base.
+        
+        The theta parameter defines the desired rotation in degrees.
+        
+        Args:
+            theta: The desired rotation in degrees, relative to the current orientation.
+            wait: If True, the function waits until the rotation is completed before returning.
+            degrees: If True, the theta value and angle_tolerance are treated as degrees, otherwise as radians.
+            angle_tolerance: Optional; The angle tolerance to the target to consider the goto finished.
+            timeout: An optional timeout for completing the rotation, in seconds."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_rotate_by(theta, wait, degrees, angle_tolerance, timeout)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_reset_odometry(cls, ) -> Dict[str, Any]:
+        """Reset the odometry.
+        
+        This method resets the mobile base's odometry, so that the current position is now (x, y, theta) = (0, 0, 0).
+        If any goto is being played, stop the goto and the queued ones."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_reset_odometry()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_set_goal_speed(cls, vx, vy, vtheta) -> Dict[str, Any]:
+        """Set the goal speed for the mobile base.
+        
+        This method sets the target velocities for the mobile base's movement along the x and y axes, as well as
+        its rotational speed. The actual movement is executed after calling `send_speed_command`.
+        
+        Args:
+            vx (float | int, optional): Linear velocity along the x-axis in meters per second. Defaults to 0.
+            vy (float | int, optional): Linear velocity along the y-axis in meters per second. Defaults to 0.
+            vtheta (float | int, optional): Rotational velocity (around the z-axis) in degrees per second. Defaults to 0.
+        
+        Raises:
+            TypeError: If any of the velocity values (`vx`, `vy`, `vtheta`) are not of type `float` or `int`.
+        
+        Notes:
+            - Use `send_speed_command` after this method to execute the movement.
+            - The velocities will be used to command the mobile base for a short duration (0.2 seconds)."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_set_goal_speed(vx, vy, vtheta)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_send_speed_command(cls, ) -> Dict[str, Any]:
+        """Send the speed command to the mobile base, based on previously set goal speeds.
+        
+        This method sends the velocity commands for the mobile base that were set with `set_goal_speed`.
+        The command will be executed for a duration of 200ms, which is predefined at the ROS level of the mobile base code.
+        
+        Raises:
+            ValueError: If the absolute value of `x_vel`, `y_vel`, or `rot_vel` exceeds the configured maximum values.
+            Warning: If the mobile base is off, no command is sent, and a warning is logged.
+        
+        Notes:
+            - This method is optimal for sending frequent speed instructions to the mobile base.
+            - The goal velocities must be set with `set_goal_speed` before calling this function."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_send_speed_command()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_set_max_xy_goto(cls, value) -> Dict[str, Any]:
+        """Set the maximum displacement in the x and y directions for the mobile base.
+        
+        Args:
+            value: The maximum displacement value to be set, in meters."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_set_max_xy_goto(value)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def parts_mobile_base_MobileBase_goto_posture(cls, common_posture, duration, wait, wait_for_goto_end, interpolation_mode) -> Dict[str, Any]:
+        """Mobile base is not affected by goto_posture. No command is sent."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'mobile')
+
+            # Call the function with parameters
+            result = obj.base_MobileBase_goto_posture(common_posture, duration, wait, wait_for_goto_end, interpolation_mode)
 
             return {
                 "success": True,

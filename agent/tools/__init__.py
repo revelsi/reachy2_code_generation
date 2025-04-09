@@ -14,7 +14,6 @@ from .parts_tools import PartsTools
 from .sensors_tools import SensorsTools
 from .utils_tools import UtilsTools
 from .reachy_sdk_tools import ReachySdkTools
-from .vision_tools import VisionTools
 
 # Add any new tool classes here
 
@@ -29,5 +28,4 @@ __all__ = [
     'SensorsTools',
     'UtilsTools',
     'ReachySdkTools',
-    'VisionTools',
 ] 

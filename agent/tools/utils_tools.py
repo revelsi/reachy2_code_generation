@@ -16,6 +16,167 @@ class UtilsTools(BaseTool):
     def register_all_tools(cls) -> None:
         """Register all utils tools."""
         cls.register_tool(
+            name="utils_custom_dict_CustomDict___repr__",
+            func=cls.utils_custom_dict_CustomDict___repr__,
+            schema=cls.create_tool_schema(
+                name="utils_custom_dict_CustomDict___repr__",
+                description="""Clean representation of the CustomDict.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_process_goto_request",
+            func=cls.utils_goto_based_element_process_goto_request,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_process_goto_request",
+                description="""Process the response from a goto request and return a SimplifiedRequest object.""",
+                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
+                required=['response']
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_process_arm_cartesian_goal",
+            func=cls.utils_goto_based_element_process_arm_cartesian_goal,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_process_arm_cartesian_goal",
+                description="""Process the response from a goto request containing an arm cartesian goal.""",
+                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
+                required=['response']
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_process_arm_joint_goal",
+            func=cls.utils_goto_based_element_process_arm_joint_goal,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_process_arm_joint_goal",
+                description="""Process the response from a goto request containing an arm joint goal.""",
+                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
+                required=['response']
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_process_neck_joint_goal",
+            func=cls.utils_goto_based_element_process_neck_joint_goal,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_process_neck_joint_goal",
+                description="""Process the response from a goto request containing a neck joint goal.""",
+                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
+                required=['response']
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_process_antenna_joint_goal",
+            func=cls.utils_goto_based_element_process_antenna_joint_goal,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_process_antenna_joint_goal",
+                description="""Process the response from a goto request containing an antenna joint goal.""",
+                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
+                required=['response']
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_process_hand_joint_goal",
+            func=cls.utils_goto_based_element_process_hand_joint_goal,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_process_hand_joint_goal",
+                description="""Process the response from a goto request containing a hand joint goal.""",
+                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
+                required=['response']
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_process_odometry_goal",
+            func=cls.utils_goto_based_element_process_odometry_goal,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_process_odometry_goal",
+                description="""Process the response from a goto request containing an odometry goal.""",
+                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
+                required=['response']
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_build_simplified_joints_request",
+            func=cls.utils_goto_based_element_build_simplified_joints_request,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_build_simplified_joints_request",
+                description="""Build a SimplifiedRequest object from a dictionary of joints request details.""",
+                parameters={'request_dict': {'type': 'object', 'description': 'Parameter request_dict'}},
+                required=['request_dict']
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_build_simplified_odometry_request",
+            func=cls.utils_goto_based_element_build_simplified_odometry_request,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_build_simplified_odometry_request",
+                description="""Build a SimplifiedRequest object from a dictionary of odomztry request details.""",
+                parameters={'request_dict': {'type': 'object', 'description': 'Parameter request_dict'}},
+                required=['request_dict']
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_IGoToBasedElement___init__",
+            func=cls.utils_goto_based_element_IGoToBasedElement___init__,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_IGoToBasedElement___init__",
+                description="""Initialize the IGoToBasedElement interface.
+
+Sets up the common attributes needed for handling goto-based movements. This includes
+associating the component with the interface and setting up the gRPC stub for performing
+goto commands.
+
+Args:
+    element_id: The robot component or part that uses this interface.
+    goto_stub: The gRPC stub used to send goto commands to the robot element.""",
+                parameters={'element_id': {'type': 'string', 'description': 'The robot component or part that uses this interface.'}, 'goto_stub': {'type': 'string', 'description': 'The gRPC stub used to send goto commands to the robot element.'}},
+                required=['element_id', 'goto_stub']
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_IGoToBasedElement_get_goto_playing",
+            func=cls.utils_goto_based_element_IGoToBasedElement_get_goto_playing,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_IGoToBasedElement_get_goto_playing",
+                description="""Return the GoToId of the currently playing goto movement on a specific element.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_IGoToBasedElement_get_goto_queue",
+            func=cls.utils_goto_based_element_IGoToBasedElement_get_goto_queue,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_IGoToBasedElement_get_goto_queue",
+                description="""Return a list of all GoToIds waiting to be played on a specific element.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_IGoToBasedElement_cancel_all_goto",
+            func=cls.utils_goto_based_element_IGoToBasedElement_cancel_all_goto,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_IGoToBasedElement_cancel_all_goto",
+                description="""Request the cancellation of all playing and waiting goto commands for a specific element.
+
+Returns:
+    A GoToAck acknowledging the cancellation of all goto commands.""",
+                parameters={},
+                required=[]
+            )
+        )
+        cls.register_tool(
+            name="utils_goto_based_element_IGoToBasedElement_goto_posture",
+            func=cls.utils_goto_based_element_IGoToBasedElement_goto_posture,
+            schema=cls.create_tool_schema(
+                name="utils_goto_based_element_IGoToBasedElement_goto_posture",
+                description="""Send all joints to standard positions with optional parameters for duration, waiting, and interpolation mode.""",
+                parameters={'common_posture': {'type': 'string', 'description': 'Parameter common_posture'}, 'duration': {'type': 'number', 'description': 'Parameter duration'}, 'wait': {'type': 'boolean', 'description': 'Parameter wait'}, 'wait_for_goto_end': {'type': 'boolean', 'description': 'Parameter wait_for_goto_end'}, 'interpolation_mode': {'type': 'string', 'description': 'Parameter interpolation_mode'}},
+                required=['common_posture', 'duration', 'wait', 'wait_for_goto_end', 'interpolation_mode']
+            )
+        )
+        cls.register_tool(
             name="utils_utils_convert_to_radians",
             func=cls.utils_utils_convert_to_radians,
             schema=cls.create_tool_schema(
@@ -415,167 +576,377 @@ Raises:
                 required=['vector', 'arc_direction']
             )
         )
-        cls.register_tool(
-            name="utils_custom_dict_CustomDict___repr__",
-            func=cls.utils_custom_dict_CustomDict___repr__,
-            schema=cls.create_tool_schema(
-                name="utils_custom_dict_CustomDict___repr__",
-                description="""Clean representation of the CustomDict.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_process_goto_request",
-            func=cls.utils_goto_based_element_process_goto_request,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_process_goto_request",
-                description="""Process the response from a goto request and return a SimplifiedRequest object.""",
-                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
-                required=['response']
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_process_arm_cartesian_goal",
-            func=cls.utils_goto_based_element_process_arm_cartesian_goal,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_process_arm_cartesian_goal",
-                description="""Process the response from a goto request containing an arm cartesian goal.""",
-                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
-                required=['response']
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_process_arm_joint_goal",
-            func=cls.utils_goto_based_element_process_arm_joint_goal,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_process_arm_joint_goal",
-                description="""Process the response from a goto request containing an arm joint goal.""",
-                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
-                required=['response']
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_process_neck_joint_goal",
-            func=cls.utils_goto_based_element_process_neck_joint_goal,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_process_neck_joint_goal",
-                description="""Process the response from a goto request containing a neck joint goal.""",
-                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
-                required=['response']
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_process_antenna_joint_goal",
-            func=cls.utils_goto_based_element_process_antenna_joint_goal,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_process_antenna_joint_goal",
-                description="""Process the response from a goto request containing an antenna joint goal.""",
-                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
-                required=['response']
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_process_hand_joint_goal",
-            func=cls.utils_goto_based_element_process_hand_joint_goal,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_process_hand_joint_goal",
-                description="""Process the response from a goto request containing a hand joint goal.""",
-                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
-                required=['response']
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_process_odometry_goal",
-            func=cls.utils_goto_based_element_process_odometry_goal,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_process_odometry_goal",
-                description="""Process the response from a goto request containing an odometry goal.""",
-                parameters={'response': {'type': 'string', 'description': 'Parameter response'}},
-                required=['response']
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_build_simplified_joints_request",
-            func=cls.utils_goto_based_element_build_simplified_joints_request,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_build_simplified_joints_request",
-                description="""Build a SimplifiedRequest object from a dictionary of joints request details.""",
-                parameters={'request_dict': {'type': 'object', 'description': 'Parameter request_dict'}},
-                required=['request_dict']
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_build_simplified_odometry_request",
-            func=cls.utils_goto_based_element_build_simplified_odometry_request,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_build_simplified_odometry_request",
-                description="""Build a SimplifiedRequest object from a dictionary of odomztry request details.""",
-                parameters={'request_dict': {'type': 'object', 'description': 'Parameter request_dict'}},
-                required=['request_dict']
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_IGoToBasedElement___init__",
-            func=cls.utils_goto_based_element_IGoToBasedElement___init__,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_IGoToBasedElement___init__",
-                description="""Initialize the IGoToBasedElement interface.
 
-Sets up the common attributes needed for handling goto-based movements. This includes
-associating the component with the interface and setting up the gRPC stub for performing
-goto commands.
+    @classmethod
+    def utils_custom_dict_CustomDict___repr__(cls, ) -> Dict[str, Any]:
+        """Clean representation of the CustomDict."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'custom')
 
-Args:
-    element_id: The robot component or part that uses this interface.
-    goto_stub: The gRPC stub used to send goto commands to the robot element.""",
-                parameters={'element_id': {'type': 'string', 'description': 'The robot component or part that uses this interface.'}, 'goto_stub': {'type': 'string', 'description': 'The gRPC stub used to send goto commands to the robot element.'}},
-                required=['element_id', 'goto_stub']
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_IGoToBasedElement_get_goto_playing",
-            func=cls.utils_goto_based_element_IGoToBasedElement_get_goto_playing,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_IGoToBasedElement_get_goto_playing",
-                description="""Return the GoToId of the currently playing goto movement on a specific element.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_IGoToBasedElement_get_goto_queue",
-            func=cls.utils_goto_based_element_IGoToBasedElement_get_goto_queue,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_IGoToBasedElement_get_goto_queue",
-                description="""Return a list of all GoToIds waiting to be played on a specific element.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_IGoToBasedElement_cancel_all_goto",
-            func=cls.utils_goto_based_element_IGoToBasedElement_cancel_all_goto,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_IGoToBasedElement_cancel_all_goto",
-                description="""Request the cancellation of all playing and waiting goto commands for a specific element.
+            # Call the function with parameters
+            result = obj.dict_CustomDict___repr__()
 
-Returns:
-    A GoToAck acknowledging the cancellation of all goto commands.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
-            name="utils_goto_based_element_IGoToBasedElement_goto_posture",
-            func=cls.utils_goto_based_element_IGoToBasedElement_goto_posture,
-            schema=cls.create_tool_schema(
-                name="utils_goto_based_element_IGoToBasedElement_goto_posture",
-                description="""Send all joints to standard positions with optional parameters for duration, waiting, and interpolation mode.""",
-                parameters={'common_posture': {'type': 'string', 'description': 'Parameter common_posture'}, 'duration': {'type': 'number', 'description': 'Parameter duration'}, 'wait': {'type': 'boolean', 'description': 'Parameter wait'}, 'wait_for_goto_end': {'type': 'boolean', 'description': 'Parameter wait_for_goto_end'}, 'interpolation_mode': {'type': 'string', 'description': 'Parameter interpolation_mode'}},
-                required=['common_posture', 'duration', 'wait', 'wait_for_goto_end', 'interpolation_mode']
-            )
-        )
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_process_goto_request(cls, response) -> Dict[str, Any]:
+        """Process the response from a goto request and return a SimplifiedRequest object."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_process_goto_request(response)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_process_arm_cartesian_goal(cls, response) -> Dict[str, Any]:
+        """Process the response from a goto request containing an arm cartesian goal."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_process_arm_cartesian_goal(response)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_process_arm_joint_goal(cls, response) -> Dict[str, Any]:
+        """Process the response from a goto request containing an arm joint goal."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_process_arm_joint_goal(response)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_process_neck_joint_goal(cls, response) -> Dict[str, Any]:
+        """Process the response from a goto request containing a neck joint goal."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_process_neck_joint_goal(response)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_process_antenna_joint_goal(cls, response) -> Dict[str, Any]:
+        """Process the response from a goto request containing an antenna joint goal."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_process_antenna_joint_goal(response)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_process_hand_joint_goal(cls, response) -> Dict[str, Any]:
+        """Process the response from a goto request containing a hand joint goal."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_process_hand_joint_goal(response)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_process_odometry_goal(cls, response) -> Dict[str, Any]:
+        """Process the response from a goto request containing an odometry goal."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_process_odometry_goal(response)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_build_simplified_joints_request(cls, request_dict) -> Dict[str, Any]:
+        """Build a SimplifiedRequest object from a dictionary of joints request details."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_build_simplified_joints_request(request_dict)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_build_simplified_odometry_request(cls, request_dict) -> Dict[str, Any]:
+        """Build a SimplifiedRequest object from a dictionary of odomztry request details."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_build_simplified_odometry_request(request_dict)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_IGoToBasedElement___init__(cls, element_id, goto_stub) -> Dict[str, Any]:
+        """Initialize the IGoToBasedElement interface.
+        
+        Sets up the common attributes needed for handling goto-based movements. This includes
+        associating the component with the interface and setting up the gRPC stub for performing
+        goto commands.
+        
+        Args:
+            element_id: The robot component or part that uses this interface.
+            goto_stub: The gRPC stub used to send goto commands to the robot element."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_IGoToBasedElement___init__(element_id, goto_stub)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_IGoToBasedElement_get_goto_playing(cls, ) -> Dict[str, Any]:
+        """Return the GoToId of the currently playing goto movement on a specific element."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_IGoToBasedElement_get_goto_playing()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_IGoToBasedElement_get_goto_queue(cls, ) -> Dict[str, Any]:
+        """Return a list of all GoToIds waiting to be played on a specific element."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_IGoToBasedElement_get_goto_queue()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_IGoToBasedElement_cancel_all_goto(cls, ) -> Dict[str, Any]:
+        """Request the cancellation of all playing and waiting goto commands for a specific element.
+        
+        Returns:
+            A GoToAck acknowledging the cancellation of all goto commands."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_IGoToBasedElement_cancel_all_goto()
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
+
+    @classmethod
+    def utils_goto_based_element_IGoToBasedElement_goto_posture(cls, common_posture, duration, wait, wait_for_goto_end, interpolation_mode) -> Dict[str, Any]:
+        """Send all joints to standard positions with optional parameters for duration, waiting, and interpolation mode."""
+        try:
+            # Get Reachy connection
+            reachy = get_reachy()
+            
+            # Get the target object
+            obj = getattr(reachy, 'goto')
+
+            # Call the function with parameters
+            result = obj.based_element_IGoToBasedElement_goto_posture(common_posture, duration, wait, wait_for_goto_end, interpolation_mode)
+
+            return {
+                "success": True,
+                "result": result
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "error": str(e)
+            }
+
 
     @classmethod
     def utils_utils_convert_to_radians(cls, angles_list) -> Dict[str, Any]:
@@ -1245,377 +1616,6 @@ Returns:
 
             # Call the function with parameters
             result = obj.get_normal_vector(vector, arc_direction)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_custom_dict_CustomDict___repr__(cls, ) -> Dict[str, Any]:
-        """Clean representation of the CustomDict."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'custom')
-
-            # Call the function with parameters
-            result = obj.dict_CustomDict___repr__()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_process_goto_request(cls, response) -> Dict[str, Any]:
-        """Process the response from a goto request and return a SimplifiedRequest object."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_process_goto_request(response)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_process_arm_cartesian_goal(cls, response) -> Dict[str, Any]:
-        """Process the response from a goto request containing an arm cartesian goal."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_process_arm_cartesian_goal(response)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_process_arm_joint_goal(cls, response) -> Dict[str, Any]:
-        """Process the response from a goto request containing an arm joint goal."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_process_arm_joint_goal(response)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_process_neck_joint_goal(cls, response) -> Dict[str, Any]:
-        """Process the response from a goto request containing a neck joint goal."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_process_neck_joint_goal(response)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_process_antenna_joint_goal(cls, response) -> Dict[str, Any]:
-        """Process the response from a goto request containing an antenna joint goal."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_process_antenna_joint_goal(response)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_process_hand_joint_goal(cls, response) -> Dict[str, Any]:
-        """Process the response from a goto request containing a hand joint goal."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_process_hand_joint_goal(response)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_process_odometry_goal(cls, response) -> Dict[str, Any]:
-        """Process the response from a goto request containing an odometry goal."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_process_odometry_goal(response)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_build_simplified_joints_request(cls, request_dict) -> Dict[str, Any]:
-        """Build a SimplifiedRequest object from a dictionary of joints request details."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_build_simplified_joints_request(request_dict)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_build_simplified_odometry_request(cls, request_dict) -> Dict[str, Any]:
-        """Build a SimplifiedRequest object from a dictionary of odomztry request details."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_build_simplified_odometry_request(request_dict)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_IGoToBasedElement___init__(cls, element_id, goto_stub) -> Dict[str, Any]:
-        """Initialize the IGoToBasedElement interface.
-        
-        Sets up the common attributes needed for handling goto-based movements. This includes
-        associating the component with the interface and setting up the gRPC stub for performing
-        goto commands.
-        
-        Args:
-            element_id: The robot component or part that uses this interface.
-            goto_stub: The gRPC stub used to send goto commands to the robot element."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_IGoToBasedElement___init__(element_id, goto_stub)
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_IGoToBasedElement_get_goto_playing(cls, ) -> Dict[str, Any]:
-        """Return the GoToId of the currently playing goto movement on a specific element."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_IGoToBasedElement_get_goto_playing()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_IGoToBasedElement_get_goto_queue(cls, ) -> Dict[str, Any]:
-        """Return a list of all GoToIds waiting to be played on a specific element."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_IGoToBasedElement_get_goto_queue()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_IGoToBasedElement_cancel_all_goto(cls, ) -> Dict[str, Any]:
-        """Request the cancellation of all playing and waiting goto commands for a specific element.
-        
-        Returns:
-            A GoToAck acknowledging the cancellation of all goto commands."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_IGoToBasedElement_cancel_all_goto()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def utils_goto_based_element_IGoToBasedElement_goto_posture(cls, common_posture, duration, wait, wait_for_goto_end, interpolation_mode) -> Dict[str, Any]:
-        """Send all joints to standard positions with optional parameters for duration, waiting, and interpolation mode."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'goto')
-
-            # Call the function with parameters
-            result = obj.based_element_IGoToBasedElement_goto_posture(common_posture, duration, wait, wait_for_goto_end, interpolation_mode)
 
             return {
                 "success": True,

@@ -1,25 +1,28 @@
 # Python 3.10+ required
+
 # Core dependencies
-openai==1.58.1,<2.0.0
-python-dotenv>=1.0.0
-typing-extensions>=4.8.0  # For Python 3.8+ compatibility
-psutil>=5.9.6  # For system monitoring
+openai==1.58.1,<2.0.0         # OpenAI API client
+python-dotenv>=1.0.0          # Environment variable management
+typing-extensions>=4.8.0      # For Python 3.8+ compatibility with newer typing features
+psutil>=5.9.6                 # For system monitoring
 
 # Robot-specific dependencies
-reachy2-sdk # for Reachy 2 robot control
-# pollen-vision[vision] @ git+https://github.com/pollen-robotics/pollen-vision.git@main  # for Reachy's vision capabilities
-# uncomment if you need vision capabilities
+reachy2-sdk                   # Reachy 2 robot control
+# Vision capabilities (uncomment if needed)
+# pollen-vision[vision] @ git+https://github.com/pollen-robotics/pollen-vision.git@main
 
 # UI dependencies
-gradio>=4.13.0,<5.0.0  # For web interface
+gradio>=4.13.0,<5.0.0         # Web interface
 
-# For development
-pytest>=7.4.3  # For testing
-pytest-cov>=4.1.0  # For test coverage
-black>=23.12.0  # For code formatting
-flake8>=6.1.0  # For linting
-isort>=5.12.0  # For import sorting
+# Development dependencies
+pytest>=7.4.3                 # Testing framework
+pytest-cov>=4.1.0             # Test coverage reporting
+black>=23.12.0                # Code formatting
+flake8>=6.1.0                 # Linting
+isort>=5.12.0                 # Import sorting
+mypy>=1.4.1                   # Type checking
 
-# For documentation extraction
-ast-comments>=1.0.1  # For extracting comments from AST
-inspect-mate>=0.0.2  # For enhanced inspection capabilities
+# Documentation extraction
+ast-comments>=1.0.1           # For extracting comments from AST
+inspect-mate>=0.0.2           # For enhanced inspection capabilities
+nbformat>=5.7.0               # For processing Jupyter notebooks

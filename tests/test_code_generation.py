@@ -14,9 +14,10 @@ import sys
 import unittest
 from unittest.mock import patch, MagicMock
 from dotenv import load_dotenv
+import json
 
-# Add the project root to the path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 # Try to load environment variables from .env file
 load_dotenv()
@@ -128,22 +129,27 @@ class TestCodeGeneration(unittest.TestCase):
         # Call the agent's process_message method
         response = self.agent.process_message("Get the battery level")
         
-        # Validate the code
-        validation = self.agent._validate_code(response["code"])
+        # Validate the code using CodeEvaluator instead of internal validation
+        from agent.code_evaluator import CodeEvaluator
+        evaluator = CodeEvaluator(api_key=os.environ.get("OPENAI_API_KEY", "dummy_key"))
+        validation = evaluator.evaluate_code(response["code"], "Get the battery level")
         
         # Verify that validation passed
         self.assertTrue(validation["valid"])
         self.assertEqual(len(validation["errors"]), 0)
     
     @patch('agent.code_generation_agent.client.chat.completions.create')
-    @patch('agent.code_generation_agent.ReachyCodeGenerationAgent._validate_code')
-    def test_invalid_code_detection(self, mock_validate, mock_completion):
+    @patch('agent.code_evaluator.CodeEvaluator.evaluate_code')
+    def test_invalid_code_detection(self, mock_evaluate, mock_completion):
         """Test that invalid code is correctly identified."""
-        # Set up the mock validation response
-        mock_validate.return_value = {
+        # Set up the mock evaluation response
+        mock_evaluate.return_value = {
             "valid": False,
             "errors": ["Syntax error: invalid syntax", "Security risk: os.system should not be used in robot control code"],
-            "warnings": ["Missing error handling (try/except)"]
+            "warnings": ["Missing error handling (try/except)"],
+            "score": 30.0,
+            "suggestions": ["Use proper error handling", "Avoid using os.system"],
+            "explanation": "Code has critical issues"
         }
         
         # Mock the OpenAI API response with invalid code
@@ -168,10 +174,12 @@ class TestCodeGeneration(unittest.TestCase):
         # Call the agent's process_message method
         response = self.agent.process_message("Check if battery level is good")
         
-        # The validation is now mocked to always return invalid
-        validation = self.agent._validate_code(response["code"])
+        # Evaluate the code with our mocked evaluator
+        from agent.code_evaluator import CodeEvaluator
+        evaluator = CodeEvaluator(api_key=os.environ.get("OPENAI_API_KEY", "dummy_key"))
+        validation = evaluator.evaluate_code(response["code"], "Check if battery level is good")
         
-        # Verify that validation failed
+        # The validation should match our mock
         self.assertFalse(validation["valid"])
         self.assertTrue(len(validation["errors"]) > 0)
 

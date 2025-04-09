@@ -21,13 +21,12 @@ if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
 # Export key classes
-from .agent_router import AgentRouter
 from .code_generation_agent import ReachyCodeGenerationAgent
 
 # Define version
 __version__ = "0.1.0"
 
-def create_agent(api_key: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None) -> AgentRouter:
+def create_agent(api_key: Optional[str] = None, model_config: Optional[Dict[str, Any]] = None) -> ReachyCodeGenerationAgent:
     """
     Create a Reachy 2 Code Generation Agent.
     
@@ -36,6 +35,6 @@ def create_agent(api_key: Optional[str] = None, model_config: Optional[Dict[str,
         model_config: Model configuration. If None, will use the configuration from config.py.
         
     Returns:
-        AgentRouter: The agent router.
+        ReachyCodeGenerationAgent: The code generation agent.
     """
-    return AgentRouter(api_key=api_key, model_config=model_config) 
+    return ReachyCodeGenerationAgent(api_key=api_key, model_config=model_config) 
