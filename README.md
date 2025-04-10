@@ -1,6 +1,11 @@
 # Reachy 2 Code Generation
-
 A powerful interface for generating, evaluating, and optimizing Python code for the Reachy 2 robot.
+
+![Demo](./assets/demo.gif)
+
+
+**Disclaimer** - This tool is in its early development stage. 
+The backbone (code generation from natural language, code evaluation and direct execution on a fake Reachy robot) is functional, but the results can be erratic. As an example, the code generation tool does not yet have a good spatial understanding of Reachy and its surroundings, resulting in movements that don't necessarily align with what a user wants.
 
 ## Overview
 
