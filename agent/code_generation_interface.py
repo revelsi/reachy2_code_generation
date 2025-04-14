@@ -117,15 +117,28 @@ class CodeGenerationInterface:
             while retry_count <= max_retries:
                 try:
                     # Call the OpenAI API
-                    response = self.client.chat.completions.create(
-                        model=self.model,
-                        messages=messages,
-                        temperature=self.temperature,
-                        max_tokens=self.max_tokens,
-                        top_p=self.top_p,
-                        frequency_penalty=self.frequency_penalty,
-                        presence_penalty=self.presence_penalty
-                    )
+                    # Prepare parameters based on model type
+                    if self.model.startswith("o3"):
+                        # o3 models use different parameters than GPT models
+                        params = {
+                            "model": self.model,
+                            "messages": messages,
+                            "max_completion_tokens": self.max_tokens
+                        }
+                    else:
+                        # GPT models use standard parameters
+                        params = {
+                            "model": self.model,
+                            "messages": messages,
+                            "temperature": self.temperature,
+                            "max_tokens": self.max_tokens,
+                            "top_p": self.top_p,
+                            "frequency_penalty": self.frequency_penalty,
+                            "presence_penalty": self.presence_penalty
+                        }
+                    
+                    # Make the API call
+                    response = self.client.chat.completions.create(**params)
                     
                     # Extract code and explanation from the response
                     content = response.choices[0].message.content
@@ -235,17 +248,32 @@ class CodeGenerationInterface:
             
             # Create generator agent and evaluator
             try:
-                generator = ReachyCodeGenerationAgent(
-                    api_key=self.client.api_key,
-                    model=self.model,
-                    temperature=self.temperature
-                )
+                # Prepare generator parameters based on model type
+                generator_kwargs = {
+                    "api_key": self.client.api_key,
+                    "model": self.model,
+                    "max_tokens": self.max_tokens
+                }
                 
-                evaluator = CodeEvaluator(
-                    api_key=self.client.api_key,
-                    model="gpt-4o-mini",  # Always use GPT-4o-mini for evaluation
-                    temperature=max(0.1, self.temperature - 0.1)  # Lower temp for evaluator
-                )
+                # Only add temperature if not using o3 model
+                if not self.model.startswith("o3"):
+                    generator_kwargs["temperature"] = self.temperature
+                
+                generator = ReachyCodeGenerationAgent(**generator_kwargs)
+                
+                # Prepare evaluator parameters based on model type
+                evaluator_model = "gpt-4o-mini"  # Default evaluator model
+                evaluator_kwargs = {
+                    "api_key": self.client.api_key,
+                    "model": evaluator_model,
+                    "max_tokens": self.max_tokens
+                }
+                
+                # Only add temperature if not using o3 model
+                if not evaluator_model.startswith("o3"):
+                    evaluator_kwargs["temperature"] = max(0.1, self.temperature - 0.1)  # Lower temp for evaluator
+                
+                evaluator = CodeEvaluator(**evaluator_kwargs)
                 
                 # Create the pipeline with integrated approach
                 pipeline = CodeGenerationPipeline(

@@ -108,6 +108,7 @@ EVALUATION CRITERIA:
 4. ERROR HANDLING: Does the code include proper error handling, especially for inverse kinematics?
 5. CODE STRUCTURE: Does the code follow the required structure with initialization, operation, and cleanup?
 6. CODE QUALITY: Is the code well-structured, documented, and maintainable?
+7. **API ADHERENCE:** Does the code ONLY use functions/classes/parameters explicitly defined in the official API documentation provided to the generator? Penalize usage of undocumented elements.
 
 REQUIRED CODE STRUCTURE:
 A. INITIALIZATION PHASE:
@@ -315,6 +316,7 @@ COMMON ERRORS TO CHECK:
 16. Using Cartesian control when joint control would be simpler and more reliable
 17. Overreliance on complex kinematics without proper error handling
 18. Not using pre-defined postures (default, elbow_90) when appropriate
+19. **Using functions/classes/parameters not documented in the provided API summary.**
 
 PROVIDE YOUR EVALUATION IN THIS JSON FORMAT:
 {
@@ -352,16 +354,33 @@ Consider both technical correctness and safety for the Reachy 2 robot.
         
         try:
             # Call the OpenAI API
-            response = self.client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt}
-                ],
-                temperature=self.temperature,
-                max_tokens=self.max_tokens,
-                response_format={"type": "json_object"}  # Request JSON format
-            )
+            # Prepare parameters based on model type
+            if self.model.startswith("o3"):
+                # o3 models use different parameters than GPT models
+                params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    "max_completion_tokens": self.max_tokens,
+                    "response_format": {"type": "json_object"}  # Request JSON format
+                }
+            else:
+                # GPT models use standard parameters
+                params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_prompt}
+                    ],
+                    "temperature": self.temperature,
+                    "max_tokens": self.max_tokens,
+                    "response_format": {"type": "json_object"}  # Request JSON format
+                }
+                
+            # Make the API call
+            response = self.client.chat.completions.create(**params)
             
             # Extract the evaluation from the response
             evaluation_text = response.choices[0].message.content

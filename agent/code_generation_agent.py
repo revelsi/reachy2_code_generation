@@ -67,360 +67,6 @@ class CodeValidationResult(TypedDict):
     warnings: List[str]
 
 
-def load_api_documentation():
-    """
-    Load the API documentation from the JSON file.
-    
-    Returns:
-        list: The API documentation.
-    """
-    try:
-        doc_path = os.path.join(os.path.dirname(__file__), "docs", "api_documentation.json")
-        with open(doc_path, "r") as f:
-            return json.load(f)
-    except Exception as e:
-        logger.error(f"Error loading API documentation: {e}")
-        return []
-
-
-def load_kinematics_guide():
-    """
-    Load the kinematics guide from the markdown file.
-    
-    Returns:
-        str: The kinematics guide content.
-    """
-    try:
-        guide_path = os.path.join(os.path.dirname(__file__), "docs", "reachy2_kinematics_prompt.md")
-        with open(guide_path, "r") as f:
-            return f.read()
-    except Exception as e:
-        logger.error(f"Error loading kinematics guide: {e}")
-        return "ARM KINEMATICS GUIDE NOT FOUND"
-
-
-def extract_parameter_details(signature: str, docstring: str) -> Dict[str, Dict[str, Any]]:
-    """
-    Extract detailed parameter information from a function signature and docstring.
-    
-    Args:
-        signature: The function signature
-        docstring: The function docstring
-        
-    Returns:
-        Dict mapping parameter names to their details
-    """
-    param_details = {}
-    
-    # Extract parameter names and types from signature
-    if signature:
-        # Extract the part between parentheses
-        params_part = signature.split('(', 1)[1].rsplit(')', 1)[0] if '(' in signature else ""
-        
-        # Split by comma, but handle nested types with commas
-        params = []
-        current_param = ""
-        bracket_count = 0
-        
-        for char in params_part:
-            if char == ',' and bracket_count == 0:
-                params.append(current_param.strip())
-                current_param = ""
-            else:
-                current_param += char
-                if char in '[{(':
-                    bracket_count += 1
-                elif char in ']})':
-                    bracket_count -= 1
-        
-        if current_param:
-            params.append(current_param.strip())
-        
-        # Process each parameter
-        for param in params:
-            if ':' in param:
-                name, type_info = param.split(':', 1)
-                name = name.strip()
-                type_info = type_info.strip()
-                
-                # Skip 'self' parameter
-                if name == 'self':
-                    continue
-                
-                param_details[name] = {
-                    "type": type_info,
-                    "description": "",
-                    "constraints": []
-                }
-    
-    # Extract parameter descriptions from docstring
-    if docstring:
-        lines = docstring.split('\n')
-        in_args_section = False
-        current_param = None
-        
-        for line in lines:
-            line = line.strip()
-            
-            # Check if we're in the Args section
-            if line.startswith("Args:"):
-                in_args_section = True
-                continue
-            
-            # Check if we've left the Args section
-            if in_args_section and (not line or line.startswith("Returns:") or line.startswith("Raises:")):
-                in_args_section = False
-                current_param = None
-                continue
-            
-            # Process parameter descriptions
-            if in_args_section:
-                if ': ' in line:
-                    # New parameter
-                    param_name, param_desc = line.split(': ', 1)
-                    param_name = param_name.strip()
-                    
-                    if param_name in param_details:
-                        current_param = param_name
-                        param_details[param_name]["description"] = param_desc.strip()
-                        
-                        # Extract constraints from description
-                        desc_lower = param_desc.lower()
-                        if "must be" in desc_lower or "should be" in desc_lower or "required" in desc_lower:
-                            param_details[param_name]["constraints"].append(param_desc.strip())
-                        
-                        # Check for units information
-                        if "degrees" in desc_lower or "radians" in desc_lower:
-                            if "degrees" in desc_lower:
-                                param_details[param_name]["units"] = "degrees"
-                            else:
-                                param_details[param_name]["units"] = "radians"
-                elif current_param and line:
-                    # Continuation of previous parameter description
-                    param_details[current_param]["description"] += " " + line
-                    
-                    # Check for additional constraints
-                    line_lower = line.lower()
-                    if "must be" in line_lower or "should be" in line_lower or "required" in line_lower:
-                        param_details[current_param]["constraints"].append(line.strip())
-    
-    return param_details
-
-
-def add_special_constraints(class_name: str, method_name: str, param_details: Dict[str, Dict[str, Any]]) -> Dict[str, Dict[str, Any]]:
-    """
-    Add special constraints for known problematic functions.
-    
-    Args:
-        class_name: The class name
-        method_name: The method name
-        param_details: The current parameter details
-        
-    Returns:
-        Updated parameter details
-    """
-    # Special case for Arm.goto
-    if class_name == "Arm" and method_name == "goto" and "target" in param_details:
-        if "constraints" not in param_details["target"]:
-            param_details["target"]["constraints"] = []
-        
-        param_details["target"]["constraints"].append("When target is a list, it MUST contain EXACTLY 7 joint values")
-        param_details["target"]["constraints"].append("When using degrees=True, values should be in degrees; otherwise in radians")
-    
-    # Special case for ReachySDK initialization
-    if class_name == "ReachySDK" and method_name == "__init__" and "host" in param_details:
-        if "constraints" not in param_details["host"]:
-            param_details["host"]["constraints"] = []
-        
-        param_details["host"]["constraints"].append("host parameter is REQUIRED (e.g., 'localhost' or IP address)")
-    
-    return param_details
-
-
-def generate_api_summary(api_docs):
-    """
-    Generate a concise summary of the API documentation with essential parameter details,
-    focusing only on the most commonly used classes and methods.
-    
-    Args:
-        api_docs: The API documentation.
-        
-    Returns:
-        str: A summary of the API documentation.
-    """
-    if not api_docs:
-        return "No API documentation available."
-    
-    # Define the official API modules (these are the ones from the Reachy SDK)
-    official_api_modules = [
-        "reachy2_sdk.reachy_sdk",
-        "reachy2_sdk.parts",
-        "reachy2_sdk.utils",
-        "reachy2_sdk.config",
-        "reachy2_sdk.media",
-        "reachy2_sdk.orbita",
-        "reachy2_sdk.sensors",
-    ]
-    
-    # Check if pollen_vision is installed and add it to official modules if it is
-    try:
-        import importlib.util
-        if importlib.util.find_spec("pollen_vision") is not None:
-            logging.getLogger("code_generation_agent").info("pollen_vision module found, adding to official API modules")
-            official_api_modules.append("pollen_vision")
-        else:
-            logging.getLogger("code_generation_agent").info("pollen_vision module not found, skipping")
-    except ImportError:
-        logging.getLogger("code_generation_agent").info("pollen_vision module not found, skipping")
-    
-    # Extract classes and their methods from the documentation
-    classes = {}
-    official_classes = set()
-    
-    # First pass: Collect all classes and their methods
-    for item in api_docs:
-        if item.get("type") == "class":
-            class_name = item.get("name")
-            module_name = item.get("module", "")
-            
-            # Only include classes from official modules
-            if module_name and any(module_name.startswith(prefix) for prefix in official_api_modules):
-                if class_name:
-                    official_classes.add(class_name)
-                    
-                    # Store class info
-                    classes[class_name] = {
-                        "module": module_name,
-                        "docstring": item.get("docstring", ""),
-                        "methods": item.get("methods", [])
-                    }
-    
-    # Format the enhanced summary
-    summary = []
-    
-    # Add a concise header with common classes
-    summary.append("# Common Classes and Methods")
-    summary.append(", ".join(sorted(official_classes)))
-    summary.append("")
-    
-    # Add class methods with enhanced details
-    for class_name, class_info in sorted(classes.items()):
-        summary.append(f"## {class_name}")
-        summary.append(f"Module: {class_info['module']}")
-        if class_info["docstring"]:
-            summary.append(class_info["docstring"])
-        summary.append("")
-        
-        # Process methods
-        for method in class_info["methods"]:
-            method_name = method.get("name")
-            
-            # Skip private methods (but allow special methods like __init__)
-            if method_name.startswith("_") and not method_name.startswith("__"):
-                continue
-            
-            signature = method.get("signature", "")
-            docstring = method.get("docstring", "")
-            
-            # Extract parameter details
-            param_details = extract_parameter_details(signature, docstring)
-            
-            # Add special constraints for known problematic functions
-            param_details = add_special_constraints(class_name, method_name, param_details)
-            
-            # Add method name and simplified signature
-            if method_name in ["__init__", "goto", "inverse_kinematics"]:
-                # Show full signature for important methods
-                if " -> " in signature:
-                    signature = signature.split(" -> ")[0] + ")"
-                summary.append(f"### {method_name}{signature}")
-            else:
-                # For other methods, show simplified signature
-                summary.append(f"### {method_name}()")
-            
-            # Add first line of docstring if it exists and is meaningful
-            if docstring and len(docstring) > 5:
-                summary.append(docstring.split("\n")[0])
-            
-            # Add parameter details if they exist
-            if param_details:
-                has_important_params = False
-                param_lines = []
-                
-                for param_name, param_info in param_details.items():
-                    if not param_info.get("description") and not param_info.get("constraints"):
-                        continue
-                    
-                    has_important_params = True
-                    param_type = param_info.get("type", "")
-                    param_desc = param_info.get("description", "")
-                    
-                    # Simplify parameter type display
-                    if param_type and len(param_type) > 20:
-                        if "List" in param_type:
-                            param_type = "List"
-                        elif "Optional" in param_type:
-                            param_type = "Optional"
-                        elif "Dict" in param_type:
-                            param_type = "Dict"
-                        elif "float | int" in param_type:
-                            param_type = "number"
-                        elif "npt.NDArray" in param_type:
-                            param_type = "array"
-                    
-                    # Add parameter with type and description
-                    param_line = f"- {param_name}"
-                    if param_type:
-                        param_line += f" ({param_type})"
-                    if param_desc:
-                        param_line += f": {param_desc}"
-                    
-                    param_lines.append(param_line)
-                    
-                    # Add constraints
-                    constraints = param_info.get("constraints", [])
-                    if constraints:
-                        for constraint in constraints:
-                            param_lines.append(f"  * {constraint}")
-                    
-                    # Add units
-                    if "units" in param_info:
-                        param_lines.append(f"  * Units: {param_info['units']}")
-                
-                if has_important_params:
-                    summary.append("Parameters:")
-                    summary.extend(param_lines)
-            
-            # Add special notes for Arm class about grippers
-            if class_name == "Arm":
-                summary.append("\nGripper Control:")
-                summary.append("- Access the gripper through the arm.gripper property")
-                summary.append("- Available methods:")
-                summary.append("  * open(): Open the gripper fully")
-                summary.append("  * close(): Close the gripper fully")
-                summary.append("  * set_opening(value): Set gripper opening (0.0 to 1.0)")
-                summary.append("\nExample:")
-                summary.append("```python")
-                summary.append("# Right arm gripper")
-                summary.append("reachy.r_arm.gripper.open()")
-                summary.append("reachy.r_arm.gripper.set_opening(0.5)  # Half open")
-                summary.append("")
-                summary.append("# Left arm gripper")
-                summary.append("reachy.l_arm.gripper.close()")
-                summary.append("```")
-            
-            summary.append("")
-        
-        summary.append("")
-    
-    # Add a note about additional classes
-    summary.append("# Note")
-    summary.append("This is a focused summary of the most commonly used classes and methods.")
-    summary.append("For details on other classes and methods, please refer to the full API documentation.")
-    
-    return "\n".join(summary)
-
-
 class ReachyCodeGenerationAgent:
     """
     An agent that generates Python code for interacting with the Reachy 2 robot.
@@ -981,15 +627,35 @@ class ReachyCodeGenerationAgent:
 
             # Simple OpenAI API call
             client = OpenAI(api_key=self.api_key)
-            response = client.chat.completions.create(
-                model=self.model,
-                messages=[
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_request}
-                ],
-                temperature=self.temperature,
-                max_tokens=self.max_tokens
-            )
+            
+            # Prepare parameters based on model type
+            if self.model.startswith("o3"):
+                # o3 models use different parameters than GPT models
+                params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_request}
+                    ],
+                    "max_completion_tokens": self.max_tokens
+                }
+            else:
+                # GPT models use standard parameters
+                params = {
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": system_prompt},
+                        {"role": "user", "content": user_request}
+                    ],
+                    "temperature": self.temperature,
+                    "max_tokens": self.max_tokens,
+                    "top_p": self.top_p,
+                    "frequency_penalty": self.frequency_penalty,
+                    "presence_penalty": self.presence_penalty
+                }
+            
+            # Make the API call
+            response = client.chat.completions.create(**params)
             
             # Extract content
             content = response.choices[0].message.content

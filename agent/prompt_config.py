@@ -56,6 +56,7 @@ CRITICAL GUIDANCE FOR CODE GENERATION:
 - Include time.sleep() after movement commands
 - Use try/finally blocks for proper cleanup
 - Handle "Target was not reachable" errors when using inverse kinematics
+- **IMPORTANT:** You MUST adhere strictly to the provided 'API SUMMARY' section below. Do NOT use any functions, classes, or parameters not explicitly listed in the summary.
 """
 
 # Simplified code structure section

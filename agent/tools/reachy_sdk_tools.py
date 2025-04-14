@@ -172,19 +172,6 @@ Returns:
             )
         )
         cls.register_tool(
-            name="reachy_sdk_ReachySDK__grpc_status",
-            func=cls.reachy_sdk_ReachySDK__grpc_status,
-            schema=cls.create_tool_schema(
-                name="reachy_sdk_ReachySDK__grpc_status",
-                description="""Get the current connection status of the robot's gRPC server.
-
-Returns:
-    "connected" if connected, "disconnected" otherwise.""",
-                parameters={},
-                required=[]
-            )
-        )
-        cls.register_tool(
             name="reachy_sdk_ReachySDK_cameras",
             func=cls.reachy_sdk_ReachySDK_cameras,
             schema=cls.create_tool_schema(
@@ -748,33 +735,6 @@ Args :
 
             # Call the function with parameters
             result = obj.ReachySDK_is_connected()
-
-            return {
-                "success": True,
-                "result": result
-            }
-        except Exception as e:
-            return {
-                "success": False,
-                "error": str(e)
-            }
-
-
-    @classmethod
-    def reachy_sdk_ReachySDK__grpc_status(cls, ) -> Dict[str, Any]:
-        """Get the current connection status of the robot's gRPC server.
-        
-        Returns:
-            "connected" if connected, "disconnected" otherwise."""
-        try:
-            # Get Reachy connection
-            reachy = get_reachy()
-            
-            # Get the target object
-            obj = getattr(reachy, 'sdk')
-
-            # Call the function with parameters
-            result = obj.ReachySDK__grpc_status()
 
             return {
                 "success": True,

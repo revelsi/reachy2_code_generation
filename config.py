@@ -60,9 +60,10 @@ MODEL_CONFIG = {
 
 # Available models for selection in UI
 AVAILABLE_MODELS = [
-    "gpt-4-turbo",
     "gpt-4o",
     "gpt-4o-mini",
+    "o3-mini",
+    "gpt-4-turbo",
     "gpt-4",
     "gpt-3.5-turbo",
 ]

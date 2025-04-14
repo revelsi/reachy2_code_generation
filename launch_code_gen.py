@@ -84,11 +84,22 @@ def main():
         logger.error("No OpenAI API key provided. Please set the OPENAI_API_KEY environment variable or use --api-key.")
         sys.exit(1)
     
+    # Check if we're using o3 models and adjust parameters accordingly
+    using_o3_generator = args.generator_model.startswith("o3")
+    using_o3_evaluator = args.evaluator_model.startswith("o3")
+    
+    if using_o3_generator:
+        logger.info("Using o3 model for generation - temperature parameter will be ignored")
+    
+    if using_o3_evaluator:
+        logger.info("Using o3 model for evaluation - temperature parameter will be ignored")
+    
     # Log configuration
     logger.info(f"Launching Reachy 2 Code Generation")
     logger.info(f"Generator model: {args.generator_model}")
     logger.info(f"Evaluator model: {args.evaluator_model}")
-    logger.info(f"Temperature: {args.temperature}")
+    if not (using_o3_generator and using_o3_evaluator):
+        logger.info(f"Temperature: {args.temperature}")
     logger.info(f"Optimization: {'Disabled' if args.no_optimize else 'Enabled'}")
     logger.info(f"Max iterations: {args.max_iterations}")
     logger.info(f"Evaluation threshold: {args.evaluation_threshold}")
@@ -123,19 +134,29 @@ def main():
     from agent.code_evaluator import CodeEvaluator
     from agent.code_generation_pipeline import CodeGenerationPipeline
     
-    # Create generator and evaluator
-    generator = ReachyCodeGenerationAgent(
-        api_key=api_key,
-        model=args.generator_model,
-        temperature=args.temperature,
-        max_tokens=args.max_tokens
-    )
+    # Create generator and evaluator with appropriate parameters
+    generator_kwargs = {
+        "api_key": api_key,
+        "model": args.generator_model,
+        "max_tokens": args.max_tokens
+    }
     
-    evaluator = CodeEvaluator(
-        api_key=api_key,
-        model=args.evaluator_model,
-        temperature=max(0.1, args.temperature - 0.1)  # Lower temperature for evaluator
-    )
+    # Only add temperature if not using o3 model
+    if not using_o3_generator:
+        generator_kwargs["temperature"] = args.temperature
+    
+    generator = ReachyCodeGenerationAgent(**generator_kwargs)
+    
+    evaluator_kwargs = {
+        "api_key": api_key,
+        "model": args.evaluator_model
+    }
+    
+    # Only add temperature if not using o3 model
+    if not using_o3_evaluator:
+        evaluator_kwargs["temperature"] = max(0.1, args.temperature - 0.1)  # Lower temperature for evaluator
+    
+    evaluator = CodeEvaluator(**evaluator_kwargs)
     
     # Create the pipeline
     pipeline = CodeGenerationPipeline(

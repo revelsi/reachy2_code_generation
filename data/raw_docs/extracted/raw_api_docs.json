@@ -273,22 +273,6 @@
       },
       {
         "type": "method",
-        "name": "_grpc_status",
-        "module": "reachy2_sdk.reachy_sdk",
-        "class": "ReachySDK",
-        "signature": "(self) -> str",
-        "docstring": "Get the current connection status of the robot's gRPC server.\n\nReturns:\n    \"connected\" if connected, \"disconnected\" otherwise.",
-        "return_type": "str",
-        "parameters": {
-          "self": "Any"
-        },
-        "source": "reachy2_sdk.reachy_sdk.ReachySDK._grpc_status",
-        "decorators": [
-          "property"
-        ]
-      },
-      {
-        "type": "method",
         "name": "cameras",
         "module": "reachy2_sdk.reachy_sdk",
         "class": "ReachySDK",
