@@ -846,23 +846,73 @@ You will analyze code for safety, correctness, and proper API usage, providing d
 """
 
 EVALUATION_CRITERIA = """
-EVALUATION CRITERIA:
-1. CORRECTNESS: Does the code fulfill the user's request? Does it accomplish the task properly?
-2. SAFETY: Does the code use safe position ranges? Does it prevent damage to the robot?
-3. API USAGE: Does the code correctly use the Reachy 2 SDK API?
-4. ERROR HANDLING: Does the code include proper error handling, especially for inverse kinematics?
-5. CODE STRUCTURE: Does the code follow the required structure with initialization, operation, and cleanup?
-6. CODE QUALITY: Is the code well-structured, documented, and maintainable?
-7. **API ADHERENCE:** Does the code ONLY use functions/classes/parameters explicitly defined in the official API documentation provided to the generator? Penalize usage of undocumented elements.
+EVALUATION CRITERIA (Weights are approximate):
+1. SAFETY (Weight: 30%): Critically important. Does the code ensure robot safety? Includes checks for:
+   - MANDATORY: `reachy.turn_on()` before movement.
+   - MANDATORY: `reachy.turn_off_smoothly()` in a `finally` block (NOT `reachy.turn_off()`).
+   - MANDATORY: `reachy.disconnect()` in the `finally` block after turning off.
+   - MANDATORY: `reachy.is_connected` check before using the robot.
+   - MANDATORY: Contextual part checking (`if reachy.r_arm is None: ...`) before using specific parts.
+   - MANDATORY: Handling of `inverse_kinematics` errors (e.g., with try/except).
+   - Correct use of `wait=True/False` and `time.sleep()` for motion sequencing.
+   - Avoidance of potentially unsafe operations (e.g., extremely fast movements, known risky poses).
+   - Use of safe position ranges (if Cartesian control is used).
+2. API ADHERENCE (Weight: 25%): Does the code use ONLY functions/classes/parameters specified in the provided API summary?
+   - MANDATORY: Correct property access (e.g., `reachy.r_arm`, not `reachy.r_arm()`).
+   - MANDATORY: Correct gripper access (`arm.gripper`, not `reachy.r_gripper`).
+   - Correct method signatures and parameter types.
+   - Avoidance of any undocumented or hypothetical API features.
+3. CORRECTNESS (Weight: 20%): Does the code accurately fulfill the user's request?
+   - Does it perform the requested actions in the correct sequence?
+   - Does it achieve the desired outcome?
+   - Does it handle edge cases implied by the request?
+4. CODE STRUCTURE (Weight: 15%): Does the code follow the required structure?
+   - Imports at the top.
+   - Connection and initialization.
+   - `try...finally` block for main logic and cleanup.
+   - Correct cleanup sequence (`turn_off_smoothly` then `disconnect`).
+5. CODE QUALITY (Weight: 10%): Is the code readable, efficient, and maintainable?
+   - Use of meaningful variable names.
+   - Appropriate comments for complex logic.
+   - Efficient use of loops or SDK features.
 """
 
 SCORING_GUIDELINES = """
-SCORING GUIDELINES:
-- 90-100: Excellent code, follows all guidelines, handles errors properly, and uses API correctly
-- 80-89: Good code with minor issues or warnings, but fully functional
-- 70-79: Functional code with several warnings or structure issues
-- 60-69: Code with significant issues but might still work in limited scenarios
-- Below 60: Code with critical errors, safety violations, or incorrect API usage
+SCORING GUIDELINES (Based on 100 points):
+
+1.  **Baseline Score:** Start with 100 points.
+
+2.  **Deductions for MANDATORY Violations (Safety & API Adherence):**
+    *   Missing `reachy.turn_on()`: -30 points
+    *   Missing `reachy.turn_off_smoothly()` in `finally`: -30 points
+    *   Using `reachy.turn_off()` instead of `turn_off_smoothly()`: -25 points
+    *   Missing `reachy.disconnect()` in `finally` (after turn off): -20 points
+    *   Missing `reachy.is_connected` check: -20 points
+    *   Missing contextual part check (e.g., `if reachy.r_arm is None:`): -15 points per missing check
+    *   Missing `try/except` for `inverse_kinematics`: -15 points
+    *   Incorrect property access (e.g., `reachy.r_arm()`): -15 points per instance
+    *   Incorrect gripper access (e.g., `reachy.r_gripper`): -15 points per instance
+    *   Using undocumented API elements: -10 points per instance
+
+3.  **Deductions for Other Criteria:**
+    *   Incorrect sequence or outcome (Correctness): -5 to -20 points depending on severity.
+    *   Missing `try...finally` structure: -15 points.
+    *   Incorrect cleanup order in `finally`: -10 points.
+    *   Inappropriate use of `time.sleep()` or `wait`: -5 to -10 points.
+    *   Significant code quality issues (readability, efficiency): -5 to -10 points.
+
+4.  **Score Calculation:**
+    *   Apply all relevant deductions from the baseline of 100.
+    *   The final score cannot be below 0.
+
+5.  **`valid` Flag:**
+    *   Set `valid: false` if ANY MANDATORY Safety or API Adherence rule is violated.
+    *   Set `valid: false` if the score drops below 60.
+    *   Otherwise, set `valid: true`.
+
+**Example Score Calculation:**
+- Code misses `turn_off_smoothly` (-30), uses `reachy.r_arm()` once (-15), and has poor structure (-10). 
+- Final Score = 100 - 30 - 15 - 10 = 45. `valid: false`.
 """
 
 FEEDBACK_FORMAT = """

@@ -10,7 +10,9 @@
 
 ## Model
 
-The interface uses **GPT-4o-mini**, which is optimized for Reachy 2 code generation. This model provides a good balance between performance and cost efficiency, making it ideal for generating code for the Reachy 2 robot.
+### Model Configuration
+
+The interface uses **gpt-4.1-mini** as the default generator model and **gpt-4.1-nano** as the default evaluator model. These models provide a good balance between performance and cost efficiency, making them ideal for generating code for the Reachy 2 robot.
 
 ## Code Validation Process
 

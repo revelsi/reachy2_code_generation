@@ -46,7 +46,7 @@ def parse_arguments():
     # Pipeline configuration
     pipeline_group = parser.add_argument_group("Pipeline Configuration")
     pipeline_group.add_argument("--no-optimize", action="store_true", help="Disable code optimization")
-    pipeline_group.add_argument("--max-iterations", type=int, default=2, help="Maximum optimization iterations (default: 2)")
+    pipeline_group.add_argument("--max-iterations", type=int, default=1, help="Maximum optimization iterations (default: 1)")
     pipeline_group.add_argument("--evaluation-threshold", type=float, default=75.0, help="Evaluation threshold (default: 75.0)")
     
     # Output options

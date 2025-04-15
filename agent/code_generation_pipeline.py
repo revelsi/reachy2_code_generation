@@ -86,7 +86,7 @@ class CodeGenerationPipeline:
         generator: 'ReachyCodeGenerationAgent',
         evaluator: 'CodeEvaluator',
         evaluation_threshold: float = 75.0,
-        max_iterations: int = 2,
+        max_iterations: int = 1,
         callback_function: Optional[Callable] = None
     ):
         """
@@ -111,7 +111,7 @@ class CodeGenerationPipeline:
         # Log configuration
         self.logger.info("Initializing Code Generation Pipeline with:")
         self.logger.info(f"  - Evaluation threshold: {evaluation_threshold}")
-        self.logger.info(f"  - Max iterations: {max_iterations}")
+        self.logger.info(f"  - Max iterations: {max_iterations} (default: 1)")
         
     def generate_code(self, user_request: str, history: Optional[Union[List[Dict[str, str]], List[List[str]]]] = None, optimize: bool = True) -> PipelineResult:
         """
@@ -454,7 +454,7 @@ def main():
     print(f"Generating code for: {request}")
     print(f"Using model for generation: {MODEL}")
     print(f"Using model for evaluation: {EVALUATOR_MODEL}")
-    print(f"Max iterations: {args.max_iterations}")
+    print(f"Max iterations: {args.max_iterations} (default: 1)")
     print(f"Evaluation threshold: {args.evaluation_threshold}")
     print("Please wait, this may take a minute...")
     

@@ -41,8 +41,8 @@ if HTTPS_PROXY:
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # Model settings
-MODEL = os.getenv("MODEL", "gpt-4.1")
-EVALUATOR_MODEL = os.getenv("EVALUATOR_MODEL", "gpt-4.1-mini")  # Default model for code evaluation
+MODEL = os.getenv("MODEL", "gpt-4.1-mini")
+EVALUATOR_MODEL = os.getenv("EVALUATOR_MODEL", "gpt-4.1-nano")  # Default model for code evaluation
 MODEL_TEMPERATURE = float(os.getenv("MODEL_TEMPERATURE", "0.2"))
 MODEL_MAX_TOKENS = int(os.getenv("MODEL_MAX_TOKENS", "4000"))
 MODEL_TOP_P = float(os.getenv("MODEL_TOP_P", "0.95"))

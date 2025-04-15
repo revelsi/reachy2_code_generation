@@ -28,7 +28,7 @@ def launch_ui(
     evaluator_model: str = EVALUATOR_MODEL,
     temperature: float = 0.2,
     max_tokens: int = 4000,
-    max_iterations: int = 2,
+    max_iterations: int = 1,
     evaluation_threshold: float = 75.0,
     port: int = 7860,
     share: bool = False
@@ -76,7 +76,7 @@ def run_code_generation(
     temperature: float = 0.2,
     max_tokens: int = 4000,
     optimize: bool = True,
-    max_iterations: int = 2,
+    max_iterations: int = 1,
     evaluation_threshold: float = 75.0,
     execute: bool = False,
     quiet: bool = False

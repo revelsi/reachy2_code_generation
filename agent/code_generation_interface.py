@@ -47,7 +47,7 @@ class CodeGenerationInterface:
     def __init__(
         self,
         api_key: str,
-        model: str = "gpt-4o",
+        model: str = "gpt-4.1-mini",
         temperature: float = 0.2,
         max_tokens: int = 4096,
         top_p: float = 0.95,
@@ -893,17 +893,20 @@ def main():
     parser.add_argument("--share", action="store_true", help="Create a public link")
     parser.add_argument("--port", type=int, default=7860, help="Port to run the server on")
     parser.add_argument("--websocket-port", type=int, help="Port for the WebSocket server (default is 8765)")
+    parser.add_argument("--generator-model", help="Specify the generator model")
+    parser.add_argument("--temperature", type=float, help="Specify the temperature")
+    parser.add_argument("--max-tokens", type=int, help="Specify the max_tokens")
     
     args = parser.parse_args()
     
-    print(f"Starting Reachy 2 Code Generation Interface with model: gpt-4o")
+    print(f"Starting Reachy 2 Code Generation Interface with model: {args.generator_model or 'gpt-4.1-mini'}")
     
     # Create interface with default temperature and max_tokens
     interface = CodeGenerationInterface(
         api_key=args.api_key,
-        model="gpt-4o",
-        temperature=0.2,      # Default temperature
-        max_tokens=4000,      # Default max_tokens
+        model=args.generator_model or "gpt-4.1-mini",
+        temperature=args.temperature,
+        max_tokens=args.max_tokens,
         websocket_port=args.websocket_port,
     )
     

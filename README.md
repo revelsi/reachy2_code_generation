@@ -16,8 +16,8 @@ This project provides an intuitive interface for controlling the Reachy 2 robot 
 - **Natural Language to Code**: Convert plain English instructions into Python code
 - **Conversational Interface**: Intuitive chat-based interaction for natural back-and-forth communication
 - **Code Generation Pipeline**: Three-stage process for high-quality code creation
-  - **Generation**: Creates initial code from user requests using GPT-4o
-  - **Evaluation**: Assesses code quality, safety, and API correctness using GPT-4o-mini
+  - **Generation**: Creates initial code from user requests using gpt-4.1
+  - **Evaluation**: Assesses code quality, safety, and API correctness using gpt-4.1-mini
   - **Optimization**: Refines code based on evaluation feedback
 - **Modern Interface**: Clean, responsive Gradio UI with intuitive two-column layout
 - **Enhanced Code Editor**: Syntax highlighting with Source Code Pro font for better readability
@@ -31,16 +31,17 @@ This project provides an intuitive interface for controlling the Reachy 2 robot 
 
 Our unique three-stage pipeline ensures robust, safe, and efficient code:
 
-1. **Generation Stage**: Your natural language request is processed by GPT-4o to create initial Python code
-2. **Evaluation Stage**: The generated code is analyzed by GPT-4o-mini for:
+1. **Generation Stage**: Your natural language request is processed by gpt-4.1 to create initial Python code
+2. **Evaluation Stage**: The generated code is analyzed by gpt-4.1-mini for:
    - Syntax correctness
    - API usage validity
    - Code safety
    - Best practices
    - Edge case handling
-3. **Optimization Stage**: If the evaluation score is below threshold, the code is automatically improved based on specific feedback
+   - Adherence to documented API functions
+3. **Optimization Stage**: If the evaluation score is below threshold (or if critical safety rules are violated), the code is automatically improved based on specific feedback
 
-This iterative workflow continues until reaching quality thresholds or maximum iteration count, ensuring you get the best possible results.
+This iterative workflow (with a default of one optimization iteration) continues until reaching quality thresholds or maximum iteration count, ensuring you get the best possible results. The evaluation process uses specific point deductions for common errors, prioritizing safety and API adherence.
 
 ## System Requirements
 
@@ -80,9 +81,10 @@ export OPENAI_API_KEY=your_api_key_here
 Or create a `.env` file in the root directory:
 ```
 OPENAI_API_KEY=your_api_key_here
-MODEL=gpt-4.1
-EVALUATOR_MODEL=gpt-4.1-mini
+MODEL=gpt-4.1-mini
+EVALUATOR_MODEL=gpt-4.1-nano
 ```
+**Note on Changing Models:** To change the default generator and evaluator models, update the `MODEL` and `EVALUATOR_MODEL` values in **both** the `.env` file and the `config.py` file for the change to take effect reliably. You can also override the models at runtime using the `--generator-model` and `--evaluator-model` command-line arguments.
 
 4. **Important:** Generate the API documentation needed by the agent:
 ```bash
@@ -105,12 +107,12 @@ This starts a web server at http://localhost:7860 by default.
 Fine-tune the application behavior with these options:
 
 ```bash
-python launch_code_gen.py --ui --generator-model gpt-4.1 --evaluator-model gpt-4.1-mini --temperature 0.3 --max-tokens 5000 --port 7861 --share
+python launch_code_gen.py --ui --generator-model gpt-4.1-mini --evaluator-model gpt-4.1-nano --temperature 0.3 --max-tokens 5000 --port 7861 --share
 ```
 
 Key options:
-- `--generator-model`: Model for code generation (default: gpt-4.1)
-- `--evaluator-model`: Model for code evaluation (default: gpt-4.1-mini)
+- `--generator-model`: Model for code generation (default: gpt-4.1-mini)
+- `--evaluator-model`: Model for code evaluation (default: gpt-4.1-nano)
 - `--temperature`: Controls randomness (0.0 to 1.0, default: 0.2)
 - `--max-tokens`: Maximum tokens to generate (default: 4000)
 - `--port`: Web server port (default: 7860)

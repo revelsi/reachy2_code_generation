@@ -15,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Optimized performance with API documentation caching to prevent redundant loading
 - Streamlined interface with cleaner feedback presentation
 - Enhanced user experience with responsive chat interactions
+- Strengthened code evaluation with stricter scoring rules and safety focus in the prompt
 
 ## [1.0.1] - 2024-04-25
 
