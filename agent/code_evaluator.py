@@ -25,7 +25,7 @@ if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
 # Import configuration
-from config import OPENAI_API_KEY, MODEL
+from config import OPENAI_API_KEY, MODEL, EVALUATOR_MODEL
 
 class EvaluationResult(TypedDict):
     """Result of code evaluation."""
@@ -47,7 +47,7 @@ class CodeEvaluator:
     def __init__(
         self,
         api_key: str,
-        model: str = "gpt-4o-mini",
+        model: str = EVALUATOR_MODEL,
         temperature: float = 0.1,  # Lower temperature for more consistent evaluation
         max_tokens: int = 2048,
     ):
@@ -354,30 +354,17 @@ Consider both technical correctness and safety for the Reachy 2 robot.
         
         try:
             # Call the OpenAI API
-            # Prepare parameters based on model type
-            if self.model.startswith("o3"):
-                # o3 models use different parameters than GPT models
-                params = {
-                    "model": self.model,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    "max_completion_tokens": self.max_tokens,
-                    "response_format": {"type": "json_object"}  # Request JSON format
-                }
-            else:
-                # GPT models use standard parameters
-                params = {
-                    "model": self.model,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_prompt}
-                    ],
-                    "temperature": self.temperature,
-                    "max_tokens": self.max_tokens,
-                    "response_format": {"type": "json_object"}  # Request JSON format
-                }
+            # GPT models use standard parameters
+            params = {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_prompt}
+                ],
+                "temperature": self.temperature,
+                "max_tokens": self.max_tokens,
+                "response_format": {"type": "json_object"}  # Request JSON format
+            }
                 
             # Make the API call
             response = self.client.chat.completions.create(**params)

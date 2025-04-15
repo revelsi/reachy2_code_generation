@@ -43,7 +43,7 @@ if importlib.util.find_spec("pollen_vision") is not None:
 else:
     OFFICIAL_API_MODULES = OFFICIAL_API_MODULES_BASE
 
-# Simplified critical warnings section - removed detailed validation instructions
+# Modify CRITICAL_WARNINGS_SIMPLIFIED section
 CRITICAL_WARNINGS_SIMPLIFIED = """
 CRITICAL GUIDANCE FOR CODE GENERATION:
 - Connect to the robot using ReachySDK(host="...")
@@ -53,13 +53,14 @@ CRITICAL GUIDANCE FOR CODE GENERATION:
 - Properties are accessed WITHOUT parentheses (e.g., reachy.r_arm NOT reachy.r_arm())
 - Gripper access must be through arm property (e.g., reachy.r_arm.gripper.open())
 - For arm goto(), provide EXACTLY 7 joint values
-- Include time.sleep() after movement commands
+- Use time.sleep() after movement commands when needed (for sequential movements or stability)
+- For fluid continuous movements, sleeps can be omitted when appropriate
 - Use try/finally blocks for proper cleanup
 - Handle "Target was not reachable" errors when using inverse kinematics
 - **IMPORTANT:** You MUST adhere strictly to the provided 'API SUMMARY' section below. Do NOT use any functions, classes, or parameters not explicitly listed in the summary.
 """
 
-# Simplified code structure section
+# Modify CODE_STRUCTURE_SIMPLIFIED section
 CODE_STRUCTURE_SIMPLIFIED = """
 REQUIRED CODE STRUCTURE:
 
@@ -72,7 +73,11 @@ REQUIRED CODE STRUCTURE:
 
 2. MAIN CODE PHASE:
    - Implement the requested functionality using the Reachy SDK
-   - Add time.sleep() after movement commands
+   - Add time.sleep() after movement commands when needed for:
+     * Ensuring a movement completes before the next one starts
+     * Stabilizing the robot between distinct movements
+     * Waiting for sensor readings or external events
+   - For fluid continuous movements, sleep calls may be omitted
    - Use try/except blocks for error handling
 
 3. CLEANUP PHASE:
@@ -81,7 +86,7 @@ REQUIRED CODE STRUCTURE:
    - Call reachy.disconnect()
 """
 
-# Basic example template
+# Modify BASIC_EXAMPLE with improved guidance about sleep
 BASIC_EXAMPLE = """
 EXAMPLE CODE TEMPLATE:
 ```python
@@ -97,15 +102,20 @@ try:
     reachy.goto_posture('default')
     time.sleep(2)  # Wait for posture to complete
     
-    # MAIN CODE
-    # Using joint angle control (RECOMMENDED for reliability)
-    # This moves the right arm to a forward extended position
+    # MAIN CODE OPTION 1: With sleep for distinct, sequential movements
+    # This approach ensures each movement completes before starting the next
+    # Use this when precision between movements is important
     reachy.r_arm.goto([0, 0, 0, -90, 0, 0, 0], duration=1.0)
     time.sleep(1.5)  # Wait for movement to complete
     
-    # Move to a slightly different position
     reachy.r_arm.goto([0, 10, -10, -90, 0, 0, 0], duration=1.0)
     time.sleep(1.5)  # Wait for movement to complete
+    
+    # MAIN CODE OPTION 2: Without sleep for fluid continuous movements
+    # This creates a more natural flowing sequence without pauses
+    # Use this when fluid motion is more important than precise positioning
+    reachy.l_arm.goto([0, 0, 0, -90, 0, 0, 0], duration=1.0)
+    reachy.l_arm.goto([0, -10, 10, -90, 0, 0, 0], duration=1.0)
     
 finally:
     # CLEANUP
@@ -114,7 +124,7 @@ finally:
 ```
 """
 
-# Example with reachability check
+# Modify REACHABILITY_EXAMPLE
 REACHABILITY_EXAMPLE = """
 EXAMPLE WITH REACHABILITY CHECK:
 ```python
@@ -130,7 +140,7 @@ try:
     # INITIALIZATION
     reachy.turn_on()
     reachy.goto_posture('default')
-    time.sleep(2)  # Wait for posture to complete
+    time.sleep(2)  # Wait for posture to complete (important for initialization)
     
     # MAIN CODE
     # IMPORTANT: Cartesian control is less reliable than joint angle control
@@ -155,15 +165,16 @@ try:
         print("Target is reachable! Moving to target position...")
         
         # If we get here, the target is reachable, so we can move to it
+        # Sleep is used here for a critical position change
         reachy.r_arm.goto(joint_positions, duration=1.0)
-        time.sleep(1.5)  # Wait for movement to complete
+        time.sleep(1.5)  # Wait for movement to complete before next action
         
     except ValueError as error:
         print(f"Target is not reachable: {error}")
         # IMPORTANT: Always have a fallback strategy using joint angles
         print("Using a fallback position with joint angles instead...")
         reachy.r_arm.goto([0, 10, -10, -90, 0, 0, 0], duration=1.0)
-        time.sleep(1.5)  # Wait for movement to complete
+        # Sleep optional here if the program continues with other actions
     
 finally:
     # CLEANUP
@@ -246,7 +257,7 @@ COMMON MISTAKES TO AVOID:
 
 """
 
-# Optimization instructions for handling evaluator feedback
+# Modify OPTIMIZATION_INSTRUCTIONS
 OPTIMIZATION_INSTRUCTIONS = """
 CODE OPTIMIZATION INSTRUCTIONS:
 
@@ -265,7 +276,8 @@ Common optimization patterns:
 - Add proper try/finally structure if missing
 - Fix property access (e.g., change reachy.r_arm() to reachy.r_arm)
 - Ensure arm.goto() always has exactly 7 joint values
-- Add time.sleep() after movement commands
+- Add time.sleep() where appropriate for movement stability and sequencing
+- Consider removing unnecessary sleep calls for fluid continuous movements
 - Add fallback strategies for inverse kinematics
 - Verify that cleanup operations happen in a finally block
 - Remove potentially unsafe functions like os.system()

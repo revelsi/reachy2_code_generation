@@ -27,7 +27,7 @@ if parent_dir not in sys.path:
     sys.path.insert(0, parent_dir)
 
 # Import configuration
-from config import OPENAI_API_KEY, MODEL, AVAILABLE_MODELS, get_model_config
+from config import OPENAI_API_KEY, MODEL, EVALUATOR_MODEL, AVAILABLE_MODELS, get_model_config
 
 # Replace with a stub implementation for now
 def get_websocket_server():
@@ -401,7 +401,7 @@ class ReachyCodeGenerationAgent:
         # Validate the code using the CodeEvaluator if available
         try:
             from agent.code_evaluator import CodeEvaluator
-            evaluator = CodeEvaluator(api_key=self.api_key, model="gpt-4o-mini")
+            evaluator = CodeEvaluator(api_key=self.api_key, model=EVALUATOR_MODEL)
             validation_result = evaluator.evaluate_code(code, "Validate code before execution")
             valid = validation_result.get("valid", False)
             warnings = validation_result.get("warnings", [])
@@ -628,31 +628,19 @@ class ReachyCodeGenerationAgent:
             # Simple OpenAI API call
             client = OpenAI(api_key=self.api_key)
             
-            # Prepare parameters based on model type
-            if self.model.startswith("o3"):
-                # o3 models use different parameters than GPT models
-                params = {
-                    "model": self.model,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_request}
-                    ],
-                    "max_completion_tokens": self.max_tokens
-                }
-            else:
-                # GPT models use standard parameters
-                params = {
-                    "model": self.model,
-                    "messages": [
-                        {"role": "system", "content": system_prompt},
-                        {"role": "user", "content": user_request}
-                    ],
-                    "temperature": self.temperature,
-                    "max_tokens": self.max_tokens,
-                    "top_p": self.top_p,
-                    "frequency_penalty": self.frequency_penalty,
-                    "presence_penalty": self.presence_penalty
-                }
+            # GPT models use standard parameters
+            params = {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": user_request}
+                ],
+                "temperature": self.temperature,
+                "max_tokens": self.max_tokens,
+                "top_p": self.top_p,
+                "frequency_penalty": self.frequency_penalty,
+                "presence_penalty": self.presence_penalty
+            }
             
             # Make the API call
             response = client.chat.completions.create(**params)

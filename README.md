@@ -76,7 +76,8 @@ export OPENAI_API_KEY=your_api_key_here
 Or create a `.env` file in the root directory:
 ```
 OPENAI_API_KEY=your_api_key_here
-MODEL=gpt-4o
+MODEL=gpt-4.1
+EVALUATOR_MODEL=gpt-4.1-mini
 ```
 
 4. **Important:** Generate the API documentation needed by the agent:
@@ -100,12 +101,12 @@ This starts a web server at http://localhost:7860 by default.
 Fine-tune the application behavior with these options:
 
 ```bash
-python launch_code_gen.py --ui --generator-model gpt-4o --evaluator-model gpt-4o-mini --temperature 0.3 --max-tokens 5000 --port 7861 --share
+python launch_code_gen.py --ui --generator-model gpt-4.1 --evaluator-model gpt-4.1-mini --temperature 0.3 --max-tokens 5000 --port 7861 --share
 ```
 
 Key options:
-- `--generator-model`: Model for code generation (default: gpt-4o)
-- `--evaluator-model`: Model for code evaluation (default: gpt-4o-mini)
+- `--generator-model`: Model for code generation (default: gpt-4.1)
+- `--evaluator-model`: Model for code evaluation (default: gpt-4.1-mini)
 - `--temperature`: Controls randomness (0.0 to 1.0, default: 0.2)
 - `--max-tokens`: Maximum tokens to generate (default: 4000)
 - `--port`: Web server port (default: 7860)

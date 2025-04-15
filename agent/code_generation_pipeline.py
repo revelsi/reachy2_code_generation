@@ -16,7 +16,7 @@ import traceback
 from typing import Dict, List, Any, Optional, TypedDict, Tuple, Union, Callable
 
 # Import configuration
-from config import MODEL
+from config import MODEL, EVALUATOR_MODEL
 
 # Type alias for the pipeline result
 PipelineResult = Dict[str, Any]
@@ -85,7 +85,7 @@ class CodeGenerationPipeline:
         generator: 'ReachyCodeGenerationAgent',
         evaluator: 'CodeEvaluator',
         evaluation_threshold: float = 75.0,
-        max_iterations: int = 3,
+        max_iterations: int = 2,
         callback_function: Optional[Callable] = None
     ):
         """
@@ -432,7 +432,7 @@ def main():
     
     evaluator = CodeEvaluator(
         api_key=api_key,
-        model="gpt-4o-mini",  # Always use GPT-4o-mini for evaluation
+        model=EVALUATOR_MODEL,  # Use the centralized evaluator model constant
         temperature=0.1  # Lower temperature for evaluation
     )
     
@@ -447,7 +447,7 @@ def main():
     # Generate code
     print(f"Generating code for: {request}")
     print(f"Using model for generation: {MODEL}")
-    print(f"Using model for evaluation: gpt-4o-mini")
+    print(f"Using model for evaluation: {EVALUATOR_MODEL}")
     print(f"Max iterations: {args.max_iterations}")
     print(f"Evaluation threshold: {args.evaluation_threshold}")
     print("Please wait, this may take a minute...")

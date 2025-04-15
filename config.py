@@ -41,7 +41,8 @@ if HTTPS_PROXY:
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 
 # Model settings
-MODEL = os.getenv("MODEL", "gpt-4o")
+MODEL = os.getenv("MODEL", "gpt-4.1")
+EVALUATOR_MODEL = os.getenv("EVALUATOR_MODEL", "gpt-4.1-mini")  # Default model for code evaluation
 MODEL_TEMPERATURE = float(os.getenv("MODEL_TEMPERATURE", "0.2"))
 MODEL_MAX_TOKENS = int(os.getenv("MODEL_MAX_TOKENS", "4000"))
 MODEL_TOP_P = float(os.getenv("MODEL_TOP_P", "0.95"))
@@ -51,6 +52,7 @@ MODEL_PRESENCE_PENALTY = float(os.getenv("MODEL_PRESENCE_PENALTY", "0"))
 # Model configuration dictionary for easy access
 MODEL_CONFIG = {
     "model": MODEL,
+    "evaluator_model": EVALUATOR_MODEL,
     "temperature": MODEL_TEMPERATURE,
     "max_tokens": MODEL_MAX_TOKENS,
     "top_p": MODEL_TOP_P,
@@ -60,9 +62,11 @@ MODEL_CONFIG = {
 
 # Available models for selection in UI
 AVAILABLE_MODELS = [
+    "gpt-4.1",
+    "gpt-4.1-mini",
+    "gpt-4.1-nano",
     "gpt-4o",
     "gpt-4o-mini",
-    "o3-mini",
     "gpt-4-turbo",
     "gpt-4",
     "gpt-3.5-turbo",
@@ -126,6 +130,8 @@ def update_model_config(config: Dict[str, Any]) -> None:
     # Update global variables
     if "model" in config:
         MODEL = config["model"]
+    if "evaluator_model" in config:
+        EVALUATOR_MODEL = config["evaluator_model"]
     if "temperature" in config:
         MODEL_TEMPERATURE = float(config["temperature"])
     if "max_tokens" in config:
@@ -140,6 +146,7 @@ def update_model_config(config: Dict[str, Any]) -> None:
     # Update the model configuration dictionary
     MODEL_CONFIG = {
         "model": MODEL,
+        "evaluator_model": EVALUATOR_MODEL,
         "temperature": MODEL_TEMPERATURE,
         "max_tokens": MODEL_MAX_TOKENS,
         "top_p": MODEL_TOP_P,
