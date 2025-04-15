@@ -12,10 +12,11 @@ import json
 import argparse
 import logging
 import time
-from typing import Dict, List, Any, Tuple, get_origin, get_args, Union, ClassVar
+from typing import Dict, List, Any, Tuple, get_origin, get_args, Union, ClassVar, Optional
 from dotenv import load_dotenv
 import numpy as np
 import traceback
+import re
 
 # Load environment variables from .env file
 load_dotenv()
@@ -53,7 +54,7 @@ class CodeGenerationInterface:
         frequency_penalty: float = 0,
         presence_penalty: float = 0,
         websocket_port: int = None,
-        max_iterations: int = 2,
+        max_iterations: int = 1,
         evaluation_threshold: float = 75.0
     ):
         """Initialize the code generation interface.
@@ -91,12 +92,13 @@ class CodeGenerationInterface:
         
         self.logger.debug(f"Initialized code generation interface with model: {model}")
 
-    def generate_code(self, system_prompt: str, user_prompt: str) -> Dict[str, Any]:
+    def generate_code(self, system_prompt: str, user_prompt: str, history: Optional[List[List[str]]] = None) -> Dict[str, Any]:
         """Generate code using the OpenAI API.
 
         Args:
             system_prompt: The system prompt to use.
             user_prompt: The user prompt to use.
+            history: Optional list of previous user/assistant messages [[user_msg, assistant_msg], ...].
 
         Returns:
             Dict[str, Any]: The response from the API, including generated code.
@@ -105,11 +107,38 @@ class CodeGenerationInterface:
             self.logger.debug(f"Generating code with model: {self.model}")
             
             # Create messages for the API
-            messages = [
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt}
-            ]
+            messages = [{"role": "system", "content": system_prompt}]
             
+            # Add history if provided
+            if history:
+                for user_msg, assistant_msg in history:
+                    # Ensure we don't add None or empty messages
+                    if user_msg:
+                        messages.append({"role": "user", "content": user_msg})
+                    if assistant_msg:
+                        # Check if assistant message contains code to handle potential structure
+                        if "```python" in assistant_msg:
+                             # Simple extraction: Find first python block or assume content is assistant response
+                             code_match = re.search(r"```python\n(.*?)```", assistant_msg, re.DOTALL)
+                             if code_match:
+                                 # Represent assistant turn as generating code
+                                 # We might simplify this to just the message content for context
+                                 messages.append({"role": "assistant", "content": assistant_msg}) # Keep full response for now
+                             else:
+                                 messages.append({"role": "assistant", "content": assistant_msg})
+                        else:
+                             messages.append({"role": "assistant", "content": assistant_msg})
+
+            # Add the current user prompt
+            messages.append({"role": "user", "content": user_prompt})
+            
+            self.logger.debug(f"API Messages length: {len(messages)}")
+            # Log last few messages for context checking
+            if len(messages) > 1:
+                 self.logger.debug(f"Last message: {messages[-1]}")
+            if len(messages) > 2:
+                 self.logger.debug(f"Second last message: {messages[-2]}")
+
             # Call the OpenAI API with retry logic
             max_retries = 2
             retry_count = 0
@@ -163,200 +192,192 @@ class CodeGenerationInterface:
             }
     
     def _extract_code_and_explanation(self, response: str) -> tuple[str, str]:
-        """Extract code and explanation from the response.
+        """Extract code and explanation (conversational intro) from the response.
+
+        Assumes the AI follows the prompt instruction to provide a brief conversational
+        explanation BEFORE the code block, and nothing after.
 
         Args:
-            response: The response from the API.
+            response: The raw response string from the API.
 
         Returns:
-            tuple[str, str]: The extracted code and explanation.
+            tuple[str, str]: (code, explanation)
         """
-        # Default values
         code = ""
-        explanation = response
+        explanation = ""
         
-        # Check if the response contains a code block
-        if "```python" in response:
-            # Split by Python code blocks
-            parts = response.split("```python")
+        # Find the start of the first Python code block
+        code_block_start = response.find("```python")
+        
+        if code_block_start != -1:
+            # Extract explanation as the text before the code block
+            explanation = response[:code_block_start].strip()
             
-            if len(parts) > 1:
-                # Get the first part as the explanation (before the code block)
-                explanation = parts[0].strip()
-                
-                # Get the code from the first code block
-                code_parts = parts[1].split("```", 1)
-                if len(code_parts) > 0:
-                    code = code_parts[0].strip()
-                
-                # If there's content after the code block, add it to the explanation
-                if len(code_parts) > 1 and code_parts[1].strip():
-                    explanation += "\n\n" + code_parts[1].strip()
-        
+            # Find the end of the code block
+            code_block_end = response.find("```", code_block_start + len("```python"))
+            
+            if code_block_end != -1:
+                # Extract the code itself
+                code = response[code_block_start + len("```python"):code_block_end].strip()
+            else:
+                # Code block started but didn't end? Extract what we can.
+                code = response[code_block_start + len("```python"):].strip()
+                self.logger.warning("Code block started with ```python but closing ``` was not found.")
+        else:
+            # No Python code block found. Assume the entire response is explanation/message.
+            explanation = response.strip()
+            code = "" # No code to display
+            self.logger.info("No ```python code block found in the response.")
+            
+        # If explanation is empty but code exists, provide a default explanation
+        if not explanation and code:
+            explanation = "Okay, here is the generated code:"
+            self.logger.debug("No explanation found before code block, using default.")
+        elif not explanation and not code:
+            # If both are empty, the response was likely empty or just whitespace
+            explanation = "(No response content received)"
+            self.logger.warning("Empty response received from the API.")
+            
         return code, explanation
 
-    def process_message(self, message: str, history: List[List[str]]) -> Tuple[List[List[str]], str, Dict[str, Any], str]:
+    def process_message(self, message: str, history: List[List[str]]) -> Tuple[List[Dict[str, str]], str, Dict[str, Any], str]:
         """
-        Process a user message and update the chat history.
+        Process a user message, update the chat history, and generate/optimize code.
         
         Args:
-            message: User message.
-            history: Current chat history.
+            message: The new user message.
+            history: Chat history in Gradio's list format [[user_msg, assistant_msg], ...].
+                    For back-compatibility with our chat UI.
             
         Returns:
-            Tuple: Updated chat history, generated code, code validation, and status message.
+            Tuple: 
+                - Updated history (as Dict format for compatibility with backend)
+                - The latest generated/optimized code.
+                - Code validation dictionary.
+                - Status message string.
         """
         try:
-            # Simple handling for Request objects from Gradio
-            if hasattr(message, "__class__") and message.__class__.__name__ == "Request":
-                # Just extract the text field which contains the actual message
-                self.logger.warning("Received a Request object, extracting text")
-                try:
-                    # For starlette Request or similar, try to extract form data
-                    if hasattr(message, "form"):
-                        form_data = message.form()
-                        if isinstance(form_data, dict) and "text" in form_data:
-                            message = form_data["text"]
-                    # Fallback to string representation
-                    if not isinstance(message, str):
-                        message = "Generate code for Reachy 2 robot"
-                except Exception as e:
-                    self.logger.error(f"Error extracting message: {e}")
-                    message = "Generate code for Reachy 2 robot"
+            # Basic message validation
+            if not isinstance(message, str) or not message.strip():
+                error_msg = "Empty or invalid message."
+                # Return as dictionary format for backend
+                history_dict = [{"role": "assistant", "content": error_msg}]
+                return history_dict, "", {"valid": False, "errors": [error_msg], "warnings": [], "score": 0.0}, "❌ Invalid input"
 
-            # Ensure history is a list
-            if not isinstance(history, list):
-                history = []
+            # Convert list-format history to dict format for backend
+            backend_history = []
+            if history and isinstance(history, list):
+                for item in history:
+                    if isinstance(item, list) and len(item) == 2:
+                        user_msg, assistant_msg = item
+                        if user_msg is not None:
+                            backend_history.append({"role": "user", "content": user_msg})
+                        if assistant_msg is not None:
+                            backend_history.append({"role": "assistant", "content": assistant_msg})
 
-            # Add a status message to the chat
-            history.append([message, "Generating code..."])
-            self.chat_history = history
-            
-            # Import necessary components
-            from agent.code_generation_pipeline import CodeGenerationPipeline
-            from agent.code_evaluator import CodeEvaluator
-            from agent.code_generation_agent import ReachyCodeGenerationAgent
-            
-            # Create generator agent and evaluator
+            # --- Code Generation Logic ---
             try:
-                # Prepare generator parameters based on model type
-                generator_kwargs = {
-                    "api_key": self.client.api_key,
-                    "model": self.model,
-                    "max_tokens": self.max_tokens,
-                    "temperature": self.temperature
-                }
+                from agent.code_generation_pipeline import CodeGenerationPipeline
+                from agent.code_evaluator import CodeEvaluator
+                from agent.code_generation_agent import ReachyCodeGenerationAgent
                 
-                generator = ReachyCodeGenerationAgent(**generator_kwargs)
-                
-                # Prepare evaluator parameters based on model type
-                evaluator_model = EVALUATOR_MODEL  # Use centralized evaluator model
-                evaluator_kwargs = {
-                    "api_key": self.client.api_key,
-                    "model": evaluator_model,
-                    "max_tokens": self.max_tokens,
-                    "temperature": max(0.1, self.temperature - 0.1)  # Lower temp for evaluator
-                }
-                
-                evaluator = CodeEvaluator(**evaluator_kwargs)
-                
-                # Create the pipeline with integrated approach
+                generator = ReachyCodeGenerationAgent(
+                    api_key=self.client.api_key,
+                    model=self.model,
+                    max_tokens=self.max_tokens,
+                    temperature=self.temperature
+                )
+                evaluator = CodeEvaluator(
+                    api_key=self.client.api_key,
+                    model=EVALUATOR_MODEL,
+                    max_tokens=self.max_tokens,
+                    temperature=max(0.1, self.temperature - 0.1)
+                )
                 pipeline = CodeGenerationPipeline(
                     generator=generator,
                     evaluator=evaluator,
                     evaluation_threshold=self.evaluation_threshold,
                     max_iterations=self.max_iterations
                 )
-                
-                self.logger.info("Components initialized successfully")
             except Exception as init_error:
-                self.logger.error(f"Error initializing components: {init_error}")
-                self.logger.error(traceback.format_exc())
-                raise RuntimeError(f"Failed to initialize components: {init_error}")
-            
-            # Generate, evaluate, and optimize code
+                self.logger.error(f"Error initializing components: {init_error}", exc_info=True)
+                history_dict = backend_history + [
+                    {"role": "user", "content": message},
+                    {"role": "assistant", "content": f"Error initializing components: {init_error}"}
+                ]
+                return history_dict, "", {"valid": False, "errors": [str(init_error)], "warnings": []}, "❌ Initialization Error"
+
+            # Generate code
             try:
-                self.logger.info(f"Starting code generation for request: {message[:100]}...")
+                self.logger.info(f"Starting pipeline for: \"{message[:100]}...\" with history length {len(backend_history)}")
                 pipeline_result = pipeline.generate_code(
                     user_request=message,
-                    optimize=True  # Always try to optimize the code
+                    history=backend_history,
+                    optimize=True
                 )
-                self.logger.info("Code generation completed successfully")
                 
-                # Add debug logging to track the pipeline result
-                self.logger.debug(f"Pipeline result keys: {pipeline_result.keys() if isinstance(pipeline_result, dict) else 'Not a dict'}")
+                # Process pipeline result
+                best_code = (pipeline_result.get("final_code") or 
+                            pipeline_result.get("optimized_code") or 
+                            pipeline_result.get("generated_code", ""))
                 
-                # Extract the best code (optimized if available, otherwise generated)
-                best_code = ""
-                if isinstance(pipeline_result, dict):
-                    # Try to get code in order of preference: final_code, optimized_code, generated_code
-                    best_code = (pipeline_result.get("final_code") or 
-                                pipeline_result.get("optimized_code") or 
-                                pipeline_result.get("generated_code", ""))
-                    
-                    # Log the code extraction for debugging
-                    self.logger.info(f"Code extraction sources - final_code: {'final_code' in pipeline_result}")
-                    self.logger.info(f"Code extraction sources - optimized_code: {'optimized_code' in pipeline_result}")
-                    self.logger.info(f"Code extraction sources - generated_code: {'generated_code' in pipeline_result}")
-                    self.logger.info(f"Code extracted - Final code length: {len(best_code) if best_code else 0}")
-                    
-                    # Extract evaluation result for validation
-                    evaluation_result = pipeline_result.get("evaluation_result", {})
-                    
-                    # Convert evaluation result to the expected validation format
-                    code_validation = {
-                        "valid": evaluation_result.get("valid", False),
-                        "errors": evaluation_result.get("errors", []),
-                        "warnings": evaluation_result.get("warnings", []),
-                        "score": evaluation_result.get("score", 0.0)
-                    }
-                    
-                    # Update chat history with a concise response
-                    if pipeline_result.get("success", False):
-                        response_message = "✅ Code generated and optimized successfully."
-                    else:
-                        response_message = "⚠️ Code generated with some issues."
-                    
-                    # Create a status message
-                    if pipeline_result.get("success", False):
-                        status = f"✅ Code generation successful"
-                    elif not best_code:
-                        status = "❌ No code generated. Try a different request."
-                    else:
-                        status = f"⚠️ Code has issues"
+                # Extract AI's conversational reply from raw response
+                raw_response = pipeline_result.get("raw_response", "")
+                _, explanation = self._extract_code_and_explanation(raw_response)
+                
+                # Build validation information 
+                evaluation_result = pipeline_result.get("evaluation_result", {})
+                code_validation = {
+                    "valid": evaluation_result.get("valid", False),
+                    "errors": evaluation_result.get("errors", []),
+                    "warnings": evaluation_result.get("warnings", []),
+                    "score": evaluation_result.get("score", 0.0)
+                }
+                
+                # Construct assistant response message
+                score = code_validation['score']
+                
+                # Use the explanation as the assistant's message, but ensure it's not empty
+                assistant_message = explanation if explanation else "Here's the code I generated for your request."
+                # Optionally add a score/warnings note
+                if not pipeline_result.get("success", False):
+                    assistant_message += f" (Score: {score:.1f}/100)"
+                
+                # Construct final status message - this goes to status_update in UI
+                if pipeline_result.get("success", False):
+                    status = f"✅ Success (Score: {score:.1f})"
+                elif best_code:
+                    status = f"⚠️ Issues Found (Score: {score:.1f})"
                 else:
-                    self.logger.error(f"Pipeline returned non-dictionary result: {type(pipeline_result)}")
-                    response_message = "⚠️ Error in code generation pipeline."
-                    code_validation = {"valid": False, "errors": ["Internal error in code generation"], "warnings": [], "score": 0.0}
-                    status = "❌ Code generation pipeline error"
-            except Exception as pipeline_error:
-                self.logger.error(f"Error in pipeline execution: {pipeline_error}")
-                self.logger.error(traceback.format_exc())
-                best_code = ""
-                response_message = f"⚠️ Error in code generation: {str(pipeline_error)}"
-                code_validation = {"valid": False, "errors": [str(pipeline_error)], "warnings": [], "score": 0.0}
-                status = "❌ Pipeline execution error"
-            
-            # Update chat history with the response
-            history[-1] = [message, response_message]
-            self.chat_history = history
-            
-            return history, best_code, code_validation, status
-        except Exception as e:
-            self.logger.error(f"Error processing message: {e}")
-            self.logger.error(traceback.format_exc())
-            error_message = f"Error: {str(e)}"
-            
-            if not history:
-                history = []
-            if len(history) > 0 and len(history[-1]) == 2 and history[-1][1] == "Generating code...":
-                history[-1] = [message, error_message]
-            else:
-                history.append([message, error_message])
+                    status = "❌ Generation Failed"
                 
-            return history, "", {"valid": False, "errors": [error_message], "warnings": []}, f"❌ Error: {str(e)}"
+                # Add to history in dictionary format for backend compatibility
+                final_history = backend_history + [
+                    {"role": "user", "content": message},
+                    {"role": "assistant", "content": assistant_message}
+                ]
+                
+                self.logger.info(f"Processed message. Returning history length: {len(final_history)}, code: {len(best_code)} chars")
+                return final_history, best_code, code_validation, status
+                
+            except Exception as e:
+                self.logger.error(f"Error in code generation: {e}", exc_info=True)
+                error_message = f"Error generating code: {str(e)}"
+                history_dict = backend_history + [
+                    {"role": "user", "content": message}, 
+                    {"role": "assistant", "content": f"❌ {error_message}"}
+                ]
+                return history_dict, "", {"valid": False, "errors": [error_message], "warnings": []}, f"❌ Error: {str(e)}"
+                
+        except Exception as e:
+            self.logger.error(f"Critical error in process_message: {e}", exc_info=True)
+            error_message = f"Critical Error: {str(e)}"
+            return [
+                {"role": "user", "content": message},
+                {"role": "assistant", "content": f"❌ {error_message}"}
+            ], "", {"valid": False, "errors": [error_message], "warnings": []}, f"❌ Critical Error: {str(e)}"
     
-    def reset_chat(self) -> Tuple[List[List[str]], str, Dict[str, Any], str]:
+    def reset_chat(self) -> Tuple[List[Dict[str, str]], str, Dict[str, Any], str]:
         """
         Reset the chat history and clear all outputs.
         
@@ -609,6 +630,20 @@ class CodeGenerationInterface:
                     font-size: 14px !important;
                 }
                 
+                /* Improve chat message styling */
+                .message {
+                    font-family: 'Inter', system-ui, sans-serif !important;
+                    font-size: 15px !important;
+                    line-height: 1.5 !important;
+                    margin-bottom: 8px !important;
+                }
+                
+                /* Improve chat container */
+                .chatbot-container {
+                    border-radius: 8px !important;
+                    background-color: #f9fafb !important;
+                }
+                
                 .status-ready { 
                     padding: 10px 15px;
                     border-radius: 8px;
@@ -649,29 +684,39 @@ class CodeGenerationInterface:
                 
                 # Main content area with two columns
                 with gr.Row(equal_height=False):
-                    # Left column for input
+                    # Left column for chat and input
                     with gr.Column(scale=1):
-                        gr.Markdown("## What would you like Reachy to do?")
+                        gr.Markdown("## Conversation")
                         
-                        # Input area
-                        msg = gr.Textbox(
-                            placeholder="Example: Move the robot's right arm to wave hello...",
-                            lines=4,
-                            max_lines=10,
-                            label="Natural Language Request"
+                        # Chatbot display - Improved setup with no avatars
+                        chatbot = gr.Chatbot(
+                            value=[], 
+                            height=400,
+                            bubble_full_width=False,
+                            avatar_images=(None, None),  # Remove avatar images
+                            show_copy_button=True,
+                            render=True,
                         )
                         
-                        # Submit button in a row for better placement
+                        # Textbox for user input
+                        msg = gr.Textbox(
+                            placeholder="Type your request or code refinement here...",
+                            lines=3,
+                            label="Message",
+                            show_label=False
+                        )
+                        
+                        # Submit/Clear buttons
                         with gr.Row():
-                            submit_btn = gr.Button("Generate Code", variant="primary", scale=2)
-                            clear_btn = gr.Button("Reset", variant="secondary", scale=1)
+                            submit_btn = gr.Button("Send", variant="primary", scale=2)
+                            clear_btn = gr.Button("Clear Chat", variant="secondary", scale=1)
                         
                         # Status indicator
                         status_md = gr.Markdown(
-                            """<div class="status-ready">Ready to generate code</div>""",
+                            """<div class="status-ready">Ready for your request</div>""",
                         )
-                    
-                    # Right column for code and feedback
+                        
+                    # Right column for code and execution
                     with gr.Column(scale=1):
                         gr.Markdown("## Generated Code")
                         
@@ -686,8 +731,8 @@ class CodeGenerationInterface:
                         # Execute button
                         execute_btn = gr.Button("Execute Code", variant="primary")
                         
-                        # Feedback section
-                        gr.Markdown("## Execution Feedback")
+                        # Feedback section - REMOVING THE TITLE
+                        # gr.Markdown("## Execution Feedback")
                         feedback = gr.Textbox(
                             value="",
                             lines=6,
@@ -696,122 +741,134 @@ class CodeGenerationInterface:
                             interactive=False,
                         )
                 
-                # Internal state to track chat history
-                chatbot = gr.State([])
-                
-                # Helper functions for status updates
-                def update_status(message="Processing your request...", status="processing"):
-                    """Update the status indicator with a message and status type"""
-                    status_classes = {
-                        "ready": "status-ready",
-                        "processing": "status-processing", 
-                        "success": "status-success",
-                        "error": "status-error"
-                    }
-                    css_class = status_classes.get(status, "status-ready")
+                # --- SIMPLIFIED CHAT FUNCTIONS ---
+                # Basic two-step function for showing user message immediately, then AI response
+                def chat_and_code(message, history):
+                    """Two-step function for handling chat and code generation."""
+                    # First, add user message to history and display
+                    history.append([message, None])
+                    yield history, status_update("Processing your request...", "processing"), "", ""
                     
-                    # Add an emoji based on status
+                    # Call backend to generate code and response
+                    try:
+                        # Call the backend process_message function - it still returns List[List]
+                        # but we're now using the older format directly in the UI
+                        full_history, code, validation, status = self.process_message(message, history[:-1])
+                        
+                        # Extract the last assistant message
+                        if full_history and len(full_history) > 0:
+                            # Update the placeholder in the UI history
+                            if full_history[-1]["role"] == "assistant":
+                                history[-1][1] = full_history[-1]["content"]
+                            else:
+                                # Fallback if something went wrong with response structure
+                                history[-1][1] = "I've generated code for your request."
+                        else:
+                            history[-1][1] = "Code generated but couldn't create a response message."
+                            
+                        # Determine appropriate status message
+                        status_message = status
+                        status_type = "error" if "❌" in status else "success" if "✅" in status else "processing"
+                        
+                        # Send final state: history with AI response, status update, code
+                        yield history, status_update(status_message, status_type), code, ""
+                        
+                    except Exception as e:
+                        self.logger.error(f"Error in chat_and_code: {e}", exc_info=True)
+                        # Add error message to history
+                        history[-1][1] = f"❌ Error: {str(e)}"
+                        yield history, status_update(f"Error: {str(e)}", "error"), "", ""
+                
+                # Helper for status messages
+                def status_update(message, status="processing"):
+                    """Create a status message with appropriate styling."""
+                    status_class = {
+                        "ready": "status-ready",
+                        "processing": "status-processing",
+                        "success": "status-success", 
+                        "error": "status-error"
+                    }.get(status, "status-ready")
+                    
                     emoji = {
                         "ready": "🔹",
                         "processing": "⏳",
                         "success": "✅",
-                        "error": "❌"
+                        "error": "❌" 
                     }.get(status, "🔹")
                     
-                    return f"""<div class="{css_class}">{emoji} {message}</div>"""
+                    return f"""<div class="{status_class}">{emoji} {message}</div>"""
                 
-                # Function to reset the interface
-                def reset_fn():
-                    """Reset all fields and state"""
-                    return [], update_status("Ready to generate code", "ready"), "", ""
-                
-                # Function to generate code (without updating feedback)
-                def generate_code_fn(message, history):
-                    """Process a user request and generate code only"""
+                # Execute code function - simplified
+                def execute_code(code):
+                    """Execute the code and yield updates."""
+                    if not code or not code.strip():
+                        yield status_update("No code to execute", "error"), "Please generate code first."
+                        return
+                    
+                    # Set processing status
+                    yield status_update("Executing code...", "processing"), "Executing... please wait."
+                    
+                    # Execute the code
                     try:
-                        # Set processing status
-                        status_html = update_status("Generating code for your request...", "processing")
-                        
-                        # Generate code
-                        new_history, code, validation, _ = self.process_message(message, history)
-                        
-                        # Update status based on code generation success
-                        if code:
-                            status_html = update_status("Code generated successfully", "success")
-                        else:
-                            status_html = update_status("No code was generated", "error")
-                            code = ""  # Ensure empty string is returned
-                        
-                        # Return status and code, but don't update feedback
-                        return new_history, status_html, code
-                        
-                    except Exception as e:
-                        self.logger.error(f"Error in generate_code_fn: {str(e)}")
-                        self.logger.error(traceback.format_exc())
-                        status_html = update_status(f"Error: {str(e)}", "error")
-                        return history, status_html, ""
-                
-                # Function to execute code
-                def execute_code_fn(code):
-                    """Execute the generated code on the robot"""
-                    try:
-                        # Set processing status
-                        status_html = update_status("Executing code on robot...", "processing")
-                        
-                        # Execute code
                         result = self.execute_code(code)
                         
-                        # Update status based on execution success
-                        if result.get("success", False):
-                            status_html = update_status("Code executed successfully", "success")
-                            
-                            if result.get("output", "").strip():
-                                feedback_text = f"✅ Execution successful\n\nOutput:\n{result['output']}"
-                            else:
-                                feedback_text = "✅ Execution completed successfully with no output."
-                        else:
-                            status_html = update_status("Execution failed", "error")
-                            
-                            if result.get("feedback", ""):
-                                feedback_text = f"❌ Execution failed\n\n{result['feedback']}"
-                            elif result.get("stderr", ""):
-                                feedback_text = f"❌ Execution failed\n\nError details:\n{result['stderr']}"
-                            else:
-                                feedback_text = f"❌ Execution failed: {result.get('message', 'Unknown error')}"
+                        # Process the result
+                        success = result.get("success", False)
+                        status_type = "success" if success else "error"
+                        status_msg = "Execution successful" if success else "Execution failed"
                         
-                        # Return the results
-                        return status_html, feedback_text
+                        # Get the feedback text
+                        feedback_text = result.get("feedback", "") or result.get("output", "")
+                        if not feedback_text.strip():
+                            feedback_text = "No output from execution."
+                            
+                        # Return the final result
+                        yield status_update(status_msg, status_type), feedback_text
+                    
                     except Exception as e:
-                        self.logger.error(f"Error in execute_code: {str(e)}")
-                        self.logger.error(traceback.format_exc())
-                        status_html = update_status(f"Error: {str(e)}", "error")
-                        return status_html, f"❌ Error executing code: {str(e)}"
+                        self.logger.error(f"Error executing code: {e}", exc_info=True)
+                        yield status_update(f"Error: {str(e)}", "error"), f"Error executing code: {str(e)}"
                 
-                # Set up event handlers
+                # Clear chat function
+                def clear_chat():
+                    """Reset the chat and code."""
+                    return [], status_update("Chat cleared. Ready for new request.", "ready"), "", ""
+                
+                # --- CONNECT EVENT HANDLERS ---
+                # Submit button triggers chat and code function
                 submit_btn.click(
-                    fn=generate_code_fn,
+                    fn=chat_and_code,
                     inputs=[msg, chatbot],
-                    outputs=[chatbot, status_md, code_editor],
-                    api_name="generate"
+                    outputs=[chatbot, status_md, code_editor, feedback]
+                ).then(
+                    fn=lambda: "", 
+                    inputs=None, 
+                    outputs=msg  # Clear input box after sending
                 )
                 
+                # Enter key in message box also triggers chat
                 msg.submit(
-                    fn=generate_code_fn,
+                    fn=chat_and_code,
                     inputs=[msg, chatbot],
-                    outputs=[chatbot, status_md, code_editor]
+                    outputs=[chatbot, status_md, code_editor, feedback]
+                ).then(
+                    fn=lambda: "", 
+                    inputs=None, 
+                    outputs=msg  # Clear input box after sending
                 )
                 
+                # Execute button triggers code execution
                 execute_btn.click(
-                    fn=execute_code_fn,
+                    fn=execute_code,
                     inputs=[code_editor],
-                    outputs=[status_md, feedback],
-                    api_name="execute"
+                    outputs=[status_md, feedback]
                 )
                 
+                # Clear button resets everything
                 clear_btn.click(
-                    fn=reset_fn,
-                    outputs=[chatbot, status_md, code_editor, feedback],
-                    api_name="reset"
+                    fn=clear_chat,
+                    inputs=[],
+                    outputs=[chatbot, status_md, code_editor, feedback]
                 )
             
             # Launch the interface

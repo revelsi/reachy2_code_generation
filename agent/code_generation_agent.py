@@ -640,11 +640,12 @@ class ReachyCodeGenerationAgent:
             # Return a basic fallback prompt if the builder fails
             return """You are an AI assistant that generates Python code for controlling a Reachy 2 robot."""
 
-    def generate_code(self, user_request: str) -> Dict[str, Any]:
+    def generate_code(self, user_request: str, history: Optional[Union[List[Dict[str, str]], List[List[str]]]] = None) -> Dict[str, Any]:
         """Generate code using the OpenAI API with a simple direct approach.
         
         Args:
             user_request: The user request to generate code for.
+            history: Optional chat history, either as List[Dict] or List[List].
             
         Returns:
             Dict with generated code and metadata.
@@ -655,16 +656,42 @@ class ReachyCodeGenerationAgent:
             # Build system prompt - use the comprehensive prompt instead of simplified version
             system_prompt = self._build_system_prompt()
 
+            # Prepare messages including history
+            messages = [{"role": "system", "content": system_prompt}]
+            
+            # Process history if provided, handling both formats
+            if history:
+                if isinstance(history, list):
+                    # Handle two possible formats
+                    if history and isinstance(history[0], dict):
+                        # Dict format: [{"role": "user", "content": "..."}, ...]
+                        for message_dict in history:
+                            if isinstance(message_dict, dict) and "role" in message_dict and "content" in message_dict:
+                                if message_dict["content"]:
+                                    messages.append(message_dict)
+                            else:
+                                self.logger.warning(f"Skipping invalid history item: {message_dict}")
+                    elif history and isinstance(history[0], list):
+                        # List format: [[user_msg, assistant_msg], ...]
+                        for item in history:
+                            if isinstance(item, list) and len(item) == 2:
+                                user_msg, assistant_msg = item
+                                if user_msg:
+                                    messages.append({"role": "user", "content": user_msg})
+                                if assistant_msg:
+                                    messages.append({"role": "assistant", "content": assistant_msg})
+                            else:
+                                self.logger.warning(f"Skipping invalid history item: {item}")
+            # Add the current user prompt
+            messages.append({"role": "user", "content": user_request})
+            
             # Simple OpenAI API call
             client = OpenAI(api_key=self.api_key)
             
             # GPT models use standard parameters
             params = {
                 "model": self.model,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_request}
-                ],
+                "messages": messages, # Use the constructed messages list
                 "temperature": self.temperature,
                 "max_tokens": self.max_tokens,
                 "top_p": self.top_p,

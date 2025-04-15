@@ -23,6 +23,11 @@ CORE_ROLE = """
 You are an AI assistant that generates Python code for controlling a Reachy 2 robot. Approach your task with a spatial understanding as if you were the robot itself - consider the physical constraints, joint limits, and reachable workspace from the robot's perspective.
 
 When planning movements, visualize the robot's body - its two arms with 7 joints each, its head, and its sensors. Think about how each joint rotation affects the position and orientation of the end effectors (hands), and ensure all movements stay within safe, reachable areas.
+
+**Conversational Response Style:**
+1.  **Acknowledge the Request:** Start your response with a brief, conversational sentence acknowledging the user's request or question (e.g., "Okay, I can help with that.", "Sure, here's the code to make Reachy wave:", "Got it, I'll refine the code to add the safety checks.").
+2.  **Provide Code:** Immediately follow the acknowledgment with the Python code block (```python ... ```).
+3.  **No Explanation After Code:** Do NOT add any explanation or commentary *after* the code block. Your conversational text should ONLY appear before the code.
 """
 
 # Define constants
@@ -358,13 +363,27 @@ Format your response with:
 """
 
 # Functions to load API documentation and generate API summary
+
+# Cache for API documentation
+_API_DOCUMENTATION_CACHE = None
+_KINEMATICS_GUIDE_CACHE = None
+
 def load_api_documentation():
     """
     Load the API documentation from the JSON file.
+    Uses a singleton pattern to ensure the documentation is only loaded once.
     
     Returns:
         list: The API documentation as a list.
     """
+    global _API_DOCUMENTATION_CACHE
+    
+    # Return cached documentation if available
+    if _API_DOCUMENTATION_CACHE is not None:
+        logger.debug("Using cached API documentation")
+        return _API_DOCUMENTATION_CACHE
+        
+    # Load documentation only if not already cached
     try:
         doc_path = os.path.join(os.path.dirname(__file__), "docs", "api_documentation.json")
         with open(doc_path, "r") as f:
@@ -377,31 +396,45 @@ def load_api_documentation():
                 logger.info("API documentation loaded in dictionary format, converting to list")
                 # If it's a dictionary, we need to transform it to a list format
                 # compatible with the existing code
-                return list(api_docs.values())
+                _API_DOCUMENTATION_CACHE = list(api_docs.values())
             elif isinstance(api_docs, list):
                 logger.info("API documentation loaded in list format")
-                return api_docs
+                _API_DOCUMENTATION_CACHE = api_docs
             else:
                 logger.error(f"Unknown API documentation format: {type(api_docs)}")
-                return []
+                _API_DOCUMENTATION_CACHE = []
+                
+            return _API_DOCUMENTATION_CACHE
     except Exception as e:
         logger.error(f"Error loading API documentation: {e}")
-        return []
+        _API_DOCUMENTATION_CACHE = []
+        return _API_DOCUMENTATION_CACHE
 
 def load_kinematics_guide():
     """
     Load the kinematics guide from the markdown file.
+    Uses a singleton pattern to ensure the guide is only loaded once.
     
     Returns:
         str: The kinematics guide content.
     """
+    global _KINEMATICS_GUIDE_CACHE
+    
+    # Return cached guide if available
+    if _KINEMATICS_GUIDE_CACHE is not None:
+        logger.debug("Using cached kinematics guide")
+        return _KINEMATICS_GUIDE_CACHE
+        
+    # Load guide only if not already cached
     try:
         guide_path = os.path.join(os.path.dirname(__file__), "docs", "reachy2_kinematics_prompt.md")
         with open(guide_path, "r") as f:
-            return f.read()
+            _KINEMATICS_GUIDE_CACHE = f.read()
+            return _KINEMATICS_GUIDE_CACHE
     except Exception as e:
         logger.error(f"Error loading kinematics guide: {e}")
-        return "ARM KINEMATICS GUIDE NOT FOUND"
+        _KINEMATICS_GUIDE_CACHE = "ARM KINEMATICS GUIDE NOT FOUND"
+        return _KINEMATICS_GUIDE_CACHE
 
 def extract_parameter_details(signature: str, docstring: str) -> Dict[str, Dict[str, Any]]:
     """

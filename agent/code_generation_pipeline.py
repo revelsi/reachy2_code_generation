@@ -68,6 +68,7 @@ class PipelineResult(TypedDict):
     iterations: int
     duration: float
     timestamp: str
+    raw_response: str
 
 class CodeGenerationPipeline:
     """
@@ -112,12 +113,13 @@ class CodeGenerationPipeline:
         self.logger.info(f"  - Evaluation threshold: {evaluation_threshold}")
         self.logger.info(f"  - Max iterations: {max_iterations}")
         
-    def generate_code(self, user_request: str, optimize: bool = True) -> PipelineResult:
+    def generate_code(self, user_request: str, history: Optional[Union[List[Dict[str, str]], List[List[str]]]] = None, optimize: bool = True) -> PipelineResult:
         """
         Generate code from a natural language request, evaluate it, and optimize it.
         
         Args:
             user_request: The user's natural language request.
+            history: Optional chat history, either as List[Dict] or List[List]. 
             optimize: Whether to optimize the generated code.
             
         Returns:
@@ -136,7 +138,8 @@ class CodeGenerationPipeline:
             "success": False,
             "iterations": 0,
             "duration": 0.0,
-            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S")
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "raw_response": ""
         }
         
         try:
@@ -145,8 +148,11 @@ class CodeGenerationPipeline:
             self._notify("Generating initial code...")
             
             try:
-                response = self.generator.generate_code(user_request)
+                # Pass history to the generator for context
+                response = self.generator.generate_code(user_request=user_request, history=history)
                 generated_code = response.get("code", "")
+                raw_response = response.get("raw_response", "")
+                result["raw_response"] = raw_response
                 
                 if not generated_code:
                     self.logger.warning("No code was generated")

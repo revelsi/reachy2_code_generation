@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.2] - 2024-05-01
+
+### Added
+- New conversational chat interface for more intuitive code generation
+- Full chat history support with back-and-forth conversation capabilities
+- Improved typography and layout for better reading experience
+
+### Improved
+- Optimized performance with API documentation caching to prevent redundant loading
+- Streamlined interface with cleaner feedback presentation
+- Enhanced user experience with responsive chat interactions
+
 ## [1.0.1] - 2024-04-25
 
 ### Improved

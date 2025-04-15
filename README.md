@@ -14,6 +14,7 @@ This project provides an intuitive interface for controlling the Reachy 2 robot 
 ## Key Features
 
 - **Natural Language to Code**: Convert plain English instructions into Python code
+- **Conversational Interface**: Intuitive chat-based interaction for natural back-and-forth communication
 - **Code Generation Pipeline**: Three-stage process for high-quality code creation
   - **Generation**: Creates initial code from user requests using GPT-4o
   - **Evaluation**: Assesses code quality, safety, and API correctness using GPT-4o-mini
@@ -124,24 +125,25 @@ The Gradio interface provides an intuitive way to generate and execute code for 
 ### Main Interface Components
 
 1. **Left Column**: 
-   - **Natural Language Input**: Enter your request (e.g., "Wave the right arm for 3 seconds")
-   - **Control Buttons**: Generate Code and Reset options
+   - **Chat Interface**: Natural conversation with the AI assistant
+   - **Message History**: View previous interactions and context
+   - **Message Input**: Type requests, ask questions, or refine code
    - **Status Indicator**: Clear visual feedback on current operation status
 
 2. **Right Column**:
    - **Code Editor**: View and modify generated Python code with syntax highlighting
    - **Execute Button**: Run the code directly on connected Reachy robots
-   - **Execution Feedback**: View output and error messages from code execution
+   - **Execution Results**: View output and error messages from code execution
 
-The interface features a modern, clean design with clear separation between input and output areas for improved usability.
+The interface features a modern, clean design with clear separation between conversation and code areas for improved usability.
 
 ### Workflow Example
 
-1. **Enter a Request**: Type "Make the robot look left, then right, then center" in the input box
-2. **Generate Code**: Click the "Generate Code" button to start the generation pipeline
-3. **Review Results**: Examine the generated code in the code editor
-4. **Execute (Optional)**: If a robot is connected, click "Execute Code" to run it directly
-5. **Refine**: Adjust your request based on results or robot behavior
+1. **Start a Conversation**: Type "Can you help me make Reachy wave its right arm?" in the message box
+2. **Receive Response**: The AI will generate code and explain its approach conversationally
+3. **Ask Follow-up Questions**: Refine your request with natural language like "Can you make it wave three times instead?"
+4. **Execute Code**: If a robot is connected, click "Execute Code" to run it directly
+5. **Iterate and Improve**: Continue the conversation to refine the code based on results
 
 ### Tips for Effective Use
 
@@ -203,6 +205,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Version History
 
+- **v1.0.2** (May 2024): New conversational chat interface with back-and-forth interactions and performance optimizations.
 - **v1.0.1** (April 2024): UI modernization with improved layout, code editor enhancements, and better status indicators.
 - **v1.0.0** (April 2024): Initial public release with the Generation-Evaluation-Optimization pipeline and Gradio interface.
 
