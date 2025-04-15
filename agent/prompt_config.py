@@ -725,4 +725,257 @@ def get_default_prompt_order():
         "kinematics_guide",
         "api_summary",
         "response_format"
-    ] 
+    ]
+
+# Add section for evaluator prompt configuration at the end of the file
+
+# Evaluator-specific sections
+EVALUATOR_CORE_ROLE = """
+You are a Python code evaluator specialized in Reachy 2 robot code.
+You will analyze code for safety, correctness, and proper API usage, providing detailed feedback.
+"""
+
+EVALUATION_CRITERIA = """
+EVALUATION CRITERIA:
+1. CORRECTNESS: Does the code fulfill the user's request? Does it accomplish the task properly?
+2. SAFETY: Does the code use safe position ranges? Does it prevent damage to the robot?
+3. API USAGE: Does the code correctly use the Reachy 2 SDK API?
+4. ERROR HANDLING: Does the code include proper error handling, especially for inverse kinematics?
+5. CODE STRUCTURE: Does the code follow the required structure with initialization, operation, and cleanup?
+6. CODE QUALITY: Is the code well-structured, documented, and maintainable?
+7. **API ADHERENCE:** Does the code ONLY use functions/classes/parameters explicitly defined in the official API documentation provided to the generator? Penalize usage of undocumented elements.
+"""
+
+SCORING_GUIDELINES = """
+SCORING GUIDELINES:
+- 90-100: Excellent code, follows all guidelines, handles errors properly, and uses API correctly
+- 80-89: Good code with minor issues or warnings, but fully functional
+- 70-79: Functional code with several warnings or structure issues
+- 60-69: Code with significant issues but might still work in limited scenarios
+- Below 60: Code with critical errors, safety violations, or incorrect API usage
+"""
+
+FEEDBACK_FORMAT = """
+RESPONSE FORMAT:
+Your evaluation must be in JSON format with these fields:
+{
+  "valid": true/false,
+  "errors": ["Critical error 1", "Critical error 2", ...],
+  "warnings": ["Warning 1", "Warning 2", ...],
+  "suggestions": ["Suggestion 1", "Suggestion 2", ...],
+  "score": 75.5,
+  "explanation": "Brief explanation of the overall quality and issues."
+}
+
+The "valid" field should be true only if there are no critical errors that would prevent the code from running or potentially damage the robot.
+"""
+
+# Real code examples from repository for evaluator
+EVALUATOR_REAL_EXAMPLES = """
+REAL SDK EXAMPLES FROM OFFICIAL REPOSITORY:
+1. BASIC SETUP AND POSTURE EXAMPLE:
+```python
+# From set_default_posture.py
+import logging
+import time
+from reachy2_sdk import ReachySDK
+
+# Connect to Reachy
+reachy = ReachySDK(host="localhost")
+
+# Check if connection is successful
+if not reachy.is_connected:
+    exit("Reachy is not connected.")
+
+# Print basic information
+print("Reachy basic information:")
+print(reachy.info)
+print("Reachy joint status:")
+print(reachy.r_arm.joints)
+
+# Turning on Reachy
+print("Turning on Reachy...")
+reachy.turn_on()
+
+time.sleep(0.2)
+
+# Set to default posture
+print("Set to default posture...")
+reachy.goto_posture("default")
+```
+
+2. PROPER ARM CONTROL AND INVERSE KINEMATICS WITH ERROR HANDLING:
+```python
+# Adapted from draw_square.py
+import logging
+import time
+import numpy as np
+from reachy2_sdk import ReachySDK
+
+# Connect to Reachy
+reachy = ReachySDK(host="localhost")
+if not reachy.is_connected:
+    exit("Reachy is not connected.")
+
+try:
+    # Initialize Reachy
+    print("Turning on Reachy")
+    reachy.turn_on()
+    time.sleep(0.2)
+    
+    # Set to initial posture  
+    print("Set to Elbow 90 pose ...")
+    reachy.goto_posture("elbow_90", wait=True)
+    
+    # Build a target pose matrix
+    target_pose = np.array([
+        [0, 0, -1, 0.4],
+        [0, 1, 0, -0.3],
+        [1, 0, 0, 0],
+        [0, 0, 0, 1]
+    ])
+    
+    # Use inverse kinematics with error handling
+    try:
+        # Get the position in the joint space
+        joints_positions = reachy.r_arm.inverse_kinematics(target_pose)
+        # Move Reachy's right arm to this point
+        reachy.r_arm.goto(joints_positions, duration=2, wait=True)
+    except ValueError as e:
+        print(f"Target position unreachable: {e}")
+        # Use a fallback safe position
+        reachy.r_arm.goto([0, 10, -10, -90, 0, 0, 0], duration=2)
+        
+    # Get current position for feedback
+    current_pos = reachy.r_arm.forward_kinematics()
+```
+"""
+
+# Function to get all evaluator prompt sections
+def get_evaluator_prompt_sections():
+    """
+    Get all evaluator prompt sections as a dictionary.
+    
+    Returns:
+        dict: A dictionary of evaluator prompt section names to their content.
+    """
+    # First get the common sections from generator
+    common_sections = get_prompt_sections()
+    
+    # Add evaluator-specific sections
+    evaluator_sections = {
+        "evaluator_core_role": EVALUATOR_CORE_ROLE,
+        "evaluation_criteria": EVALUATION_CRITERIA,
+        "scoring_guidelines": SCORING_GUIDELINES,
+        "feedback_format": FEEDBACK_FORMAT,
+        "evaluator_real_examples": EVALUATOR_REAL_EXAMPLES,
+    }
+    
+    # Combined dictionary with common and evaluator-specific sections
+    # Using common ones with an "shared_" prefix to avoid confusion
+    combined = {}
+    for key, value in common_sections.items():
+        combined[f"shared_{key}"] = value
+    combined.update(evaluator_sections)
+    
+    return combined
+
+# Function to get the default evaluator prompt sections order
+def get_default_evaluator_prompt_order():
+    """
+    Get the default order of evaluator prompt sections.
+    
+    Returns:
+        list: A list of section names in the default order.
+    """
+    return [
+        "evaluator_core_role",
+        "shared_official_modules",
+        "shared_critical_warnings",
+        "shared_code_structure",
+        "evaluation_criteria",
+        "scoring_guidelines",
+        "evaluator_real_examples",
+        "shared_api_summary",
+        "feedback_format"
+    ]
+
+# Function to build a complete evaluator prompt from sections
+def build_evaluator_prompt(custom_order=None):
+    """
+    Build a complete evaluator prompt from the predefined sections.
+    
+    Args:
+        custom_order: An optional list of section names in a custom order.
+        
+    Returns:
+        str: The complete evaluator prompt.
+    """
+    sections = get_evaluator_prompt_sections()
+    
+    # Use custom order if provided, otherwise use default
+    order = custom_order if custom_order else get_default_evaluator_prompt_order()
+    
+    # Build prompt by joining sections in the specified order
+    prompt_parts = []
+    for section_name in order:
+        if section_name in sections:
+            prompt_parts.append(sections[section_name])
+        else:
+            logger.warning(f"Section '{section_name}' not found in prompt sections")
+    
+    return "\n\n".join(prompt_parts)
+
+# Modified to build a complete generator prompt from sections
+def build_generator_prompt(custom_order=None):
+    """
+    Build a complete generator prompt from the predefined sections.
+    
+    Args:
+        custom_order: An optional list of section names in a custom order.
+        
+    Returns:
+        str: The complete generator prompt.
+    """
+    sections = get_prompt_sections()
+    
+    # Use custom order if provided, otherwise use default
+    order = custom_order if custom_order else get_default_prompt_order()
+    
+    # Build prompt by joining sections in the specified order
+    prompt_parts = []
+    for section_name in order:
+        if section_name in sections:
+            prompt_parts.append(sections[section_name])
+        else:
+            logger.warning(f"Section '{section_name}' not found in prompt sections")
+    
+    return "\n\n".join(prompt_parts)
+
+# Main function to demonstrate unified prompt building
+def main():
+    """
+    Demonstrates the unified prompt building system.
+    """
+    # Build the generator prompt
+    generator_prompt = build_generator_prompt()
+    
+    # Build the evaluator prompt
+    evaluator_prompt = build_evaluator_prompt()
+    
+    # Print the lengths of both prompts
+    print(f"Generator prompt length: {len(generator_prompt)} characters")
+    print(f"Evaluator prompt length: {len(evaluator_prompt)} characters")
+    
+    # Example of saving prompts to files
+    try:
+        with open("generator_prompt.txt", "w") as f:
+            f.write(generator_prompt)
+        with open("evaluator_prompt.txt", "w") as f:
+            f.write(evaluator_prompt)
+        print("Prompts saved to generator_prompt.txt and evaluator_prompt.txt")
+    except Exception as e:
+        print(f"Error saving prompts: {e}")
+
+if __name__ == "__main__":
+    main() 

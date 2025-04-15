@@ -29,6 +29,9 @@ if parent_dir not in sys.path:
 # Import configuration
 from config import OPENAI_API_KEY, MODEL, EVALUATOR_MODEL, AVAILABLE_MODELS, get_model_config
 
+# Import the unified prompt builder
+from agent.prompt_config import build_generator_prompt
+
 # Replace with a stub implementation for now
 def get_websocket_server():
     """
@@ -589,26 +592,20 @@ class ReachyCodeGenerationAgent:
             logger.error(traceback.format_exc())
 
     def _build_system_prompt(self) -> str:
-        """Build the system prompt for the code generation agent.
+        """Build the system prompt for code generation.
         
         Returns:
-            str: The system prompt.
+            str: The system prompt for code generation.
         """
-        # Get prompt sections and default order
-        from agent.prompt_config import get_prompt_sections, get_default_prompt_order
-        
-        sections = get_prompt_sections()
-        section_order = get_default_prompt_order()
-        
-        # Build the prompt by concatenating sections in order
-        prompt_parts = []
-        
-        for section_name in section_order:
-            if section_name in sections:
-                prompt_parts.append(sections[section_name])
-        
-        # Join all parts with double newlines for better readability
-        return "\n\n".join(prompt_parts)
+        try:
+            # Use the unified prompt builder
+            system_prompt = build_generator_prompt()
+            return system_prompt
+        except Exception as e:
+            self.logger.error(f"Error building system prompt: {e}")
+            self.logger.error(traceback.format_exc())
+            # Return a basic fallback prompt if the builder fails
+            return """You are an AI assistant that generates Python code for controlling a Reachy 2 robot."""
 
     def generate_code(self, user_request: str) -> Dict[str, Any]:
         """Generate code using the OpenAI API with a simple direct approach.
