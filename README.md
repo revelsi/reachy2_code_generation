@@ -207,9 +207,9 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Version History
 
-- **v1.0.2** (May 2024): New conversational chat interface with back-and-forth interactions and performance optimizations.
-- **v1.0.1** (April 2024): UI modernization with improved layout, code editor enhancements, and better status indicators.
-- **v1.0.0** (April 2024): Initial public release with the Generation-Evaluation-Optimization pipeline and Gradio interface.
+- **v1.0.2** (15 April 2025): New conversational chat interface with back-and-forth interactions and performance optimizations.
+- **v1.0.1** (14 April 2025): UI modernization with improved layout, code editor enhancements, and better status indicators.
+- **v1.0.0** (8 April 2025): Initial public release with the Generation-Evaluation-Optimization pipeline and Gradio interface.
 
 ## License
 

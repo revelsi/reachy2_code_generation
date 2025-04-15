@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [1.0.2] - 2024-05-01
+## [1.0.2] - 2025-04-15
 
 ### Added
 - New conversational chat interface for more intuitive code generation
@@ -17,7 +17,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Enhanced user experience with responsive chat interactions
 - Strengthened code evaluation with stricter scoring rules and safety focus in the prompt
 
-## [1.0.1] - 2024-04-25
+## [1.0.1] - 2025-04-14
 
 ### Improved
 - Completely redesigned UI with a modern two-column layout for better usability
@@ -26,7 +26,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Simplified status indicators with clear visual feedback for different states
 - Improved error handling and status messaging throughout the interface
 
-## [1.0.0] - 2025-04-09
+## [1.0.0] - 2025-04-08
 
 ### Added
 - Initial public release of the Reachy2 code generation system
