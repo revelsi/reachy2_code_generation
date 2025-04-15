@@ -53,6 +53,12 @@ CRITICAL GUIDANCE FOR CODE GENERATION:
 - Properties are accessed WITHOUT parentheses (e.g., reachy.r_arm NOT reachy.r_arm())
 - Gripper access must be through arm property (e.g., reachy.r_arm.gripper.open())
 - For arm goto(), provide EXACTLY 7 joint values
+- CRITICAL: CONTEXTUAL CONNECTION CHECKING is REQUIRED:
+  1. First verify basic connection: `if not reachy.is_connected: sys.exit(1)`
+  2. THEN verify only the specific robot parts your code will use:
+     - If using right arm: `if reachy.r_arm is None: print("Error: Right arm unavailable"); sys.exit(1)`
+     - If using left arm: `if reachy.l_arm is None: print("Error: Left arm unavailable"); sys.exit(1)`
+     - If using head: `if reachy.head is None: print("Error: Head unavailable"); sys.exit(1)`
 - Use time.sleep() after movement commands when needed (for sequential movements or stability)
 - For fluid continuous movements, sleeps can be omitted when appropriate
 - Use try/finally blocks for proper cleanup
@@ -92,9 +98,29 @@ EXAMPLE CODE TEMPLATE:
 ```python
 from reachy2_sdk import ReachySDK
 import time
+import sys
 
 # Connect to the robot
 reachy = ReachySDK(host="localhost")
+
+# CONTEXTUAL CONNECTION VERIFICATION
+# Step 1: Check basic connection
+if not reachy.is_connected:
+    print("Error: Could not connect to Reachy robot")
+    print("Please ensure the robot or simulator is running and accessible")
+    sys.exit(1)
+
+# Step 2: Verify only the specific robot parts this code will use
+# This example uses both arms, so check both
+if reachy.r_arm is None:
+    print("Error: Right arm is not available")
+    print("This code requires the right arm to function properly")
+    sys.exit(1)
+    
+if reachy.l_arm is None:
+    print("Error: Left arm is not available")
+    print("This code requires the left arm to function properly")
+    sys.exit(1)
 
 try:
     # INITIALIZATION
@@ -105,20 +131,57 @@ try:
     # MAIN CODE OPTION 1: With sleep for distinct, sequential movements
     # This approach ensures each movement completes before starting the next
     # Use this when precision between movements is important
-    reachy.r_arm.goto([0, 0, 0, -90, 0, 0, 0], duration=1.0)
+    reachy.r_arm.goto([0, 0, 0, -90, 0, 0, 0], duration=1.0, interpolation_space="joint_space")
     time.sleep(1.5)  # Wait for movement to complete
     
-    reachy.r_arm.goto([0, 10, -10, -90, 0, 0, 0], duration=1.0)
+    reachy.r_arm.goto([0, 10, -10, -90, 0, 0, 0], duration=1.0, interpolation_space="joint_space")
     time.sleep(1.5)  # Wait for movement to complete
     
     # MAIN CODE OPTION 2: Without sleep for fluid continuous movements
     # This creates a more natural flowing sequence without pauses
     # Use this when fluid motion is more important than precise positioning
-    reachy.l_arm.goto([0, 0, 0, -90, 0, 0, 0], duration=1.0)
-    reachy.l_arm.goto([0, -10, 10, -90, 0, 0, 0], duration=1.0)
+    reachy.l_arm.goto([0, 0, 0, -90, 0, 0, 0], duration=1.0, interpolation_space="joint_space")
+    reachy.l_arm.goto([0, -10, 10, -90, 0, 0, 0], duration=1.0, interpolation_space="joint_space")
     
 finally:
     # CLEANUP
+    reachy.turn_off_smoothly()
+    reachy.disconnect()
+```
+
+# EXAMPLE WITH JUST THE HEAD
+```python
+from reachy2_sdk import ReachySDK
+import time
+import sys
+
+# Connect to the robot
+reachy = ReachySDK(host="localhost")
+
+# Contextual connection verification - only verify parts we'll use
+if not reachy.is_connected:
+    print("Error: Could not connect to Reachy robot")
+    sys.exit(1)
+
+# Only check for head since we're only using the head in this example
+if reachy.head is None:
+    print("Error: Head is not available")
+    print("This code requires the head to function properly")
+    sys.exit(1)
+
+try:
+    # Initialize and use only the head
+    reachy.turn_on()
+    
+    # Look at a point in front of the robot
+    reachy.head.look_at(0.5, 0, 0.2, duration=1.0, wait=True)
+    
+    # Move head to different orientations
+    reachy.head.goto([0, 20, 0], duration=1.0, wait=True, interpolation_mode="minimum_jerk")
+    time.sleep(1)
+    reachy.head.goto([0, -20, 0], duration=1.0, wait=True, interpolation_mode="minimum_jerk")
+    
+finally:
     reachy.turn_off_smoothly()
     reachy.disconnect()
 ```
@@ -466,6 +529,20 @@ def add_special_constraints(class_name: str, method_name: str, param_details: Di
         
         param_details["target"]["constraints"].append("When target is a list, it MUST contain EXACTLY 7 joint values")
         param_details["target"]["constraints"].append("When using degrees=True, values should be in degrees; otherwise in radians")
+    
+    # Special case for Arm.goto - add constraints for interpolation_space
+    if class_name == "Arm" and method_name == "goto" and "interpolation_space" in param_details:
+        if "constraints" not in param_details["interpolation_space"]:
+            param_details["interpolation_space"]["constraints"] = []
+        
+        param_details["interpolation_space"]["constraints"].append("Must be EXACTLY 'joint_space' or 'cartesian_space' (not 'joint' or 'cartesian')")
+    
+    # Special case for Arm.goto - add constraints for interpolation_mode
+    if class_name == "Arm" and method_name == "goto" and "interpolation_mode" in param_details:
+        if "constraints" not in param_details["interpolation_mode"]:
+            param_details["interpolation_mode"]["constraints"] = []
+        
+        param_details["interpolation_mode"]["constraints"].append("Must be one of: 'minimum_jerk', 'linear', or 'elliptical'")
     
     # Special case for ReachySDK initialization
     if class_name == "ReachySDK" and method_name == "__init__" and "host" in param_details:

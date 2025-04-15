@@ -12,7 +12,7 @@ reachy2-sdk                   # Reachy 2 robot control
 # pollen-vision[vision] @ git+https://github.com/pollen-robotics/pollen-vision.git@main
 
 # UI dependencies
-gradio>=4.13.0,<5.0.0         # Web interface
+gradio>=5.0.0                 # Web interface
 
 # Development dependencies
 pytest>=7.4.3                 # Testing framework

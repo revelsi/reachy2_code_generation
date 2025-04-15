@@ -297,6 +297,35 @@ class ReachyCodeGenerationAgent:
         """
         feedback = ""
         
+        # First check for connection issues - look in both stderr and output
+        if "is not connected" in stderr or "is not connected" in output or "not reachy.is_connected" in output:
+            feedback += "CONNECTION ERROR: Reachy robot is not connected.\n\n"
+            feedback += "Suggestions:\n"
+            feedback += "1. Always verify connection with 'if not reachy.is_connected:' before proceeding\n"
+            feedback += "2. Make sure the Reachy robot or simulator is running\n"
+            feedback += "3. Check that the host parameter is correct in ReachySDK() initialization\n"
+            feedback += "4. Ensure the gRPC port (default: 50051) is not blocked\n"
+            feedback += "5. Verify the robot's network connectivity if using a physical robot\n"
+            return feedback
+        
+        # Check for NoneType errors on robot parts (common indication of connection issues)
+        if "'NoneType' object has no attribute" in stderr:
+            import re
+            none_attr_match = re.search(r"'NoneType' object has no attribute '(.+?)'", stderr)
+            if none_attr_match:
+                attr_name = none_attr_match.group(1)
+                feedback += "CONNECTION ERROR: Robot part is not properly connected or initialized.\n\n"
+                feedback += f"The '{attr_name}' method was called on a None object, which typically happens when:\n"
+                feedback += "1. The robot is not connected, despite reachy.is_connected returning True\n"
+                feedback += "2. The robot part (arm, head, etc.) is not available or not fully initialized\n"
+                feedback += "3. The gRPC connection is partially established but not fully functional\n\n"
+                feedback += "Suggestions:\n"
+                feedback += "1. Make sure the robot or simulator is fully running before connecting\n"
+                feedback += "2. Check that all robot parts are properly detected in the simulator or on the physical robot\n"
+                feedback += "3. Try disconnecting and reconnecting to the robot\n"
+                feedback += "4. Verify the host parameter is correct and the robot is reachable\n"
+                return feedback
+        
         # Check for "Target was not reachable" message in output
         if "Target was not reachable" in output:
             feedback += "UNREACHABLE TARGET ERROR: The target pose is not reachable by the robot arm.\n\n"
@@ -401,6 +430,10 @@ class ReachyCodeGenerationAgent:
                 "output": ""
             }
         
+        # INTERNAL VALIDATION PHASE - Results not shown in the execution feedback section
+        validation_passed = True
+        validation_messages = []
+        
         # Validate the code using the CodeEvaluator if available
         try:
             from agent.code_evaluator import CodeEvaluator
@@ -409,49 +442,47 @@ class ReachyCodeGenerationAgent:
             valid = validation_result.get("valid", False)
             warnings = validation_result.get("warnings", [])
             errors = validation_result.get("errors", [])
+            
+            # Record validation result for internal use only
+            validation_passed = valid
+            validation_messages = errors + warnings
+            
         except Exception as e:
             self.logger.warning(f"Could not use CodeEvaluator for validation: {e}")
             # Simple basic check if evaluator is not available
-            valid = True
-            errors = []
-            warnings = []
             try:
                 compile(code, '<string>', 'exec')
             except SyntaxError as e:
-                valid = False
-                errors = [f"Syntax error: {str(e)}"]
+                validation_passed = False
+                validation_messages = [f"Syntax error: {str(e)}"]
         
         # Check if the code is valid (but don't prevent execution if force=True)
-        if not valid and not force:
-            # Instead of preventing execution, just add warnings and require confirmation
-            warnings.append("Code validation failed. Execution may be risky.")
-            
-            # Always require confirmation for invalid code
+        if not validation_passed and not force:
+            # For internal confirmation logic only, not for UI display
             confirm = True
         
-        # Check for critical warnings (but don't prevent execution if force=True)
-        critical_warnings = [w for w in warnings if "CRITICAL" in w]
-        if critical_warnings and not force:
-            # Instead of preventing execution, just add warnings and require confirmation
-            warnings.append("Code contains critical issues that could damage the robot.")
-            
-            # Always require confirmation for code with critical warnings
+        # Check for internal critical warnings
+        has_critical_warnings = any("CRITICAL" in w for w in validation_messages)
+        if has_critical_warnings and not force:
+            # For internal confirmation logic only
             confirm = True
         
-        # If confirmation is required, return the code and validation for UI to handle
+        # If confirmation is required, return validation for UI to handle
+        # This keeps validation info separate from execution feedback
         if confirm:
             return {
                 "requires_confirmation": True,
                 "code": code,
                 "validation": {
-                    "valid": valid,
-                    "errors": errors,
-                    "warnings": warnings
+                    "valid": validation_passed,
+                    "errors": [m for m in validation_messages if "CRITICAL" in m or m in errors],
+                    "warnings": [m for m in validation_messages if "CRITICAL" not in m and m not in errors]
                 },
-                "message": "Code is ready for execution. Please confirm to proceed."
+                "message": "Code is ready for execution. Please confirm to proceed.",
+                "feedback": "Waiting for execution confirmation. Click 'Execute Code' to proceed."
             }
         
-        # Execute the code
+        # EXECUTION PHASE - Results shown in the execution feedback section
         try:
             # Create a temporary file for the code
             import tempfile
@@ -522,12 +553,12 @@ class ReachyCodeGenerationAgent:
             except Exception as e:
                 self.logger.warning(f"Failed to delete temporary file {temp_file_path}: {e}")
             
-            # Check if the execution was successful
+            # Check if the execution was successful - THIS IS WHAT SHOWS IN EXECUTION FEEDBACK
             if process.returncode == 0:
                 # Even if the return code is 0, check for specific error messages in the output
                 if "Target was not reachable" in stdout:
                     # Analyze the error and provide helpful feedback
-                    feedback = self._analyze_execution_error(stderr, stdout)
+                    execution_feedback = self._analyze_execution_error(stderr, stdout)
                     
                     return {
                         "success": False,
@@ -535,7 +566,7 @@ class ReachyCodeGenerationAgent:
                         "output": stdout,
                         "stderr": stderr,
                         "return_code": process.returncode,
-                        "feedback": feedback
+                        "feedback": execution_feedback  # This is only about execution results
                     }
                 else:
                     return {
@@ -543,11 +574,12 @@ class ReachyCodeGenerationAgent:
                         "message": "Code executed successfully",
                         "output": stdout,
                         "stderr": stderr,
-                        "return_code": process.returncode
+                        "return_code": process.returncode,
+                        "feedback": "Code executed successfully." + ("\n\nOutput:\n" + stdout if stdout.strip() else " No output was produced.")
                     }
             else:
                 # Analyze the error and provide helpful feedback
-                feedback = self._analyze_execution_error(stderr, stdout)
+                execution_feedback = self._analyze_execution_error(stderr, stdout)
                 
                 return {
                     "success": False,
@@ -555,7 +587,7 @@ class ReachyCodeGenerationAgent:
                     "output": stdout,
                     "stderr": stderr,
                     "return_code": process.returncode,
-                    "feedback": feedback
+                    "feedback": execution_feedback  # This is only about execution results
                 }
                 
         except Exception as e:
@@ -565,7 +597,8 @@ class ReachyCodeGenerationAgent:
                 "success": False,
                 "message": f"Error executing code: {str(e)}",
                 "output": "",
-                "error": str(e)
+                "error": str(e),
+                "feedback": f"Error executing code: {str(e)}\n\nThis may be due to:\n- Missing dependencies\n- Invalid syntax\n- Permission issues\n- Robot connectivity problems"
             }
     
     def _send_websocket_notification(self, response: Dict[str, Any]) -> None:

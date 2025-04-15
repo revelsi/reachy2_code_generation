@@ -18,6 +18,9 @@ This project provides an intuitive interface for controlling the Reachy 2 robot 
   - **Generation**: Creates initial code from user requests using GPT-4o
   - **Evaluation**: Assesses code quality, safety, and API correctness using GPT-4o-mini
   - **Optimization**: Refines code based on evaluation feedback
+- **Modern Interface**: Clean, responsive Gradio UI with intuitive two-column layout
+- **Enhanced Code Editor**: Syntax highlighting with Source Code Pro font for better readability
+- **Real-time Status Indicators**: Clear visual feedback for all operations
 - **Interactive Gradio Interface**: User-friendly web interface with real-time feedback
 - **Automatic Code Validation**: Identifies errors, warnings, and improvement opportunities
 - **Direct Code Execution**: Run code on connected Reachy robots from the interface
@@ -120,19 +123,24 @@ The Gradio interface provides an intuitive way to generate and execute code for 
 
 ### Main Interface Components
 
-1. **Input Area**: Enter your natural language request (e.g., "Wave the right arm for 3 seconds")
-2. **Generation Settings**: Adjust model, temperature, and token limits
-3. **Code Display**: View the generated/optimized Python code
-4. **Evaluation Feedback**: See quality scores, warnings, and suggestions
-5. **Execution Controls**: Run code directly on connected Reachy robots
-6. **Chat History**: Review previous requests and responses
+1. **Left Column**: 
+   - **Natural Language Input**: Enter your request (e.g., "Wave the right arm for 3 seconds")
+   - **Control Buttons**: Generate Code and Reset options
+   - **Status Indicator**: Clear visual feedback on current operation status
+
+2. **Right Column**:
+   - **Code Editor**: View and modify generated Python code with syntax highlighting
+   - **Execute Button**: Run the code directly on connected Reachy robots
+   - **Execution Feedback**: View output and error messages from code execution
+
+The interface features a modern, clean design with clear separation between input and output areas for improved usability.
 
 ### Workflow Example
 
 1. **Enter a Request**: Type "Make the robot look left, then right, then center" in the input box
-2. **Generate Code**: Click the submit button to start the generation pipeline
-3. **Review Results**: Examine the generated code and evaluation feedback
-4. **Execute (Optional)**: If a robot is connected, run the code directly
+2. **Generate Code**: Click the "Generate Code" button to start the generation pipeline
+3. **Review Results**: Examine the generated code in the code editor
+4. **Execute (Optional)**: If a robot is connected, click "Execute Code" to run it directly
 5. **Refine**: Adjust your request based on results or robot behavior
 
 ### Tips for Effective Use
@@ -195,7 +203,8 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Version History
 
-- **v0.1.0** (April 2024): Initial public release with the Generation-Evaluation-Optimization pipeline and Gradio interface.
+- **v1.0.1** (April 2024): UI modernization with improved layout, code editor enhancements, and better status indicators.
+- **v1.0.0** (April 2024): Initial public release with the Generation-Evaluation-Optimization pipeline and Gradio interface.
 
 ## License
 
