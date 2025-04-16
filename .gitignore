@@ -88,4 +88,7 @@ Desktop.ini
 *.bak
 *.backup
 *.old
-*~ 
+*~
+
+# Cursor Editor specific files
+.cursor/ 
