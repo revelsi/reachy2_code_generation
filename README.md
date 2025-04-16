@@ -157,16 +157,6 @@ The interface features a modern, clean design with clear separation between conv
 - **Iterative Refinement**: Use feedback to improve your requests
 - **Check Robot Status**: Confirm robot connectivity before execution
 
-## Example Requests
-
-Here are some effective requests to get started:
-
-1. **Basic Movement**: "Move the right arm to position x=0.3, y=0.2, z=0.1"
-2. **Sequential Actions**: "Turn the head to the right, wait 2 seconds, then look left"
-3. **Timed Movements**: "Wave the left arm up and down 3 times over a period of 5 seconds"
-4. **Coordinated Motion**: "Make the robot nod while waving its right hand"
-5. **Complex Interactions**: "Look for a red object, point at it with the right hand, and say 'I found it'"
-
 ## Advanced Configuration
 
 ### Refreshing the SDK Documentation
