@@ -4,6 +4,14 @@ All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.0.3] - 2025-04-16
+
+### Added
+- Support for OpenAI O-family models (o1, o1-mini, o3, o3-mini) with specific configuration parameters (`reasoning_effort`, `max_completion_tokens`).
+
+### Changed
+- Refactored configuration loading (`config.py`) to handle distinct parameter sets for different model families.
+
 ## [1.0.2] - 2025-04-15
 
 ### Added

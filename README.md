@@ -26,6 +26,8 @@ This project provides an intuitive interface for controlling the Reachy 2 robot 
 - **Automatic Code Validation**: Identifies errors, warnings, and improvement opportunities
 - **Direct Code Execution**: Run code on connected Reachy robots from the interface
 - **Flexible Model Selection**: Support for various OpenAI models with configurable parameters
+  - Supports GPT-family (gpt-4.1, gpt-4o, gpt-3.5-turbo, etc.)
+  - Supports O-family reasoning models (o1, o1-mini, o3, o3-mini)
 
 ## Generation-Evaluation-Optimization Workflow
 
@@ -84,7 +86,7 @@ OPENAI_API_KEY=your_api_key_here
 MODEL=gpt-4.1-mini
 EVALUATOR_MODEL=gpt-4.1-nano
 ```
-**Note on Changing Models:** To change the default generator and evaluator models, update the `MODEL` and `EVALUATOR_MODEL` values in **both** the `.env` file and the `config.py` file for the change to take effect reliably. You can also override the models at runtime using the `--generator-model` and `--evaluator-model` command-line arguments.
+**Note on Changing Models:** To change the default generator and evaluator models, update the `MODEL` and `EVALUATOR_MODEL` values in the `.env` file. The system now automatically loads the correct parameters based on the selected model family (GPT vs O-family). See `.env.example` for model-specific parameters like `MODEL_REASONING_EFFORT` and `MODEL_MAX_COMPLETION_TOKENS`.
 
 4. **Important:** Generate the API documentation needed by the agent:
 ```bash
@@ -207,6 +209,7 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## Version History
 
+- **v1.0.3** (16 April 2025): Support of OpenAI o-family models (o1, o1-mini, o3, o3-mini)
 - **v1.0.2** (15 April 2025): New conversational chat interface with back-and-forth interactions and performance optimizations.
 - **v1.0.1** (14 April 2025): UI modernization with improved layout, code editor enhancements, and better status indicators.
 - **v1.0.0** (8 April 2025): Initial public release with the Generation-Evaluation-Optimization pipeline and Gradio interface.

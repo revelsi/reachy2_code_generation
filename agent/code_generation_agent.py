@@ -15,6 +15,21 @@ from typing import Dict, List, Any, Optional, TypedDict, Tuple, Union
 from openai import OpenAI
 import httpx
 import re
+import openai
+from reachy2_sdk import ReachySDK
+from config import (
+    MODEL, 
+    EVALUATOR_MODEL, 
+    MODEL_TEMPERATURE, 
+    MODEL_MAX_TOKENS, # Still used in __init__ default, but should be replaced by get_model_config
+    MODEL_TOP_P, 
+    MODEL_FREQUENCY_PENALTY, 
+    MODEL_PRESENCE_PENALTY, 
+    get_model_config, # Import the function
+    OPENAI_API_KEY, 
+    REACHY_HOST,
+    DISABLE_WEBSOCKET
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO,
@@ -641,63 +656,62 @@ class ReachyCodeGenerationAgent:
             return """You are an AI assistant that generates Python code for controlling a Reachy 2 robot."""
 
     def generate_code(self, user_request: str, history: Optional[Union[List[Dict[str, str]], List[List[str]]]] = None) -> Dict[str, Any]:
-        """Generate code using the OpenAI API with a simple direct approach.
+        """Generate code based on user request using OpenAI API.
         
         Args:
-            user_request: The user request to generate code for.
-            history: Optional chat history, either as List[Dict] or List[List].
-            
+            user_request: The user's request.
+            history: Conversation history.
+        
         Returns:
-            Dict with generated code and metadata.
+            Dict[str, Any]: Dictionary containing the generated code or error.
         """
-        self.logger.info(f"Generating code for request: {user_request[:100]}...")
+        client = openai.OpenAI(api_key=self.api_key)
         
         try:
-            # Build system prompt - use the comprehensive prompt instead of simplified version
+            # --- Restore Message Building Logic --- 
+            # Build system prompt
             system_prompt = self._build_system_prompt()
+            if not system_prompt:
+                 self.logger.error("Failed to build system prompt.")
+                 raise ValueError("System prompt could not be generated.")
 
-            # Prepare messages including history
+            # Prepare messages list
             messages = [{"role": "system", "content": system_prompt}]
             
-            # Process history if provided, handling both formats
-            if history:
-                if isinstance(history, list):
-                    # Handle two possible formats
-                    if history and isinstance(history[0], dict):
-                        # Dict format: [{"role": "user", "content": "..."}, ...]
-                        for message_dict in history:
-                            if isinstance(message_dict, dict) and "role" in message_dict and "content" in message_dict:
-                                if message_dict["content"]:
-                                    messages.append(message_dict)
-                            else:
-                                self.logger.warning(f"Skipping invalid history item: {message_dict}")
-                    elif history and isinstance(history[0], list):
-                        # List format: [[user_msg, assistant_msg], ...]
-                        for item in history:
-                            if isinstance(item, list) and len(item) == 2:
-                                user_msg, assistant_msg = item
-                                if user_msg:
-                                    messages.append({"role": "user", "content": user_msg})
-                                if assistant_msg:
-                                    messages.append({"role": "assistant", "content": assistant_msg})
-                            else:
-                                self.logger.warning(f"Skipping invalid history item: {item}")
-            # Add the current user prompt
+            # Process history if provided (assuming List[Dict[str, str]] format from pipeline)
+            if history and isinstance(history, list):
+                 for message_dict in history:
+                     if isinstance(message_dict, dict) and "role" in message_dict and "content" in message_dict:
+                         # Add valid history messages
+                         if message_dict["content"]:
+                             messages.append(message_dict)
+                     else:
+                         # Log invalid history items if necessary
+                         self.logger.warning(f"Skipping invalid history item: {message_dict}")
+                         
+            # Add the current user request
             messages.append({"role": "user", "content": user_request})
-            
-            # Simple OpenAI API call
-            client = OpenAI(api_key=self.api_key)
-            
-            # GPT models use standard parameters
+            # --- End Message Building Logic ---
+
+            # --- Get model-specific configuration --- 
+            # Fetch the correct parameters for the currently selected model
+            active_model_config = get_model_config()
+            model_name = active_model_config.pop('model', self.model) # Get model name, remove from params dict
+
+            # Ensure required parameters are present
+            if not model_name:
+                 self.logger.error("Model name is missing from configuration.")
+                 raise ValueError("Model name is missing from configuration.")
+
+            # --- Construct parameters for API call --- 
             params = {
-                "model": self.model,
-                "messages": messages, # Use the constructed messages list
-                "temperature": self.temperature,
-                "max_tokens": self.max_tokens,
-                "top_p": self.top_p,
-                "frequency_penalty": self.frequency_penalty,
-                "presence_penalty": self.presence_penalty
+                "model": model_name,
+                "messages": messages,
+                **active_model_config # Unpack the model-specific parameters (temp, max_tokens/max_completion_tokens, etc.)
             }
+            
+            self.logger.info(f"Making OpenAI API call with model: {model_name}")
+            self.logger.debug(f"API Parameters: {params}")
             
             # Make the API call
             response = client.chat.completions.create(**params)

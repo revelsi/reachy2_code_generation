@@ -8,7 +8,7 @@ with open("requirements.txt", "r", encoding="utf-8") as fh:
 
 setup(
     name="reachy2-code-generation",
-    version="0.1.0",
+    version="1.0.2",
     author="Simon Revelly",
     author_email="contact@pollen-robotics.com",
     description="A code generation interface for the Reachy 2 robot",
